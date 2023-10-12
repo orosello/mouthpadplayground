@@ -1,0 +1,25 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: black;
+    color: white;
+    text-align: left;
+    padding: 50px;
+}
+
+.game-link {
+    text-decoration: none;
+    color: white;
+    font-size: 24px;
+    display: block;
+    margin: 20px 0;
+    padding: 10px 30px;
+    /* border: 1px solid white; */
+    font-weight: 300;
+    /* outline: none;  Disabling the outline */
+}
+
+.game-link:hover {
+    background-color: white;
+    color: black;
+    font-weight: 300;
+}

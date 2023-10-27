@@ -1,9 +1,9 @@
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(600, 400);
 }
 
 function draw() {
   background(220);
-  rect(mouseX,mouseY,50,50);
+  circle(mouseX,mouseY,50,50);
 
 }

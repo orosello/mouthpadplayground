@@ -4,7 +4,6 @@ let yPosition = 0;
 function setup() {
   createCanvas(600, 600);
   colorMode(RGB);
-  print("hello");
 }
 
 function draw() {
@@ -12,8 +11,12 @@ function draw() {
   //sustain the ball when mouse is clicked
   if (mouseIsPressed) {
     yPosition -= 1;
+    fill("black");
+    stroke("white");
   } else {
     yPosition += 1;
+    fill(255);
+    stroke("black");
   };
 
   background("black");

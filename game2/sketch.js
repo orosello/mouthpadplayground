@@ -1,5 +1,6 @@
 let circles = [];
-let redCircleIndex;
+let whiteCircleIndex;
+let clickCount = 0;
 
 function setup() {
   createCanvas(800, 600);
@@ -11,16 +12,16 @@ function setup() {
     circles.push({
       x: x,
       y: y,
-      r: 50,
+      r: 70,
       color: 'gray' // add color property
     });
   }
-  redCircleIndex = floor(random(circles.length));
-  circles[redCircleIndex].color = 'red'; // set the color of the red circle
+  whiteCircleIndex = floor(random(circles.length));
+  circles[whiteCircleIndex].color = 'white'; // set the color of the white circle
 }
 
 function draw() {
-  background(220);
+  background(0);
   for (let i = 0; i < circles.length; i++) {
     fill(circles[i].color); // use the color property to set the color
     ellipse(circles[i].x, circles[i].y, circles[i].r * 2);
@@ -28,14 +29,34 @@ function draw() {
 }
 
 function mousePressed() {
-  let d = dist(mouseX, mouseY, circles[redCircleIndex].x, circles[redCircleIndex].y);
-  if (d < circles[redCircleIndex].r) {
+  let d = dist(mouseX, mouseY, circles[whiteCircleIndex].x, circles[whiteCircleIndex].y);
+  if (d < circles[whiteCircleIndex].r) {
+    clickCount++;
+    if (clickCount === 4) {
+      for (let i = 0; i < circles.length; i++) {
+        circles[i].r = 50;
+      }
+    } else if (clickCount === 8) {
+      for (let i = 0; i < circles.length; i++) {
+        circles[i].r = 20;
+      }
+    } else if (clickCount === 12) {
+      for (let i = 0; i < circles.length; i++) {
+        circles[i].r = 40;
+      }
+      clickCount = 0; // reset the count after reaching 12
+    }
+
     // Fill all the circles gray
     for (let i = 0; i < circles.length; i++) {
       circles[i].color = 'gray'; // update the color property
     }
-    // Fill another circle red at random
-    redCircleIndex = floor(random(circles.length));
-    circles[redCircleIndex].color = 'red'; // update the color property
+    // Fill another circle white at random
+    let newWhiteCircleIndex;
+    do {
+      newWhiteCircleIndex = floor(random(circles.length));
+    } while (newWhiteCircleIndex === whiteCircleIndex);
+    whiteCircleIndex = newWhiteCircleIndex;
+    circles[whiteCircleIndex].color = 'white'; // update the color property
   }
 }

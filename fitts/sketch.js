@@ -62,6 +62,9 @@ function mousePressed() {
           newRadius = 40;
           break;
         case 40:
+          newRadius = 8;
+          break;
+        case 8:
         default:
           newRadius = 70;
           break;

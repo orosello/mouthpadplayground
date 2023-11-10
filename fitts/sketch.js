@@ -1,62 +1,89 @@
 let circles = [];
-let whiteCircleIndex;
-let clickCount = 0;
+let targetCircleIndex;
+let clickedCircles = new Set(); // Set to keep track of clicked circles
 
 function setup() {
   createCanvas(800, 600);
-  let radius = 200; // radius of the circle on which the circles will be placed
-  for (let i = 0; i < 5; i++) {
-    let angle = map(i, 0, 5, 0, TWO_PI); // map the index to an angle between 0 and 2*PI
+  const radius = 200; // radius of the circle on which the circles will be placed
+  const circleCount = 5;
+  const circleSize = 70;
+
+  // Create circles
+  for (let i = 0; i < circleCount; i++) {
+    let angle = map(i, 0, circleCount, 0, TWO_PI); // map the index to an angle between 0 and 2*PI
     let x = width / 2 + radius * cos(angle); // calculate x coordinate
     let y = height / 2 + radius * sin(angle); // calculate y coordinate
     circles.push({
       x: x,
       y: y,
-      r: 70,
-      color: 'gray' // add color property
+      r: circleSize,
+      color: "gray",
     });
   }
-  whiteCircleIndex = floor(random(circles.length));
-  circles[whiteCircleIndex].color = 'white'; // set the color of the white circle
+
+  // Randomly select a target circle
+  targetCircleIndex = floor(random(circles.length));
+  circles[targetCircleIndex].color = "white";
 }
 
 function draw() {
   background(0);
-  for (let i = 0; i < circles.length; i++) {
-    fill(circles[i].color); // use the color property to set the color
-    ellipse(circles[i].x, circles[i].y, circles[i].r * 2);
+
+  // Draw circles
+  for (let circle of circles) {
+    fill(circle.color);
+    ellipse(circle.x, circle.y, circle.r * 2);
   }
 }
 
 function mousePressed() {
-  let d = dist(mouseX, mouseY, circles[whiteCircleIndex].x, circles[whiteCircleIndex].y);
-  if (d < circles[whiteCircleIndex].r) {
-    clickCount++;
-    if (clickCount === 4) {
-      for (let i = 0; i < circles.length; i++) {
-        circles[i].r = 50;
+  let distanceToTarget = dist(
+    mouseX,
+    mouseY,
+    circles[targetCircleIndex].x,
+    circles[targetCircleIndex].y
+  );
+
+  // If the target circle is clicked
+  if (distanceToTarget < circles[targetCircleIndex].r) {
+    clickedCircles.add(targetCircleIndex); // Add the clicked circle to the set
+
+    // Update circle sizes after all circles have been clicked
+    if (clickedCircles.size === circles.length) {
+      let newRadius;
+      switch (circles[0].r) {
+        case 70:
+          newRadius = 50;
+          break;
+        case 50:
+          newRadius = 20;
+          break;
+        case 20:
+          newRadius = 40;
+          break;
+        case 40:
+        default:
+          newRadius = 70;
+          break;
       }
-    } else if (clickCount === 8) {
-      for (let i = 0; i < circles.length; i++) {
-        circles[i].r = 20;
+
+      for (let circle of circles) {
+        circle.r = newRadius;
       }
-    } else if (clickCount === 12) {
-      for (let i = 0; i < circles.length; i++) {
-        circles[i].r = 40;
-      }
-      clickCount = 0; // reset the count after reaching 12
+      clickedCircles.clear(); // Clear the set after updating circle sizes
     }
 
-    // Fill all the circles gray
-    for (let i = 0; i < circles.length; i++) {
-      circles[i].color = 'gray'; // update the color property
+    // Reset all circles to gray
+    for (let circle of circles) {
+      circle.color = "gray";
     }
-    // Fill another circle white at random
-    let newWhiteCircleIndex;
+
+    // Select a new target circle
+    let newTargetCircleIndex;
     do {
-      newWhiteCircleIndex = floor(random(circles.length));
-    } while (newWhiteCircleIndex === whiteCircleIndex);
-    whiteCircleIndex = newWhiteCircleIndex;
-    circles[whiteCircleIndex].color = 'white'; // update the color property
+      newTargetCircleIndex = floor(random(circles.length));
+    } while (clickedCircles.has(newTargetCircleIndex)); // Ensure the new target hasn't been clicked yet
+    targetCircleIndex = newTargetCircleIndex;
+    circles[targetCircleIndex].color = "white";
   }
 }

@@ -105,9 +105,9 @@ function updateCircleSizes() {
       newRadius = 40;
       break;
     case 40:
-      newRadius = 8;
+      newRadius = 7; //aprox close window size icon, Corbin's suggestion
       break;
-    case 8:
+    case 7:
     default:
       newRadius = 70;
       break;

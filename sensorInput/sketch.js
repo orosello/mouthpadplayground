@@ -6,10 +6,10 @@ let quadrantActivationCount = 0;
 let forwardOrder = true;
 
 let quadrantColors = [
-  [255, 105, 180], // Pink color for quadrant 1
-  [255, 105, 180], // Pink color for quadrant 2
-  [255, 105, 180], // Pink color for quadrant 3
-  [255, 105, 180], // Pink color for quadrant 4
+  [255], // White color for quadrant 1
+  [255],
+  [255],
+  [255],
 ];
 
 function setup() {

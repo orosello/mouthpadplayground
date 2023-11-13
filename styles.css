@@ -11,7 +11,19 @@ body {
 .game-link {
     text-decoration: none;
     color: white;
-    font-size: 24px;
+    font-size: 16px;
+    display: block;
+    margin: 20px 0;
+    padding: 10px 30px;
+    /* border: 1px solid white; */
+    font-weight: 300;
+    /* outline: none;  Disabling the outline */
+}
+
+.title{
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
     display: block;
     margin: 20px 0;
     padding: 10px 30px;
@@ -21,7 +33,7 @@ body {
 }
 
 .game-link:hover {
-    background-color: white;
+    background-color:white;
     color: black;
     font-weight: 300;
 }

@@ -4,7 +4,7 @@ let clickedCircles = new Set(); // Set to keep track of clicked circles
 let totalClicks = 0; // Total number of clicks throughout the game
 
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(windowWidth, windowHeight);
   initializeCircles();
   selectTargetCircle();
 }
@@ -28,8 +28,8 @@ function initializeCircles() {
   // Create circles
   for (let i = 0; i < circleCount; i++) {
     let angle = map(i, 0, circleCount, 0, TWO_PI); // map the index to an angle between 0 and 2*PI
-    let x = width / 2 + radius * cos(angle); // calculate x coordinate
-    let y = height / 2 + radius * sin(angle); // calculate y coordinate
+    let x = windowWidth / 2 + radius * cos(angle); // calculate x coordinate
+    let y = windowHeight / 2 + radius * sin(angle); // calculate y coordinate
     circles.push({
       x: x,
       y: y,
@@ -131,10 +131,10 @@ function selectNewTargetCircle() {
 // Function to draw progress bar
 function drawProgressBar() {
   let progress = totalClicks / (circles.length * 5); // Calculate progress based on total clicks
-  let progressBarWidth = (width - 100) * progress; // Calculate width of the progress bar
+  let progressBarWidth = (windowWidth - 100) * progress; // Calculate width of the progress bar
 
   strokeWeight(5); // Set line thickness
   stroke(100); // Set line color to white
-  line(50, height - 5, 50 + progressBarWidth, height - 5); // Draw line
+  line(50, windowHeight - 20, 50 + progressBarWidth, windowHeight - 20); // Draw line
   noStroke(); // Reset stroke settings
 }

@@ -19,8 +19,12 @@ function draw() {
   // Rotate the cylinder 90 degrees around the X-axis
   rotateX(HALF_PI);
 
-  // Draw a cylinder with radius 50, height 100, and increased resolution
-  cylinder(10, 500, 64, 64);
+  // Calculate the radius and height of the cylinder based on the window size
+  let radius = windowWidth * 0.03; // 5% of window width
+  let height = windowHeight * 0.95; // 80% of window height
+
+  // Draw a cylinder with calculated radius and height, and increased resolution
+  cylinder(radius, height, 64, 64);
 }
 
 function windowResized() {

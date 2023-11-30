@@ -1,10 +1,9 @@
-let width = 710;
-let height = 400;
 let circleRadius = 40;
-let lineY = height / 2; // Store the y-coordinate of the line
+let lineY; // We will calculate this in setup()
 
 function setup() {
-  createCanvas(width, height);
+  createCanvas(windowWidth, windowHeight);
+  lineY = height / 2; // Calculate the y-coordinate of the line here
 }
 
 function draw() {
@@ -23,4 +22,8 @@ function draw() {
   noStroke(); // Ensure the circle has no stroke
   fill(255); // Set the fill color for the circle
   circle(mouseX, mouseY, circleRadius * 2); // Draw the circle
+}
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  lineY = height / 2; // Recalculate the y-coordinate of the line
 }

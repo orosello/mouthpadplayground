@@ -1,39 +1,47 @@
 body {
-    /* font-family: 'DotGothic16', sans-serif; */
-    /* font-family: 'Inter', sans-serif; */
-    font-family: 'Press Start 2P', sans-serif;
-    background-color: black;
-    color: white;
-    text-align: left;
-    padding: 50px;
+  /* font-family: 'DotGothic16', sans-serif; */
+  /* font-family: 'Inter', sans-serif; */
+  font-family: "Press Start 2P", sans-serif;
+  background-color: black;
+  color: white;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+.index-body {
+  margin: 0px;
+  padding: 50px;
+  overflow: auto; /* Allow scrolling if necessary */
 }
 
 .game-link {
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: block;
-    margin: 20px 0;
-    padding: 10px 30px;
-    /* border: 1px solid white; */
-    font-weight: 300;
-    /* outline: none;  Disabling the outline */
+  text-decoration: none;
+  color: white;
+  font-size: 16px;
+  display: block;
+  margin: 20px 0;
+  padding: 10px 30px;
+  /* border: 1px solid white; */
+  font-weight: 300;
+  /* outline: none;  Disabling the outline */
 }
 
-.title{
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    display: block;
-    margin: 20px 0;
-    padding: 10px 30px;
-    /* border: 1px solid white; */
-    font-weight: 300;
-    /* outline: none;  Disabling the outline */
+.title {
+  text-decoration: none;
+  color: white;
+  font-size: 16px;
+  display: block;
+  margin: 20px 0;
+  padding: 10px 30px;
+  /* border: 1px solid white; */
+  font-weight: 300;
+  /* outline: none;  Disabling the outline */
 }
 
 .game-link:hover {
-    background-color:white;
-    color: black;
-    font-weight: 300;
+  background-color: white;
+  color: black;
+  font-weight: 300;
 }

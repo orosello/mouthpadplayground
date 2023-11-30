@@ -1,8 +1,8 @@
-
 let yPosition = 0;
+let delay = 0;
 
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(windowWidth, windowHeight);
   colorMode(RGB);
 }
 
@@ -14,7 +14,11 @@ function draw() {
     fill("black");
     stroke("white");
   } else {
-    yPosition += 1;
+    if (delay > 0) {
+      delay--;
+    } else {
+      yPosition += 1;
+    }
     fill(255);
     stroke("black");
   };
@@ -23,12 +27,16 @@ function draw() {
   fill(255);
   strokeWeight(5);
   rectMode(CENTER);
-  circle(300, yPosition, 80, 80);
+  circle(windowWidth / 2, yPosition, 80, 80);
 
   //drop new ball when ball is out
-  if (yPosition > 600){
-    yPosition = 0;
+  if (yPosition - 40 > windowHeight){
+    yPosition = -40;
+    delay = 30;
   }
 
+}
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }

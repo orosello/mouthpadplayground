@@ -38,7 +38,7 @@ function draw() {
   textAlign(CENTER, BOTTOM);
 
   // Display the instructions at the bottom of the canvas
-  text("Drag the circle into the hole", width / 2, height - 20);
+  text("Drag and drop the circle into the hole", width / 2, height - 20);
 
   // If the circle is being dragged, update its position
   if (circle.dragging) {

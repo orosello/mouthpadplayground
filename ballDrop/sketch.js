@@ -11,6 +11,9 @@ function draw() {
   //sustain the ball when mouse is clicked
   if (mouseIsPressed) {
     yPosition -= 1;
+    if (yPosition < 40) { // Prevent the ball from going off the top edge
+      yPosition = 40;
+    }
     fill("black");
     stroke("white");
   } else {

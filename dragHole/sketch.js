@@ -7,6 +7,7 @@ let circle = {
   offsetX: 0,
   offsetY: 0,
   disappearing: false,
+  jitter: false, // Add this property to control the jitter effect
 };
 
 // Define the target circle object
@@ -71,7 +72,14 @@ function updateCirclePosition() {
 function drawCircles() {
   // Draw the main circle with a white fill
   fill(255);
-  ellipse(circle.x, circle.y, circle.diameter);
+  if (circle.jitter) {
+    // Add a random offset to the circle's position to create a jitter effect
+    let jitterX = random(-2, 2);
+    let jitterY = random(-2, 2);
+    ellipse(circle.x + jitterX, circle.y + jitterY, circle.diameter);
+  } else {
+    ellipse(circle.x, circle.y, circle.diameter);
+  }
 
   // Draw the target circle with a white outline and no fill
   noFill();
@@ -90,6 +98,9 @@ function checkCircleReachedTarget() {
   // If the circle is close enough to the target, start the disappearing animation
   if (closeEnough) {
     circle.disappearing = true;
+    circle.jitter = true; // Start the jitter effect
+  } else {
+    circle.jitter = false; // Stop the jitter effect
   }
 }
 
@@ -137,6 +148,7 @@ function startDraggingCircle() {
 function mouseReleased() {
   // Stop dragging the circle
   circle.dragging = false;
+  circle.jitter = false; // Stop the jitter effect
 }
 
 // This function is called when the window is resized

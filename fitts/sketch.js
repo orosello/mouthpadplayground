@@ -2,6 +2,7 @@ let circles = [];
 let targetCircleIndex;
 let clickedCircles = new Set(); // Set to keep track of clicked circles
 let totalClicks = 0; // Total number of clicks throughout the game
+let baseCircleColor = 30;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -23,7 +24,7 @@ function mousePressed() {
 function initializeCircles() {
   const radius = 200; // radius of the circle on which the circles will be placed
   const circleCount = 5;
-  const circleSize = 70;
+  const circleSize = 90;
 
   // Create circles
   for (let i = 0; i < circleCount; i++) {
@@ -34,7 +35,7 @@ function initializeCircles() {
       x: x,
       y: y,
       r: circleSize,
-      color: "gray",
+      color: baseCircleColor,
     });
   }
 }
@@ -84,7 +85,7 @@ function handleCircleClick() {
 
   // Reset all circles to gray
   for (let circle of circles) {
-    circle.color = "gray";
+    circle.color = baseCircleColor;
   }
 
   // Select a new target circle

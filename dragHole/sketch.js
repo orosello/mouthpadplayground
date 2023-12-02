@@ -1,8 +1,10 @@
+
+let circleDiameter = 70;
 // Define the main circle object
 let circle = {
   x: 200,
   y: 200,
-  diameter: 50,
+  diameter: circleDiameter,
   dragging: false,
   offsetX: 0,
   offsetY: 0,
@@ -14,7 +16,7 @@ let circle = {
 let targetCircle = {
   x: 300,
   y: 300,
-  diameter: 50,
+  diameter: circleDiameter,
 };
 
 // This function is called once when the program starts
@@ -119,7 +121,7 @@ function animateCircleDisappearing() {
 function resetCircle() {
   circle.x = random(0, width);
   circle.y = random(0, height);
-  circle.diameter = 50;
+  circle.diameter = circleDiameter;
   circle.disappearing = false;
 }
 

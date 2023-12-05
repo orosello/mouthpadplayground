@@ -1,10 +1,10 @@
 // Matter.js module aliases
 let Engine = Matter.Engine,
-    World = Matter.World,
-    Bodies = Matter.Bodies,
-    Body = Matter.Body,
-    Mouse = Matter.Mouse,
-    MouseConstraint = Matter.MouseConstraint;
+  World = Matter.World,
+  Bodies = Matter.Bodies,
+  Body = Matter.Body,
+  Mouse = Matter.Mouse,
+  MouseConstraint = Matter.MouseConstraint;
 
 let engine;
 let ground;
@@ -133,3 +133,4 @@ class SlingShot {
     }
   }
 }
+

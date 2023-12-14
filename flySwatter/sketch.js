@@ -1,6 +1,5 @@
-let circleRadius = 20;
-let b;
-let bubbles = [];
+const circleRadius = 20;
+const bubbles = [];
 let state = "bubbles"; // Add a state variable
 let stateChangeTime;
 
@@ -8,44 +7,47 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   for (let i = 0; i < 20; i++) {
-    let x = windowWidth / 2 + random(-100, 100);
-    let y = windowHeight / 2 + random(-100, 100);
-    let r = circleRadius;
-    b = new Bubble(x, y, r);
+    const x = windowWidth / 2 + random(-100, 100);
+    const y = windowHeight / 2 + random(-100, 100);
+    const r = circleRadius;
+    const b = new Bubble(x, y, r);
     bubbles.push(b);
   }
 }
 
 function draw() {
-  if (state === "bubbles") {
-    background(0);
+  switch (state) {
+    case "bubbles":
+      background(0);
+      bubbles.forEach((bubble) => {
+        bubble.move();
+        bubble.show();
+      });
 
-    for (let i = 0; i < bubbles.length; i++) {
-      bubbles[i].move();
-      bubbles[i].show();
-    }
-
-    if (bubbles.length === 0) {
-      state = "animation";
-      stateChangeTime = millis(); // Record the time when the state changes
-    }
-  } else if (state === "animation") {
-    background("black");
-    let gap = calculateSpacing(10);
-    for (let i = 0; i <= width; i += gap) {
-      for (let j = 0; j <= height; j += 50) {
-        fill(random(0, 255), random(0, 255), random(0, 255));
-        noStroke();
-        circle(i, j, 50);
+      if (bubbles.length === 0) {
+        state = "animation";
+        stateChangeTime = millis(); // Record the time when the state changes
       }
-    }
+      break;
+    case "animation":
+      background("black");
+      const gap = calculateSpacing(10);
+      for (let i = 0; i <= width; i += gap) {
+        for (let j = 0; j <= height; j += 50) {
+          fill(random(0, 255), random(0, 255), random(0, 255));
+          noStroke();
+          circle(i, j, 50);
+        }
+      }
 
-    if (millis() - stateChangeTime > 3000) {
-      // If 3 seconds have passed
-      state = "black";
-    }
-  } else if (state === "black") {
-    background(0);
+      if (millis() - stateChangeTime > 3000) {
+        // If 3 seconds have passed
+        state = "black";
+      }
+      break;
+    case "black":
+      background(0);
+      break;
   }
 }
 
@@ -89,7 +91,7 @@ class Bubble {
   }
 
   onHover() {
-    let d = dist(mouseX, mouseY, this.x, this.y);
+    const d = dist(mouseX, mouseY, this.x, this.y);
     return d < this.r;
   }
 }

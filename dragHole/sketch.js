@@ -1,4 +1,3 @@
-
 let circleDiameter = 70;
 // Define the main circle object
 let circle = {
@@ -97,11 +96,12 @@ function checkCircleReachedTarget() {
   let distance = dist(circle.x, circle.y, targetCircle.x, targetCircle.y);
   let closeEnough = distance < circle.diameter / 2;
 
-  // If the circle is close enough to the target, start the disappearing animation
-  if (closeEnough) {
+  // If the circle is close enough to the target and it's being dragged, start the disappearing animation and the jitter effect
+  if (closeEnough && circle.dragging) {
     circle.disappearing = true;
     circle.jitter = true; // Start the jitter effect
-  } else {
+  } else if (!closeEnough && circle.dragging) {
+    circle.disappearing = false; // Stop the disappearing animation
     circle.jitter = false; // Stop the jitter effect
   }
 }

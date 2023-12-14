@@ -1,6 +1,12 @@
 let circleRadius = 20;
 let bubble1;
 
+let myFont;
+
+function preload() {
+  myFont = loadFont('../assets/Press_Start_2P/PressStart2P-Regular.ttf');
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   let x = windowWidth / 2;
@@ -12,6 +18,10 @@ function setup() {
   canvas.oncontextmenu = function (e) {
     e.preventDefault();
   };
+
+  textFont(myFont);
+  textSize(16);
+  textAlign(CENTER);
 }
 
 function draw() {
@@ -22,9 +32,7 @@ function draw() {
   if (bubble1.mouseIsPressed && mouseButton === RIGHT) {
     noStroke();
     fill(255);
-    textSize(16);
-    textAlign(CENTER);
-    text("Woops! That's a right click.", windowWidth / 2, windowHeight / 2 + 50);
+    text("Woops! That's a right click.", windowWidth / 2, windowHeight - 50);
   }
 }
 
@@ -44,6 +52,8 @@ function mouseReleased() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  bubble1.x = windowWidth / 2;
+  bubble1.y = windowHeight / 2;
 }
 
 class Bubble {

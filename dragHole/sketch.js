@@ -1,4 +1,6 @@
 let circleDiameter = 70;
+let gameWon = false; // New variable to track game state
+
 // Define the main circle object
 let circle = {
   x: 200,
@@ -9,6 +11,7 @@ let circle = {
   offsetY: 0,
   disappearing: false,
   jitter: false, // Add this property to control the jitter effect
+  hovering: false, // Add this property to track when the circle is hovering over the target
 };
 
 // Define the target circle object
@@ -18,6 +21,10 @@ let targetCircle = {
   diameter: circleDiameter,
 };
 
+function preload() {
+  myFont = loadFont('../assets/Press_Start_2P/PressStart2P-Regular.ttf');
+}
+
 // This function is called once when the program starts
 function setup() {
   // Create a canvas that fills the window
@@ -26,6 +33,10 @@ function setup() {
   // Position the target circle in the center of the canvas
   targetCircle.x = width / 2;
   targetCircle.y = height / 2;
+
+  textFont(myFont);
+  textSize(16);
+  textAlign(CENTER);
 }
 
 // This function is called repeatedly to draw the scene
@@ -35,12 +46,21 @@ function draw() {
 
   // Set the text properties
   textSize(16);
-  fill(255);
+
   noStroke();
+  fill(255);
   textAlign(CENTER, BOTTOM);
 
   // Display the instructions at the bottom of the canvas
-  text("Drag and drop the white circle into the hole", width / 2, height - 20);
+  noStroke();
+  fill(255);
+  if (gameWon) {
+    text("Nice!", windowWidth / 2, windowHeight - 50);
+  } else if (circle.hovering) {
+    text("...now drop the ball", windowWidth / 2, windowHeight - 50);
+  } else {
+    text("Drag and drop the white circle into the hole", windowWidth / 2, windowHeight - 50);
+  }
 
   // If the circle is being dragged, update its position
   if (circle.dragging) {
@@ -100,9 +120,11 @@ function checkCircleReachedTarget() {
   if (closeEnough && circle.dragging) {
     circle.disappearing = true;
     circle.jitter = true; // Start the jitter effect
+    circle.hovering = true; // Set hovering to true when the circle is close enough to the target
   } else if (!closeEnough && circle.dragging) {
     circle.disappearing = false; // Stop the disappearing animation
     circle.jitter = false; // Stop the jitter effect
+    circle.hovering = false; // Set hovering to false when the circle is not close enough to the target
   }
 }
 
@@ -123,6 +145,8 @@ function resetCircle() {
   circle.y = random(0, height);
   circle.diameter = circleDiameter;
   circle.disappearing = false;
+  circle.hovering = false; // Reset the hovering state when the circle is reset
+  gameWon = false; // Reset the game state when the circle is reset
 }
 
 // This function is called when the mouse button is pressed
@@ -151,6 +175,11 @@ function mouseReleased() {
   // Stop dragging the circle
   circle.dragging = false;
   circle.jitter = false; // Stop the jitter effect
+
+  // If the circle is hovering over the target when the mouse button is released, the game is won
+  if (circle.hovering) {
+    gameWon = true;
+  }
 }
 
 // This function is called when the window is resized

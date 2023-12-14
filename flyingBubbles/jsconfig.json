@@ -2,9 +2,13 @@
   "compilerOptions": {
     "target": "es6"
   },
+  "typeAcquisition": {
+    "include": ["p5"]
+  },
   "include": [
     "*.js",
     "**/*.js",
     "/Users/rosello/.vscode/extensions/samplavigne.p5-vscode-1.2.14/p5types/global.d.ts"
   ]
 }
+

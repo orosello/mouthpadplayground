@@ -46,7 +46,7 @@ function draw() {
       }
       break;
     case "black":
-      background(0);
+      window.location.href = "../index.html";
       break;
   }
 }

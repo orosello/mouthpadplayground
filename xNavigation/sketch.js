@@ -9,7 +9,6 @@ function draw() {
 
   // Set the stroke color to white
   stroke(255);
-  // Set the stroke weight to 2
   strokeWeight(2);
   fill(0);
 

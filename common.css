@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Press Start 2P";
-  src: url("/assets/Press_Start_2P/PressStart2P-Regular.ttf");
+  src: url("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
   font-style: normal;
   font-weight: 400;
 }

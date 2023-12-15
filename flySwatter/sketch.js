@@ -4,7 +4,7 @@ let state = "bubbles"; // Add a state variable
 let stateChangeTime;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  let canvas = createCanvas(windowWidth, windowHeight);
 
   // Disable right click context menu
   canvas.elt.oncontextmenu = function (e) {

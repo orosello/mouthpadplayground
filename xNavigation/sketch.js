@@ -11,7 +11,6 @@ function draw() {
   stroke(255);
   // Set the stroke weight to 2
   strokeWeight(2);
-  // Set the fill color to black
   fill(0);
 
   // Draw the rectangle

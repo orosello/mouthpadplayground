@@ -1,4 +1,4 @@
-# Welcome to the MouthPad training tool!
+# Welcome to the MouthPad training tool
 
 To access this tool without an internet connection, please follow the steps below:
 

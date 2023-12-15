@@ -1,29 +1,33 @@
 let circleRadius = 40;
-let lineY; // We will calculate this in setup()
+let rectWidth = windowWidth - 20; // Reduce the rectangle width slightly
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  lineY = height / 2; // Calculate the y-coordinate of the line here
 }
 
 function draw() {
   background(0);
 
-  // Check if the circle is outside the bounds of the line
-  if (mouseY < lineY - circleRadius || mouseY > lineY + circleRadius) {
-    stroke(0); // Change the stroke color to red
-  } else {
-    stroke(50); // Change it back to the original color
+  // Draw the rectangle only when the mouse is inside it
+  if (
+    mouseY > windowHeight / 2 - circleRadius - 10 &&
+    mouseY < windowHeight / 2 + circleRadius + 10
+  ) {
+    fill(0); // Set the fill color to a gray color
+    stroke(255); // Set the stroke color to white
+    rect(
+      -5,
+      windowHeight / 2 - circleRadius - 10,
+      windowWidth * 3,
+      circleRadius * 2 + 20
+    );
   }
 
-  strokeWeight(100); // Set the stroke weight to the circle's radius
-  line(0, lineY, width, lineY);
-
-  noStroke(); // Ensure the circle has no stroke
+  noStroke(); // no stroke for the circle
   fill(255); // Set the fill color for the circle
   circle(mouseX, mouseY, circleRadius * 2); // Draw the circle
 }
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  lineY = height / 2; // Recalculate the y-coordinate of the line
 }

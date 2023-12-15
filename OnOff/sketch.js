@@ -4,7 +4,7 @@ let bubble1;
 let myFont;
 
 function preload() {
-  myFont = loadFont('../assets/Press_Start_2P/PressStart2P-Regular.ttf');
+  myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
 }
 
 function setup() {

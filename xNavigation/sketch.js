@@ -45,9 +45,10 @@ class Circle {
 
 let circleRadius = 40;
 let leftCircle, rightCircle, movingCircle;
+let cnv; // Declare the canvas variable
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  cnv = createCanvas(windowWidth, windowHeight); // Store the canvas in the variable
   leftCircle = new Circle(10 + circleRadius, windowHeight / 2, circleRadius, 0);
   rightCircle = new Circle(
     windowWidth - 10 - circleRadius,
@@ -65,6 +66,11 @@ function setup() {
   // Set mouseX and mouseY to the center of the window
   mouseX = windowWidth / 2;
   mouseY = windowHeight / 2;
+
+  // Disable the context menu on right click
+  cnv.elt.oncontextmenu = function (e) {
+    e.preventDefault();
+  };
 }
 
 function draw() {

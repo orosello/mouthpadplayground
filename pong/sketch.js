@@ -1,8 +1,8 @@
 let ball = {
   x: 300,
   y: 200,
-  xspeed: 2,
-  yspeed: -2,
+  xspeed: 3,
+  yspeed: -3,
   r: 10,
 };
 
@@ -15,7 +15,7 @@ let playerPaddle = {
 
 let computerPaddle = {
   x: 0,
-  y: 10,
+  y: 50,
   w: 100,
   h: 20,
 };
@@ -27,8 +27,13 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  let cnv = createCanvas(windowWidth, windowHeight);
   playerPaddle.y = windowHeight - 200; // set the actual y value here
+
+  // prevent right-click context menu on the entire window
+  window.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+  });
 }
 
 function draw() {
@@ -109,12 +114,3 @@ function keyPressed() {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
-
-// prevent right click context menu
-window.addEventListener(
-  "contextmenu",
-  function (e) {
-    e.preventDefault();
-  },
-  false
-);

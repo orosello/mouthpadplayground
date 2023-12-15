@@ -1,3 +1,10 @@
+let font;
+let instruction = "Please lick left or right";
+
+function preload() {
+  font = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
+}
+
 class Circle {
   constructor(x, y, radius, color) {
     this.x = x;
@@ -17,6 +24,11 @@ class Circle {
     let d = dist(mouseX, mouseY, this.x, this.y);
     if (d <= this.radius * 2) {
       this.color = "white";
+      if (this.x < windowWidth / 2) {
+        instruction = "...now go right";
+      } else {
+        instruction = "...now go left";
+      }
     } else {
       this.color = 0;
     }
@@ -35,7 +47,16 @@ function setup() {
     circleRadius,
     0
   );
-  movingCircle = new Circle(0, windowHeight / 2, circleRadius, 255);
+  movingCircle = new Circle(
+    windowWidth / 2,
+    windowHeight / 2,
+    circleRadius,
+    255
+  );
+
+  // Set mouseX and mouseY to the center of the window
+  mouseX = windowWidth / 2;
+  mouseY = windowHeight / 2;
 }
 
 function draw() {
@@ -61,8 +82,22 @@ function draw() {
   // Draw the moving circle
   movingCircle.x = mouseX;
   movingCircle.display();
+
+  // Draw the instruction
+  textFont(font);
+  textSize(16);
+  textAlign(CENTER, CENTER);
+  noStroke();
+  fill(255);
+  text(instruction, windowWidth / 2, windowHeight - 50);
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+
+  // Update the y position of the circles
+  let newY = windowHeight / 2;
+  leftCircle.y = newY;
+  rightCircle.y = newY;
+  movingCircle.y = newY;
 }

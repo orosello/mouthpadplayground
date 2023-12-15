@@ -6,11 +6,23 @@ function setup() {
 
 function draw() {
   background(0);
-  stroke(50);
-  strokeWeight(100); // Set the stroke weight to the circle's radius
-  line(0, windowHeight / 2, windowWidth, windowHeight / 2);
 
-  noStroke(); // Ensure the circle has no stroke
+  // Set the stroke color to white
+  stroke(255);
+  // Set the stroke weight to 2
+  strokeWeight(2);
+  // Set the fill color to black
+  fill(0);
+
+  // Draw the rectangle
+  rect(
+    -windowWidth,
+    windowHeight / 2 - circleRadius - 10,
+    windowWidth * 3,
+    circleRadius * 2 + 20
+  );
+
+  noStroke(); // no stroke for the circle
   fill(255); // Set the fill color for the circle
   circle(mouseX, windowHeight / 2, circleRadius * 2); // Draw the circle
 }

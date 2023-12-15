@@ -6,6 +6,11 @@ let stateChangeTime;
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
+  // Disable right click context menu
+  canvas.elt.oncontextmenu = function (e) {
+    e.preventDefault();
+  };
+
   for (let i = 0; i < 20; i++) {
     const x = windowWidth / 2 + random(-100, 100);
     const y = windowHeight / 2 + random(-100, 100);

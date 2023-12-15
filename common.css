@@ -1,6 +1,11 @@
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("/assets/Press_Start_2P/PressStart2P-Regular.ttf");
+  font-style: normal;
+  font-weight: 400;
+}
+
 body {
-  /* font-family: 'DotGothic16', sans-serif; */
-  /* font-family: 'Inter', sans-serif; */
   font-family: "Press Start 2P", sans-serif;
   background-color: black;
   color: white;

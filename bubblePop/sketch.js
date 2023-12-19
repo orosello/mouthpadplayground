@@ -1,4 +1,9 @@
 let bubbles = [];
+let myFont;
+
+function preload() {
+  myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -9,9 +14,13 @@ function setup() {
     let r = 40;
     bubbles[i] = new Bubble(x, y, r);
   }
+
+  textFont(myFont);
+  textSize(16);
+  textAlign(CENTER);
 }
 
-function mousePressed() {
+function doubleClicked() {
   for (var i = bubbles.length - 1; i >= 0; i--) {
     if (bubbles[i].isHovered()) {
       bubbles.splice(i, 1);
@@ -25,13 +34,31 @@ function draw() {
   for (var i = 0; i < bubbles.length; i++) {
     bubbles[i].move();
     bubbles[i].show();
-    //chekc if mouse is over the bubble
+    //check if mouse is over the bubble
     if (bubbles[i].isHovered() && !bubbles[i].hovered) {
       bubbles[i].hovered = true;
     } else if (!bubbles[i].isHovered()) {
       bubbles[i].hovered = false;
     }
   }
+
+  // Reset stroke and fill settings
+  noStroke();
+  fill(0);
+
+  // Draw a black rectangle behind the text
+  // rect(windowWidth / 2 - 75, windowHeight - 70, 150, 30);
+
+  rectMode(CENTER);
+  rect(windowWidth / 2, windowHeight - 60, 550, 30);
+
+  // Draw the text on top of the rectangle
+  fill(255);
+  text(
+    "Double click on a bubble to pop it",
+    windowWidth / 2,
+    windowHeight - 50
+  );
 }
 
 class Bubble {
@@ -64,6 +91,7 @@ class Bubble {
     return d < this.r;
   }
 }
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }

@@ -63,6 +63,8 @@ class Bubble {
   constructor(x, y, r) {
     this.x = x;
     this.y = y;
+    this.targetX = x;
+    this.targetY = y;
     this.r = r;
     this.mouseIsPressed = false;
   }
@@ -70,6 +72,8 @@ class Bubble {
   show() {
     fill(this.mouseIsPressed ? 0 : 255);
     this.mouseIsPressed ? stroke(255) : noStroke();
+    this.x = lerp(this.x, this.targetX, 0.05);
+    this.y = lerp(this.y, this.targetY, 0.05);
     circle(this.x, this.y, this.r * 2);
   }
 
@@ -84,7 +88,7 @@ class Bubble {
   }
 
   setPosition(x, y) {
-    this.x = x;
-    this.y = y;
+    this.targetX = x;
+    this.targetY = y;
   }
 }

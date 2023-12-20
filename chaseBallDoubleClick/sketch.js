@@ -35,7 +35,7 @@ function draw() {
   noStroke();
   fill(255);
   const textMessage = hasMoved
-    ? "Nice try, haha. Try to catch me!"
+    ? "Nice! Let's try it again"
     : "Double click on the circle";
   text(textMessage, windowWidth / 2, windowHeight - BOTTOM_TEXT_Y_OFFSET);
 }

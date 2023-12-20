@@ -25,6 +25,7 @@ function setup() {
   textFont(myFont);
   textSize(FONT_SIZE);
   textAlign(CENTER);
+
 }
 
 // Draw the canvas and bubble

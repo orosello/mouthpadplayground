@@ -4,11 +4,17 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(RGB);
   background(0);
+
+  // Disable right-click context menu
+  canvas = document.querySelector("canvas");
+  canvas.oncontextmenu = function (e) {
+    e.preventDefault();
+  };
 }
 
 function draw() {
   if (mouseIsPressed) {
-    // randomCircleRadius = random(10, 80);
+    // randomCircleRadius = random(20, 80);
     randomCircleRadius = 70;
 
     fill(255);

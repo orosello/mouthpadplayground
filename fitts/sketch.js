@@ -3,11 +3,19 @@ let targetCircleIndex;
 let clickedCircles = new Set(); // Set to keep track of clicked circles
 let totalClicks = 0; // Total number of clicks throughout the game
 let baseCircleColor = 30;
+let canvas; // Define a variable to hold the canvas object
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(windowWidth, windowHeight); // Store the canvas object
   initializeCircles();
   selectTargetCircle();
+
+  // Prevent the context menu from appearing on right click
+  canvas.elt.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
+
+  // ... rest of the setup code ...
 }
 
 function draw() {

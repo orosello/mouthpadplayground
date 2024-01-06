@@ -8,10 +8,25 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  for (var i = 0; i < 100; i++) {
-    let x = random(width);
-    let y = random(height);
-    let r = 40;
+  let r = 100; // Bubble radius
+  for (var i = 0; i < 8; i++) {
+    let validPlacement = false;
+    let x, y;
+    while (!validPlacement) {
+      x = random(r, width - r);
+      y = random(r, height - r);
+      validPlacement = true;
+
+      // Check for overlap with other bubbles
+      for (let j = 0; j < bubbles.length; j++) {
+        let other = bubbles[j];
+        let d = dist(x, y, other.x, other.y);
+        if (d < r + other.r) {
+          validPlacement = false;
+          break;
+        }
+      }
+    }
     bubbles[i] = new Bubble(x, y, r);
   }
 
@@ -25,6 +40,11 @@ function doubleClicked() {
     if (bubbles[i].isHovered()) {
       bubbles.splice(i, 1);
     }
+  }
+
+  // Check if all bubbles are popped
+  if (bubbles.length === 0) {
+    window.location.href = "../index.html"; // Navigate back to the main menu
   }
 }
 

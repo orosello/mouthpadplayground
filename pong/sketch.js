@@ -1,8 +1,8 @@
 let ball = {
   x: 300,
   y: 200,
-  xspeed: 3,
-  yspeed: -3,
+  xspeed: 2,
+  yspeed: -2,
   r: 10,
 };
 

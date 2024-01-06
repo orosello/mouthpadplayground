@@ -6,6 +6,11 @@ let animating = false;
 function setup() {
   createCanvas(windowWidth, windowHeight);
   setStage();
+
+  // Prevent the default right-click context menu
+  canvas.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
 }
 
 function setStage() {

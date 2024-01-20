@@ -4,6 +4,12 @@ let clickedCircles = new Set(); // Set to keep track of clicked circles
 let totalClicks = 0; // Total number of clicks throughout the game
 let baseCircleColor = 30;
 let canvas; // Define a variable to hold the canvas object
+let showText = true; // Variable to control the visibility of the text
+let myFont; // Variable to hold the font
+
+function preload() {
+  myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
+}
 
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight); // Store the canvas object
@@ -22,6 +28,20 @@ function draw() {
   background(0);
   drawCircles();
   drawProgressBar();
+
+  if (showText) {
+    noStroke();
+    fill(255);
+    textFont(myFont);
+    textSize(16);
+    textAlign(CENTER);
+    text(
+      "Click on the white circle.",
+      windowWidth / 2 - (windowWidth - 100) / 2,
+      windowHeight - 50,
+      windowWidth - 100 // subtracting 100 to leave some margin on both sides
+    );
+  }
 }
 
 function mousePressed() {
@@ -84,6 +104,10 @@ function handleMousePress() {
 function handleCircleClick() {
   clickedCircles.add(targetCircleIndex); // Add the clicked circle to the set
   totalClicks++; // Increment total clicks
+
+  if (showText) {
+    showText = false;
+  }
 
   // Update circle sizes after all circles have been clicked
   if (clickedCircles.size === circles.length) {

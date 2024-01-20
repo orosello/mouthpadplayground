@@ -1,3 +1,9 @@
+let myFont;
+
+function preload() {
+  myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
 }
@@ -31,3 +37,38 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   background(0);
 }
+
+let s = function (p) {
+  let myFont;
+
+  p.preload = function () {
+    myFont = p.loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
+  };
+
+  p.setup = function () {
+    let canvas = p.createCanvas(windowWidth, windowHeight);
+    canvas.position(0, 0);
+    canvas.style("z-index", "1"); // Make sure the canvas is on top
+  };
+
+  p.draw = function () {
+    p.background(0, 0, 0, 0); // Transparent background
+
+    // Set the text properties
+    p.textFont(myFont);
+    p.textSize(16);
+    p.textAlign(p.CENTER);
+    p.noStroke();
+    p.fill(255);
+
+    // Display the text
+    p.text(
+      "To click and drag, hold your tongue \nagainst the roof of your mouth. \nNext, move the cursor. Then, tap to release.",
+      windowWidth / 2 - (windowWidth - 100) / 2,
+      windowHeight - 80,
+      windowWidth - 100 // subtracting 100 to leave some margin on both sides
+    );
+  };
+};
+
+let myp5 = new p5(s);

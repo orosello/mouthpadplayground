@@ -1,7 +1,7 @@
 let circleRadius = 20;
 let bubble1;
-
 let myFont;
+let showInstruction = true;
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -22,6 +22,9 @@ function setup() {
   textFont(myFont);
   textSize(16);
   textAlign(CENTER);
+
+  // Add this line to set the initial state of the instruction text
+  showInstruction = true;
 }
 
 function draw() {
@@ -33,6 +36,35 @@ function draw() {
     noStroke();
     fill(255);
     text("Woops! That's a right click.", windowWidth / 2, windowHeight - 50);
+
+    // When the "Whoops!" text appears, hide the instruction text
+    showInstruction = false;
+  }
+
+  // Check for left mouse button here
+  if (bubble1.mouseIsPressed && mouseButton === LEFT) {
+    noStroke();
+    fill(255);
+    text(
+      "Awesome! Now you know how to click.",
+      windowWidth / 2,
+      windowHeight - 50
+    );
+
+    // When the "Awesome!" text appears, hide the instruction text
+    showInstruction = false;
+  }
+
+  // Display the instruction text if showInstruction is true
+  if (showInstruction) {
+    noStroke();
+    fill(255);
+    text(
+      "To click, press your tongue flat",
+      windowWidth / 2,
+      windowHeight - 70
+    );
+    text("against the roof of your mouth.", windowWidth / 2, windowHeight - 50);
   }
 }
 

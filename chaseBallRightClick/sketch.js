@@ -1,7 +1,7 @@
 // Constants
 const CIRCLE_RADIUS = 20;
 const FONT_SIZE = 16;
-const BOTTOM_TEXT_Y_OFFSET = 50;
+const BOTTOM_TEXT_Y_OFFSET = 80;
 
 // Variables
 let bubble;
@@ -25,7 +25,6 @@ function setup() {
   textFont(myFont);
   textSize(FONT_SIZE);
   textAlign(CENTER);
-
 }
 
 // Draw the canvas and bubble
@@ -37,7 +36,7 @@ function draw() {
   fill(255);
   const textMessage = hasMoved
     ? "Nice! Let's try it again"
-    : "Right click on the circle";
+    : "To right-click on the circle, \napply tight suction in the back of your mouth. \nMuch like sucking on a straw but without swallowing.";
   text(textMessage, windowWidth / 2, windowHeight - BOTTOM_TEXT_Y_OFFSET);
 }
 

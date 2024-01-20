@@ -57,7 +57,8 @@ function draw() {
   ellipse(ball.x, ball.y, ball.r * 2, ball.r * 2);
 
   // Player Paddle
-  rect(mouseX, playerPaddle.y, playerPaddle.w, playerPaddle.h);
+  let paddleX = constrain(mouseX, 0, windowWidth - playerPaddle.w);
+  rect(paddleX, playerPaddle.y, playerPaddle.w, playerPaddle.h);
 
   // Computer Paddle
   rect(computerPaddle.x, computerPaddle.y, computerPaddle.w, computerPaddle.h);
@@ -78,8 +79,8 @@ function draw() {
   if (
     ball.y > playerPaddle.y &&
     ball.y < playerPaddle.y + playerPaddle.h &&
-    ball.x > mouseX &&
-    ball.x < mouseX + playerPaddle.w
+    ball.x > paddleX &&
+    ball.x < paddleX + playerPaddle.w
   ) {
     ball.yspeed *= -1;
   }
@@ -100,8 +101,18 @@ function draw() {
     if (keyIsDown(RIGHT_ARROW)) {
       computerPaddle.x += 5;
     }
+    git;
+    computerPaddle.x = constrain(
+      computerPaddle.x,
+      0,
+      windowWidth - computerPaddle.w
+    );
   } else {
-    computerPaddle.x = ball.x - computerPaddle.w / 2;
+    computerPaddle.x = constrain(
+      ball.x - computerPaddle.w / 2,
+      0,
+      windowWidth - computerPaddle.w
+    );
   }
 }
 

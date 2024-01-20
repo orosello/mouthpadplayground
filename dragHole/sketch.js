@@ -22,13 +22,13 @@ let targetCircle = {
 };
 
 function preload() {
-  myFont = loadFont('../assets/Press_Start_2P/PressStart2P-Regular.ttf');
+  myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
 }
 
 // This function is called once when the program starts
 function setup() {
   // Create a canvas that fills the window
-  createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(windowWidth, windowHeight);
 
   // Position the target circle in the center of the canvas
   targetCircle.x = width / 2;
@@ -37,6 +37,9 @@ function setup() {
   textFont(myFont);
   textSize(16);
   textAlign(CENTER);
+
+  // Disable right-click context menu
+  canvas.elt.oncontextmenu = (e) => e.preventDefault();
 }
 
 // This function is called repeatedly to draw the scene
@@ -59,7 +62,11 @@ function draw() {
   } else if (circle.hovering) {
     text("...now drop the ball", windowWidth / 2, windowHeight - 50);
   } else {
-    text("Drag and drop the white circle into the hole", windowWidth / 2, windowHeight - 50);
+    text(
+      "Drag and drop the white circle into the hole.",
+      windowWidth / 2,
+      windowHeight - 50
+    );
   }
 
   // If the circle is being dragged, update its position

@@ -121,9 +121,10 @@ function draw() {
 
 function getMessage() {
   if (stage === 0 && firstTimeStage[0]) {
-    return "Move your cursor to each of the \nfour circles located on the edges. \n\nTo move the cursor, slide the tip \nof your tongue on the MouthPad^ \ntouchpad with minimal pressure. \n\nUse our Utility App to check where \nyour tongue is in the touchpad.";
+    // return "Move your cursor to each of the \nfour circles located on the edges. \n\nTo move the cursor, slide the tip \nof your tongue on the MouthPad^ \ntouchpad with minimal pressure. \n\nUse our Utility App to check where \nyour tongue is in the touchpad.";
+    return "Move the cursor to the circles";
   } else if (stage === 1 && firstTimeStage[1]) {
-    return "Great job! Let's continue with a few more \nrounds to help you improve even further.";
+    return "Great job!";
   } else {
     return "";
   }

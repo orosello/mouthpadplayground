@@ -6,7 +6,7 @@ const BOTTOM_TEXT_Y_OFFSET = 50;
 // Variables
 let bubble;
 let myFont;
-let hasMoved = false;
+let moveCount = 1; // Changed this line
 
 // Preload assets
 function preload() {
@@ -34,10 +34,19 @@ function draw() {
 
   noStroke();
   fill(255);
-  const textMessage = hasMoved
-    ? "Nice! Let's try it again"
-    : "Double click on the circle";
-  text(textMessage, windowWidth / 2, windowHeight - BOTTOM_TEXT_Y_OFFSET);
+  if (moveCount === 1) {
+    text(
+      "Double click on the circle",
+      windowWidth / 2,
+      windowHeight - BOTTOM_TEXT_Y_OFFSET
+    );
+  } else if (moveCount === 2) {
+    text(
+      "Nice! Let's try it again",
+      windowWidth / 2,
+      windowHeight - BOTTOM_TEXT_Y_OFFSET
+    );
+  }
 }
 
 // Handle mouse press and release events
@@ -87,11 +96,15 @@ class Bubble {
         random(this.r, windowWidth - this.r),
         random(this.r, windowHeight - this.r)
       );
-      hasMoved = true;
+      moveCount++; // Added this line
     }
   }
 
   setPosition(x, y) {
+    while (dist(x, y, this.x, this.y) < this.r * 5) {
+      x = random(this.r, windowWidth - this.r);
+      y = random(this.r, windowHeight - this.r);
+    }
     this.targetX = x;
     this.targetY = y;
   }

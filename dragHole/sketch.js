@@ -63,7 +63,7 @@ function draw() {
     text("...now drop the ball", windowWidth / 2, windowHeight - 50);
   } else {
     text(
-      "Drag and drop the white circle into the hole.",
+      "Drag and drop the white circle into the hole",
       windowWidth / 2,
       windowHeight - 50
     );

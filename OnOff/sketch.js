@@ -35,7 +35,7 @@ function draw() {
   if (bubble1.mouseIsPressed && mouseButton === RIGHT) {
     noStroke();
     fill(255);
-    text("Woops! That's a right click.", windowWidth / 2, windowHeight - 50);
+    text("Woops! That's a right click", windowWidth / 2, windowHeight - 50);
 
     // When the "Whoops!" text appears, hide the instruction text
     showInstruction = false;
@@ -45,11 +45,7 @@ function draw() {
   if (bubble1.mouseIsPressed && mouseButton === LEFT) {
     noStroke();
     fill(255);
-    text(
-      "Awesome! Now you know how to click.",
-      windowWidth / 2,
-      windowHeight - 50
-    );
+    text("Awesome!", windowWidth / 2, windowHeight - 50);
 
     // When the "Awesome!" text appears, hide the instruction text
     showInstruction = false;
@@ -64,7 +60,7 @@ function draw() {
       windowWidth / 2,
       windowHeight - 70
     );
-    text("against the roof of your mouth.", windowWidth / 2, windowHeight - 50);
+    text("against the roof of your mouth", windowWidth / 2, windowHeight - 50);
   }
 }
 

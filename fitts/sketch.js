@@ -36,7 +36,7 @@ function draw() {
     textSize(16);
     textAlign(CENTER);
     text(
-      "Click on the white circle.",
+      "Click on the white circle",
       windowWidth / 2 - (windowWidth - 100) / 2,
       windowHeight - 50,
       windowWidth - 100 // subtracting 100 to leave some margin on both sides

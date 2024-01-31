@@ -42,7 +42,7 @@ function draw() {
   }
   textAlign(CENTER, BOTTOM);
   text(
-    "Click to make bubbles. Right click to drop them.",
+    "Click to make bubbles. Right click to drop them",
     width / 2,
     height - 20
   );

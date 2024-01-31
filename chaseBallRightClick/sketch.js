@@ -6,7 +6,7 @@ const BOTTOM_TEXT_Y_OFFSET = 80;
 // Variables
 let bubble;
 let myFont;
-let hasMoved = false;
+let moveCount = 0; // New variable to keep track of the number of times the bubble has moved
 
 // Preload assets
 function preload() {
@@ -34,9 +34,15 @@ function draw() {
 
   noStroke();
   fill(255);
-  const textMessage = hasMoved
-    ? "Nice! Let's try it again"
-    : "To right-click on the circle, \napply tight suction in the back of your mouth. \nMuch like sucking on a straw but without swallowing.";
+  let textMessage;
+  if (moveCount === 0) {
+    textMessage =
+      "To right-click on the circle, \napply tight suction in the back of your mouth. \nMuch like sucking on a straw but without swallowing";
+  } else if (moveCount === 1) {
+    textMessage = "Yes! Let's try it again";
+  } else {
+    textMessage = ""; // No text after the bubble has moved more than once
+  }
   text(textMessage, windowWidth / 2, windowHeight - BOTTOM_TEXT_Y_OFFSET);
 }
 
@@ -47,7 +53,7 @@ function mousePressed() {
       random(bubble.r, windowWidth - bubble.r),
       random(bubble.r, windowHeight - bubble.r)
     );
-    hasMoved = true;
+    moveCount++; // Increment the move count each time the bubble moves
   }
 }
 

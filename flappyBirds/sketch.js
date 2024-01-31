@@ -20,8 +20,14 @@ function draw() {
   updateBird();
   displayScore();
 
-  // Generate a new pipe every 100 frames
-  if (frameCount % 100 == 0) {
+  // EDIT for game difficulty
+  // Calculate the pipe frequency based on the current score
+  let baseFrequency = 300; // Increase the base frequency to make the game easier
+  let scoreFactor = Math.floor(score / 5); // Calculate the score factor
+  let frequency = baseFrequency - scoreFactor * 50; // Decrease the frequency substantially every 5 points
+
+  // Generate a new pipe based on the calculated frequency
+  if (frameCount % frequency == 0) {
     pipes.push(new Pipe());
   }
 }
@@ -127,12 +133,25 @@ window.addEventListener(
 );
 
 function Pipe() {
-  this.spacing = map(score, 0, 100, 250, 150);
+  // Calculate the spacing based on the current score
+  //EDIT for game difficulty
+  // This line maps the score (which ranges from 0 to 100) to a base spacing value (which ranges from 400 to 150).
+  // As the score increases, the base spacing decreases, making the game more difficult.
+  let baseSpacing = map(score, 0, 100, 500, 150);
+  let scoreFactor = Math.floor(score / 5); // Calculate the score factor
+  this.spacing = baseSpacing - scoreFactor * 80; // Decrease the spacing substantially every 5 points
+
+  // Add some randomness to the opening
+  this.spacing += random(-10, 10);
+
   this.top = random(height / 6, (4 / 6) * height);
   this.bottom = height - (this.top + this.spacing);
   this.x = width;
   this.width = PIPE_WIDTH;
-  this.speed = PIPE_SPEED;
+
+  // Increase the speed based on the current score
+  this.speed = PIPE_SPEED + scoreFactor * 0.1; // Increase the speed every 10 points
+
   this.color = color(255); // default color
   this.stroke = color(0); // default stroke
   this.scored = false; // Flag to track if score has been incremented for this pipe

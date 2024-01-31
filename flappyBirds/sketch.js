@@ -7,20 +7,55 @@ const BIRD_DIAMETER = 64;
 let bird;
 let pipes = [];
 let score = 0;
+let myFont;
+let scoreGraphics; // Graphics buffer for the score
+
+function preload() {
+  myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   bird = new Bird();
   pipes.push(new Pipe());
+
+  // Create the graphics buffer for the score
+  scoreGraphics = createGraphics(windowWidth, windowHeight);
 }
 
 function draw() {
   background(0);
   updatePipes();
   updateBird();
-  displayScore();
 
-  // EDIT for game difficulty
+  // Clear the score graphics buffer
+  scoreGraphics.clear();
+
+  // Set the text properties for the score
+  scoreGraphics.textFont(myFont);
+  scoreGraphics.textSize(16);
+  scoreGraphics.fill(0); // Set the fill color to black for the rectangle
+  scoreGraphics.noStroke(); // Remove the stroke
+
+  // Calculate the width and height of the score text
+  let scoreText = "Score: " + String(score).padStart(4, "0");
+  let textWidth = scoreGraphics.textWidth(scoreText);
+  let textHeight = 16;
+
+  // Calculate the position of the score text
+  let textX = 20; // Align to the left with 20px padding
+  let textY = 50;
+
+  // Draw a black rectangle behind the score text
+  scoreGraphics.rect(textX, textY - textHeight, textWidth, textHeight);
+
+  // Display the score
+  scoreGraphics.fill(255); // Set the fill color back to white for the text
+  scoreGraphics.text(scoreText, textX, textY);
+
+  // Display the score graphics buffer on top of everything else
+  image(scoreGraphics, 0, 0);
+
   // Calculate the pipe frequency based on the current score
   let baseFrequency = 300; // Increase the base frequency to make the game easier
   let scoreFactor = Math.floor(score / 5); // Calculate the score factor
@@ -28,7 +63,13 @@ function draw() {
 
   // Generate a new pipe based on the calculated frequency
   if (frameCount % frequency == 0) {
-    pipes.push(new Pipe());
+    // Only generate a new pipe if the last pipe is far enough from the right edge
+    if (
+      pipes.length == 0 ||
+      pipes[pipes.length - 1].x < width - PIPE_WIDTH - 100
+    ) {
+      pipes.push(new Pipe());
+    }
   }
 }
 
@@ -59,12 +100,6 @@ function updatePipes() {
 function updateBird() {
   bird.show();
   bird.update();
-}
-
-function displayScore() {
-  fill(255);
-  textSize(32);
-  text(`Score: ${score}`, 10, 50);
 }
 
 function mousePressed() {
@@ -134,12 +169,9 @@ window.addEventListener(
 
 function Pipe() {
   // Calculate the spacing based on the current score
-  //EDIT for game difficulty
-  // This line maps the score (which ranges from 0 to 100) to a base spacing value (which ranges from 400 to 150).
-  // As the score increases, the base spacing decreases, making the game more difficult.
-  let baseSpacing = map(score, 0, 100, 500, 150);
+  let baseSpacing = map(score, 0, 100, 500, 150); // Increase the base spacing to make the game easier
   let scoreFactor = Math.floor(score / 5); // Calculate the score factor
-  this.spacing = baseSpacing - scoreFactor * 80; // Decrease the spacing substantially every 5 points
+  this.spacing = baseSpacing - scoreFactor * 50; // Decrease the spacing substantially every 5 points
 
   // Add some randomness to the opening
   this.spacing += random(-10, 10);

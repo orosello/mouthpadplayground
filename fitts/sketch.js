@@ -79,8 +79,15 @@ function selectTargetCircle() {
 function drawCircles() {
   // Draw circles
   for (let circle of circles) {
-    noStroke(); // Ensure circles don't have an outline
-    fill(circle.color);
+    if (circle.color === baseCircleColor) {
+      // Check if the circle is gray
+      fill("black"); // Change fill to black
+      stroke("white"); // Change stroke to white
+      strokeWeight(1); // Make the circle stroke weight thinner
+    } else {
+      noStroke(); // Ensure circles don't have an outline
+      fill(circle.color);
+    }
     ellipse(circle.x, circle.y, circle.r * 2);
   }
 }

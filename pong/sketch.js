@@ -101,7 +101,6 @@ function draw() {
     if (keyIsDown(RIGHT_ARROW)) {
       computerPaddle.x += 5;
     }
-    git;
     computerPaddle.x = constrain(
       computerPaddle.x,
       0,

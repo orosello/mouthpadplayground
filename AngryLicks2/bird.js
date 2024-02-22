@@ -15,8 +15,6 @@ class Bird {
     push();
     translate(pos.x, pos.y);
     rotate(angle);
-    // imageMode(CENTER);
-    // image(dotImg, 0, 0, this.r * 2, this.r * 2);
     stroke(0);
     strokeWeight(2);
     fill(255);

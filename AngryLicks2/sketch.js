@@ -7,43 +7,44 @@ let world, engine;
 let mConstraint;
 let slingshot;
 
-// let dotImg;
-// let boxImg;
-// let bkgImg;
-
-// function preload() {
-//   dotImg = loadImage("images/dot.png");
-//   boxImg = loadImage("images/equals.png");
-//   bkgImg = loadImage("images/skyBackground.png");
-// }
-
 function setup() {
-  const canvas = createCanvas(711, 400);
+  const canvas = createCanvas(windowWidth, windowHeight);
   engine = Engine.create();
   world = engine.world;
   ground = new Ground(width / 2, height - 10, width, 20);
-  for (let i = 0; i < 3; i++) {
+
+  let birdStartPositionY = windowHeight - windowHeight / 4;
+  let birdStartPositionX = 150; // You can adjust this based on your preference
+
+  for (let i = 0; i < 5; i++) {
     boxes[i] = new Box(450, 300 - i * 75, 84, 100);
   }
-  bird = new Bird(150, 300, 25);
 
-  slingshot = new SlingShot(150, 300, bird.body);
+  bird = new Bird(birdStartPositionX, birdStartPositionY, 25);
+
+  slingshot = new SlingShot(birdStartPositionX, birdStartPositionY, bird.body);
 
   const mouse = Mouse.create(canvas.elt);
   const options = {
     mouse: mouse,
   };
 
-  // A fix for HiDPI displays
   mouse.pixelRatio = pixelDensity();
   mConstraint = MouseConstraint.create(engine, options);
   World.add(world, mConstraint);
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  ground = new Ground(width / 2, height - 10, width, 20);
+}
+
 function keyPressed() {
   if (key == " ") {
     World.remove(world, bird.body);
-    bird = new Bird(150, 300, 25);
+    let birdStartPositionY = windowHeight - windowHeight / 4;
+    let birdStartPositionX = 150;
+    bird = new Bird(birdStartPositionX, birdStartPositionY, 25);
     slingshot.attach(bird.body);
   }
 }

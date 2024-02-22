@@ -7,7 +7,7 @@ class SlingShot {
       },
       bodyB: body,
       stiffness: 0.02,
-      length: 40,
+      length: 100,
     };
     this.sling = Constraint.create(options);
     World.add(world, this.sling);

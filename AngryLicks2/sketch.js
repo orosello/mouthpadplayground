@@ -16,7 +16,7 @@ function setup() {
   ground = new Ground(width / 2, height - 10, width, 20);
 
   let birdStartPositionY = windowHeight - windowHeight / 4;
-  let birdStartPositionX = 150; /
+  let birdStartPositionX = 150;
   let towerStartX = 450;
   let distanceToRightEdge = windowWidth - towerStartX;
 
@@ -86,7 +86,7 @@ function draw() {
       Math.abs(bird.body.velocity.x) < 0.01 &&
       Math.abs(bird.body.velocity.y) < 0.01
     ) {
-      birdStopped = true; /
+      birdStopped = true;
       setTimeout(resetGame, 2000); // Wait 2 secs before resetting the game
     }
   }

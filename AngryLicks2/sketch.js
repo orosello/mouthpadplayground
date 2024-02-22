@@ -16,12 +16,32 @@ function setup() {
   let birdStartPositionY = windowHeight - windowHeight / 4;
   let birdStartPositionX = 150; // You can adjust this based on your preference
 
-  for (let i = 0; i < 5; i++) {
-    boxes[i] = new Box(450, 300 - i * 75, 84, 100);
+  // Define the starting X position for the first tower
+  let towerStartX = 450;
+  // Calculate the distance between the first tower and the right edge of the screen
+  let distanceToRightEdge = windowWidth - towerStartX;
+
+  // Calculate the spacing between towers and the right edge
+  let spacing = distanceToRightEdge / 4; // Dividing by 4 to get 3 spaces for towers and 1 at the end
+
+  // Loop to create 3 towers
+  for (let j = 0; j < 3; j++) {
+    // Calculate the number of boxes in each tower (randomly between 4 and 6)
+    let numberOfBoxes = Math.floor(Math.random() * 3) + 4; // 4 to 6 boxes
+    // Calculate the X position for the current tower
+    let currentTowerX = towerStartX + j * spacing;
+    // Loop to create each box in the tower
+    for (let i = 0; i < numberOfBoxes; i++) {
+      // Generate a random displacement between -5 and 5
+      let randomDisplacement = Math.floor(Math.random() * 11) - 5;
+      // Apply the displacement to the X position of each box
+      boxes.push(
+        new Box(currentTowerX + randomDisplacement, 300 - i * 75, 84, 100)
+      );
+    }
   }
 
   bird = new Bird(birdStartPositionX, birdStartPositionY, 25);
-
   slingshot = new SlingShot(birdStartPositionX, birdStartPositionY, bird.body);
 
   const mouse = Mouse.create(canvas.elt);

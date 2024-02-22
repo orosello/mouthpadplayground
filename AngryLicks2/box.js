@@ -15,6 +15,7 @@ class Box {
     push();
     translate(pos.x, pos.y);
     rotate(angle);
+    stroke(0);
     strokeWeight(2);
     fill(255);
     rectMode(CENTER);

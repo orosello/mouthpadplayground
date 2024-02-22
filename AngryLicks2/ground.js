@@ -1,12 +1,7 @@
-class Box {
+class Ground extends Box {
   constructor(x, y, w, h) {
-    const options = {
-      restitution: 0.5,
-    };
-    this.body = Matter.Bodies.rectangle(x, y, w, h, options);
-    Matter.World.add(world, this.body);
-    this.w = w;
-    this.h = h;
+    super(x, y, w, h);
+    this.body.isStatic = true;
   }
 
   show() {
@@ -19,8 +14,6 @@ class Box {
     fill(255);
     rectMode(CENTER);
     rect(0, 0, this.w, this.h);
-    // imageMode(CENTER);
-    // image(boxImg, 0, 0, this.w, this.h);
     pop();
   }
 }

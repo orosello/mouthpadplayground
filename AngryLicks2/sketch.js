@@ -6,6 +6,8 @@ let bird;
 let world, engine;
 let mConstraint;
 let slingshot;
+let birdLaunched = false;
+let birdStopped = false;
 
 function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
@@ -72,11 +74,11 @@ function keyPressed() {
 function mouseReleased() {
   setTimeout(() => {
     slingshot.fly();
+    birdLaunched = true; // Set birdLaunched to true when the bird is launched
   }, 100);
 }
 
 function draw() {
-  // background(bkgImg);
   background(0);
   Matter.Engine.update(engine);
   ground.show();
@@ -85,4 +87,25 @@ function draw() {
   }
   slingshot.show();
   bird.show();
+
+  if (birdLaunched && !birdStopped) {
+    // Check if the bird has stopped moving
+    if (
+      Math.abs(bird.body.velocity.x) < 0.01 &&
+      Math.abs(bird.body.velocity.y) < 0.01
+    ) {
+      birdStopped = true; // Mark the bird as stopped
+      setTimeout(resetGame, 2000); // Wait 2 seconds before resetting the game
+    }
+  }
+}
+
+function resetGame() {
+  World.remove(world, bird.body);
+  let birdStartPositionY = windowHeight - windowHeight / 4;
+  let birdStartPositionX = 150;
+  bird = new Bird(birdStartPositionX, birdStartPositionY, 25);
+  slingshot.attach(bird.body);
+  birdLaunched = false; // Reset the birdLaunched flag
+  birdStopped = false; // Reset the birdStopped flag
 }

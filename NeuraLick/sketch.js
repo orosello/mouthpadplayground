@@ -15,21 +15,36 @@ let INITIAL_COLOR;
 let HOVER_COLOR;
 let TARGET_COLOR;
 
+let ledFont; // Declare a variable for the font
+
+function preload() {
+  // Load the font; adjust the path to where you've stored your font file
+  ledFont = loadFont('../assets/led-counter-7/led_counter-7.ttf');
+}
+
 class Square {
   constructor(x, y) {
     this.x = x;
     this.y = y;
     this.size = SQUARE_SIZE;
     this.color = INITIAL_COLOR;
+    this.targetColor = this.color; // Initialize targetColor
     this.isTarget = false;
   }
 
   update() {
-    // Update color based on mouse position and target status
-    this.color = this.isMouseOver() ? HOVER_COLOR : INITIAL_COLOR;
-    if (this.isTarget) {
-      this.color = TARGET_COLOR;
+    // Determine the target color based on mouse position and target status
+    if (this.isMouseOver()) {
+      this.targetColor = HOVER_COLOR;
+    } else if (this.isTarget) {
+      this.targetColor = TARGET_COLOR;
+    } else {
+      this.targetColor = INITIAL_COLOR;
     }
+
+    // Animate color transition
+    this.color = lerpColor(this.color, this.targetColor, 0.1);
+
     // Animate size for a hover effect
     this.size = lerp(this.size, this.isMouseOver() ? SQUARE_SIZE + GAP_SIZE : SQUARE_SIZE, 0.1);
   }
@@ -61,8 +76,9 @@ class Square {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   rectMode(CENTER);
-  textSize(TEXT_SIZE);
-  textAlign(RIGHT, CENTER);
+
+  textFont(ledFont, TEXT_SIZE); // Apply the loaded font with the desired size
+  textAlign(LEFT);
 
   // Initialize colors
   INITIAL_COLOR = color(30);
@@ -76,6 +92,7 @@ function initializeGrid() {
   // Calculate the total grid width and height
   const totalGridWidth = GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) - GAP_SIZE;
   const totalGridHeight = GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) - GAP_SIZE;
+  print(totalGridWidth, totalGridHeight);
 
   // Calculate starting positions to center the grid, adjusting offsetX and offsetY to shift the grid rightwards and downwards
   const offsetX = (windowWidth - totalGridWidth) / 2 + SQUARE_SIZE / 2; // Adjusted offsetX
@@ -125,15 +142,49 @@ function selectNewTarget() {
 }
 
 function displayTimes() {
+  // Recalculate offsetY to ensure it's defined in this scope
+  const totalGridHeight = GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) - GAP_SIZE;
+  const offsetY = (windowHeight - totalGridHeight) / 2 + SQUARE_SIZE / 2; // Adjusted offsetY
+
   // Display last, average, and fastest reaction times
   const lastTime = times.length > 0 ? times[times.length - 1] : "0.00";
-  // Skip the first measurement for the average and fastest time calculation
   const relevantTimes = times.slice(1);
   const averageTime = relevantTimes.length > 0 ? relevantTimes.reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / relevantTimes.length : 0;
   const fastestTime = relevantTimes.length > 0 ? Math.min(...relevantTimes.map(time => parseFloat(time))) : 0;
 
+  // Calculate the position to the right of the grid, separated by the width of 3 squares and 2 gaps
+  const textX = (GRID_SIZE * (SQUARE_SIZE + GAP_SIZE)) + (3 * SQUARE_SIZE) + (15
+    * GAP_SIZE);
+
+  // Set the fill color to white (or any other color you prefer)
   fill(255);
-  text(`Fastest Time: ${fastestTime.toFixed(2)}s`, windowWidth - 20, windowHeight / 2);
-  text(`Last Time: ${lastTime}s`, windowWidth - 20, windowHeight / 2 + 40);
-  text(`Avg Time: ${averageTime.toFixed(2)}s`, windowWidth - 20, windowHeight / 2 + 80);
+
+  // Adjust the spacing between the texts
+  const padding = 5; // Reduced padding for closer text
+
+  const yDisp = SQUARE_SIZE * 2 + GAP_SIZE * 1;
+
+  // Fastest Time
+  textSize(SQUARE_SIZE / 2); // Set text size for times
+  text(`${fastestTime.toFixed(2)}`, textX, offsetY + yDisp); // Position at the top of the third row
+  textSize(SQUARE_SIZE / 6); // Smaller text size for description
+  text("FASTEST", textX, offsetY + SQUARE_SIZE / 6 + yDisp); // Description for fastest time with reduced padding
+
+  // Last Time
+  textSize(SQUARE_SIZE / 2); // Reset text size for times
+  text(`${lastTime}`, textX, offsetY + 90 + yDisp); // Adjusted for closer positioning
+  textSize(SQUARE_SIZE / 6); // Smaller text size for description
+  text("LAST", textX, offsetY + SQUARE_SIZE / 6 + 90 + yDisp); // Description for last time with reduced padding
+
+
+  // Average Time
+  textSize(SQUARE_SIZE / 2); // Reset text size for times
+  text(`${averageTime.toFixed(2)}`, textX, offsetY + 180 + yDisp); // Adjusted for closer positioning
+  textSize(SQUARE_SIZE / 6); // Smaller text size for description
+  text("AVERAGE", textX, offsetY + SQUARE_SIZE / 6 + 180 + yDisp); // Description for last time with reduced padding
+
+
+
+
+
 }

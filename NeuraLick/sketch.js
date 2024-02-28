@@ -36,7 +36,7 @@ class Square {
   }
 
   makeTarget() {
-    this.color = targetColor;
+    this.targetColor = targetColor; // Set target color to purple for lerping
     this.isTarget = true; // Set to true when this square becomes the target
   }
 
@@ -97,15 +97,11 @@ function draw() {
 
 function mousePressed() {
   if (targetSquare && targetSquare.isMouseOver()) {
-    // Clear the target status of the current target square
-    targetSquare.clearTarget(); // Add this line
-
-    // Reset the color of the current target square
-    targetSquare.color = color(30); // Reset to non-hover color or any default color
+    targetSquare.clearTarget(); // Clear the previous target status
 
     // Select a new target square
     const randomIndex = floor(random(squares.length));
     targetSquare = squares[randomIndex];
-    targetSquare.makeTarget();
+    targetSquare.makeTarget(); // This now starts the color transition
   }
 }

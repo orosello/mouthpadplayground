@@ -73,9 +73,15 @@ function setup() {
 }
 
 function initializeGrid() {
-  // Calculate starting positions
-  const offsetX = (windowWidth - GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) + GAP_SIZE) / 2;
-  const offsetY = (windowHeight - GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) + GAP_SIZE) / 2;
+  // Calculate the total grid width and height
+  const totalGridWidth = GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) - GAP_SIZE;
+  const totalGridHeight = GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) - GAP_SIZE;
+
+  // Calculate starting positions to center the grid, adjusting offsetX and offsetY to shift the grid rightwards and downwards
+  const offsetX = (windowWidth - totalGridWidth) / 2 + SQUARE_SIZE / 2; // Adjusted offsetX
+  const offsetY = (windowHeight - totalGridHeight) / 2 + SQUARE_SIZE / 2; // Adjusted offsetY
+
+  squares = []; // Clear previous squares to avoid duplicates when window is resized
 
   // Create grid of squares
   for (let i = 0; i < GRID_SIZE; i++) {
@@ -120,14 +126,14 @@ function selectNewTarget() {
 
 function displayTimes() {
   // Display last, average, and fastest reaction times
-  const lastTime = times[times.length - 1] || 0;
+  const lastTime = times.length > 0 ? times[times.length - 1] : "0.00";
   // Skip the first measurement for the average and fastest time calculation
   const relevantTimes = times.slice(1);
   const averageTime = relevantTimes.length > 0 ? relevantTimes.reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / relevantTimes.length : 0;
   const fastestTime = relevantTimes.length > 0 ? Math.min(...relevantTimes.map(time => parseFloat(time))) : 0;
 
   fill(255);
-  text(`Last Time: ${lastTime}s`, windowWidth - 20, windowHeight / 2);
-  text(`Avg Time: ${averageTime.toFixed(2)}s`, windowWidth - 20, windowHeight / 2 + 40);
-  text(`Fastest Time: ${fastestTime.toFixed(2)}s`, windowWidth - 20, windowHeight / 2 + 80);
+  text(`Fastest Time: ${fastestTime.toFixed(2)}s`, windowWidth - 20, windowHeight / 2);
+  text(`Last Time: ${lastTime}s`, windowWidth - 20, windowHeight / 2 + 40);
+  text(`Avg Time: ${averageTime.toFixed(2)}s`, windowWidth - 20, windowHeight / 2 + 80);
 }

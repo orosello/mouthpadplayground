@@ -5,6 +5,7 @@ let customFont;
 let keyWidth = 40;
 let keyHeight = 40;
 let totalKeysPerRow = 10; // Assuming 10 keys per row for QWERTYUIOP, etc.
+let extraKeys = [" ", "<"]; // Spacebar and backspace key
 
 function preload() {
   // Load your custom font; replace 'your_font_file.ttf' with the path to your font file
@@ -50,19 +51,39 @@ function drawKeyboard() {
     noStroke();
     text(keys[i], x + keyWidth / 2 - textWidth(keys[i]) / 2, y + keyHeight / 2 + 10); // Draw letter
   }
+
+  // Draw additional keys
+  let extraX = startX + (keys.length % totalKeysPerRow) * keyWidth;
+  let extraY = startY + Math.floor(keys.length / totalKeysPerRow) * keyHeight;
+
+  for (let i = 0; i < extraKeys.length; i++) {
+    fill(255);
+    stroke(0);
+    rect(extraX, extraY, keyWidth, keyHeight, 5); // Draw key
+    fill(0);
+    noStroke();
+    text(extraKeys[i], extraX + keyWidth / 2 - textWidth(extraKeys[i]) / 2, extraY + keyHeight / 2 + 10); // Draw symbol
+    extraX += keyWidth;
+  }
 }
 
 function mousePressed() {
   let startX = width / 2 - (totalKeysPerRow * keyWidth) / 2; // Center the keyboard horizontally
   let startY = height / 2 + 50; // Position the keyboard vertically below the text
-  let keys = "QWERTYUIOPASDFGHJKLZXCVBNM";
+  let keys = "QWERTYUIOPASDFGHJKLZXCVBNM" + extraKeys.join("");
 
   for (let i = 0; i < keys.length; i++) {
     let x = startX + (i % totalKeysPerRow) * keyWidth;
     let y = startY + Math.floor(i / totalKeysPerRow) * keyHeight;
     // Check if the mouse click is within the bounds of the key
     if (mouseX > x && mouseX < x + keyWidth && mouseY > y && mouseY < y + keyHeight) {
-      inputText += keys[i];
+      if (i < keys.length - extraKeys.length) {
+        inputText += keys[i];
+      } else if (keys[i] === "<") {
+        inputText = inputText.slice(0, -1); // Backspace
+      } else {
+        inputText += " "; // Spacebar
+      }
       break; // Exit the loop once the correct key is found
     }
   }

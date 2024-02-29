@@ -10,17 +10,8 @@ let targetSquare = null;
 let startTime = 0;
 let times = [];
 
-// Colors will be initialized in setup()
-let INITIAL_COLOR;
-let HOVER_COLOR;
-let TARGET_COLOR;
-
-let ledFont; // Declare a variable for the font
-
-function preload() {
-  // Load the font; adjust the path to where you've stored your font file
-  ledFont = loadFont('../assets/led-counter-7/led_counter-7.ttf');
-}
+// Colors and font will be initialized in setup()
+let INITIAL_COLOR, HOVER_COLOR, TARGET_COLOR, ledFont;
 
 class Square {
   constructor(x, y) {
@@ -28,59 +19,51 @@ class Square {
     this.y = y;
     this.size = SQUARE_SIZE;
     this.color = INITIAL_COLOR;
-    this.targetColor = this.color; // Initialize targetColor
     this.isTarget = false;
   }
 
   update() {
-    // Determine the target color based on mouse position and target status
-    if (this.isMouseOver()) {
-      this.targetColor = HOVER_COLOR;
-    } else if (this.isTarget) {
-      this.targetColor = TARGET_COLOR;
-    } else {
-      this.targetColor = INITIAL_COLOR;
-    }
-
-    // Animate color transition
+    this.targetColor = this.getTargetColor();
     this.color = lerpColor(this.color, this.targetColor, 0.1);
-
-    // Animate size for a hover effect
     this.size = lerp(this.size, this.isMouseOver() ? SQUARE_SIZE + GAP_SIZE : SQUARE_SIZE, 0.1);
   }
 
+  getTargetColor() {
+    if (this.isMouseOver()) return HOVER_COLOR;
+    if (this.isTarget) return TARGET_COLOR;
+    return INITIAL_COLOR;
+  }
+
   isMouseOver() {
-    // Check if the mouse is over this square
     return mouseX >= this.x - this.size / 2 && mouseX <= this.x + this.size / 2 &&
       mouseY >= this.y - this.size / 2 && mouseY <= this.y + this.size / 2;
   }
 
   draw() {
-    // Draw the square with current color and size
     fill(this.color);
     rect(this.x, this.y, this.size, this.size, 10);
   }
 
   makeTarget() {
-    // Mark as target and record start time
     this.isTarget = true;
     startTime = millis();
   }
 
   clearTarget() {
-    // Clear target status
     this.isTarget = false;
   }
+}
+
+function preload() {
+  ledFont = loadFont('../assets/led-counter-7/led_counter-7.ttf');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   rectMode(CENTER);
-
-  textFont(ledFont, TEXT_SIZE); // Apply the loaded font with the desired size
+  textFont(ledFont, TEXT_SIZE);
   textAlign(LEFT);
 
-  // Initialize colors
   INITIAL_COLOR = color(30);
   HOVER_COLOR = color(100);
   TARGET_COLOR = color(128, 0, 128);
@@ -89,23 +72,14 @@ function setup() {
 }
 
 function initializeGrid() {
-  // Calculate the total grid width and height
   const totalGridWidth = GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) - GAP_SIZE;
-  const totalGridHeight = GRID_SIZE * (SQUARE_SIZE + GAP_SIZE) - GAP_SIZE;
-  print(totalGridWidth, totalGridHeight);
+  const offsetX = (windowWidth - totalGridWidth) / 2 + SQUARE_SIZE / 2;
+  const offsetY = (windowHeight - totalGridWidth) / 2 + SQUARE_SIZE / 2;
 
-  // Calculate starting positions to center the grid, adjusting offsetX and offsetY to shift the grid rightwards and downwards
-  const offsetX = (windowWidth - totalGridWidth) / 2 + SQUARE_SIZE / 2; // Adjusted offsetX
-  const offsetY = (windowHeight - totalGridHeight) / 2 + SQUARE_SIZE / 2; // Adjusted offsetY
-
-  squares = []; // Clear previous squares to avoid duplicates when window is resized
-
-  // Create grid of squares
+  squares = [];
   for (let i = 0; i < GRID_SIZE; i++) {
     for (let j = 0; j < GRID_SIZE; j++) {
-      const x = offsetX + i * (SQUARE_SIZE + GAP_SIZE);
-      const y = offsetY + j * (SQUARE_SIZE + GAP_SIZE);
-      squares.push(new Square(x, y));
+      squares.push(new Square(offsetX + i * (SQUARE_SIZE + GAP_SIZE), offsetY + j * (SQUARE_SIZE + GAP_SIZE)));
     }
   }
   selectNewTarget();
@@ -121,7 +95,6 @@ function draw() {
 }
 
 function mousePressed() {
-  // Check if the target square is clicked
   if (targetSquare && targetSquare.isMouseOver()) {
     recordTime();
     targetSquare.clearTarget();
@@ -130,13 +103,10 @@ function mousePressed() {
 }
 
 function recordTime() {
-  // Record reaction time
-  let currentTime = (millis() - startTime) / 1000;
-  times.push(currentTime.toFixed(2));
+  times.push(((millis() - startTime) / 1000).toFixed(2));
 }
 
 function selectNewTarget() {
-  // Randomly select a new target square
   targetSquare = squares[floor(random(squares.length))];
   targetSquare.makeTarget();
 }
@@ -183,8 +153,10 @@ function displayTimes() {
   textSize(SQUARE_SIZE / 6); // Smaller text size for description
   text("AVERAGE", textX, offsetY + SQUARE_SIZE / 6 + 180 + yDisp); // Description for last time with reduced padding
 
+}
 
 
-
-
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  initializeGrid();
 }

@@ -19,10 +19,10 @@ function setup() {
 }
 
 function draw() {
-  background(220);
+  background(0); // Changed background color to black
 
   // Draw the input text and blinking cursor
-  fill(0);
+  fill(255); // Changed font color to white
   noStroke();
   text(inputText + (blink ? '|' : ''), width / 2 - textWidth(inputText) / 2, height / 2);
 
@@ -44,10 +44,10 @@ function drawKeyboard() {
   for (let i = 0; i < keys.length; i++) {
     let x = startX + (i % totalKeysPerRow) * keyWidth;
     let y = startY + Math.floor(i / totalKeysPerRow) * keyHeight;
-    fill(255);
-    stroke(0);
+    noFill(); // Changed to have no fill for keys
+    stroke(255); // Outline color changed to white
     rect(x, y, keyWidth, keyHeight, 5); // Draw key
-    fill(0);
+    fill(128); // Changed keyboard font color to gray
     noStroke();
     text(keys[i], x + keyWidth / 2 - textWidth(keys[i]) / 2, y + keyHeight / 2 + 10); // Draw letter
   }
@@ -57,10 +57,10 @@ function drawKeyboard() {
   let extraY = startY + Math.floor(keys.length / totalKeysPerRow) * keyHeight;
 
   for (let i = 0; i < extraKeys.length; i++) {
-    fill(255);
-    stroke(0);
+    noFill(); // Changed to have no fill for keys
+    stroke(255); // Outline color changed to white
     rect(extraX, extraY, keyWidth, keyHeight, 5); // Draw key
-    fill(0);
+    fill(128); // Changed keyboard font color to gray
     noStroke();
     text(extraKeys[i], extraX + keyWidth / 2 - textWidth(extraKeys[i]) / 2, extraY + keyHeight / 2 + 10); // Draw symbol
     extraX += keyWidth;

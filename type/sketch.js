@@ -88,3 +88,11 @@ function mousePressed() {
     }
   }
 }
+function keyPressed() {
+  // Check if the key is a character or a space and add it to inputText
+  if (key.length === 1) { // This checks if a single character was pressed
+    inputText += key;
+  } else if (keyCode === BACKSPACE) { // Handle the backspace key
+    inputText = inputText.slice(0, -1);
+  }
+}

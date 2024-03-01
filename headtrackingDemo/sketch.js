@@ -59,9 +59,22 @@ function keyPressed() {
   if (keyCode === BACKSPACE) { // Handle the backspace key
     // Prevent default backspace behavior to avoid navigating back in browser history
     inputText = inputText.slice(0, -1);
-    select('#textInput').value(inputText); // Update hidden input value
-    return false; // Prevent any default behavior
+  } else {
+    // Append the last key pressed to inputText, unless it's a special key
+    if (keyCode >= 32 && keyCode <= 126) {
+      inputText += key;
+    }
   }
+  select('#textInput').value(inputText); // Update hidden input value
+
+  // Check if the inputText ends with "click"
+  if (inputText.endsWith("click")) {
+    setTimeout(function () {
+      window.location.href = "/NeuraLick/neuraLick.html"; // Redirect to the specified URL after 1 second
+    }, 1000); // 1000 milliseconds = 1 second
+  }
+
+  return false; // Prevent any default behavior
 }
 
 function windowResized() {

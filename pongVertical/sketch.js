@@ -1,18 +1,18 @@
 let windowWidth, windowHeight;
 
 let ball = {
-  x: 300,
-  y: 200,
-  xspeed: 2,
-  yspeed: -2,
-  r: 10,
+  x: 400,
+  y: 400,
+  xspeed: 6,
+  yspeed: -6,
+  r: 20,
 };
 
 let playerPaddle = {
   x: 0,
   y: 0,
   w: 20,
-  h: 120,
+  h: 150,
   fillColor: 255, // Fill color for player's paddle
   maxColor: [200, 0, 200], // Maximum fill color (purple)
   colorChangeDuration: 60, // Duration of color change animation (frames)
@@ -23,7 +23,7 @@ let computerPaddle = {
   x: 0,
   y: 0,
   w: 20,
-  h: 120,
+  h: 150,
   fillColor: 255, // Fill color for computer's paddle
 };
 
@@ -33,9 +33,9 @@ function setup() {
   windowWidth = window.innerWidth;
   windowHeight = window.innerHeight;
   let cnv = createCanvas(windowWidth, windowHeight);
-  playerPaddle.x = windowWidth - playerPaddle.w - 100;
+  playerPaddle.x = windowWidth - playerPaddle.w - 300;
   playerPaddle.y = windowHeight / 2 - playerPaddle.h / 2;
-  computerPaddle.x = 100;
+  computerPaddle.x = 300;
   computerPaddle.y = windowHeight / 2 - computerPaddle.h / 2;
 
   window.addEventListener("contextmenu", (e) => {

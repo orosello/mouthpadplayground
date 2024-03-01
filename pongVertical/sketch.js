@@ -3,8 +3,8 @@ let windowWidth, windowHeight;
 let ball = {
   x: 400,
   y: 400,
-  xspeed: 6,
-  yspeed: -6,
+  xspeed: 15,
+  yspeed: -15,
   r: 20,
 };
 
@@ -101,9 +101,8 @@ function draw() {
     ball.xspeed *= -1;
   }
 
-  // Smoothly move computer's paddle towards the ball's y position
-  let targetY = ball.y - computerPaddle.h / 2;
-  computerPaddle.y = lerp(computerPaddle.y, targetY, 0.1);
+  // Directly set computer's paddle y position to match the ball's y position
+  computerPaddle.y = ball.y - computerPaddle.h / 2;
 
   // Ensure paddles cannot leave the screen
   playerPaddle.y = constrain(paddleY, 0, windowHeight - playerPaddle.h);

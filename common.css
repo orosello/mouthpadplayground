@@ -1,6 +1,10 @@
 @font-face {
   font-family: "Press Start 2P";
   src: url("assets/Press_Start_2P/PressStart2P-Regular.ttf");
+  /* src: url('../assets/led-counter-7/led_counter-7.ttf'); */
+
+
+
   font-style: normal;
   font-weight: 400;
 }
@@ -82,4 +86,25 @@ body {
   background-color: white;
   color: rgb(50, 50, 50);
   font-weight: 300;
+}
+
+.textInput {
+  position: absolute;
+  top: 50%;
+  /* Adjust based on your canvas layout */
+  left: 50%;
+  /* Adjust based on your canvas layout */
+  transform: translate(-50%, -50%);
+  border: none;
+  background: none;
+  color: white;
+  /* Match your sketch's text color */
+  font-family: 'Press Start 2P', sans-serif;
+  /* Match your sketch's font */
+  font-size: 32px;
+  /* Match your sketch's text size */
+  outline: none;
+  width: 60%;
+  /* Adjust based on your needs */
+  text-align: center;
 }

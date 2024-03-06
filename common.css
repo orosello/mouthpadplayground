@@ -3,8 +3,6 @@
   src: url("assets/Press_Start_2P/PressStart2P-Regular.ttf");
   /* src: url('../assets/led-counter-7/led_counter-7.ttf'); */
 
-
-
   font-style: normal;
   font-weight: 400;
 }
@@ -47,9 +45,7 @@ body {
   margin: 20px 0;
   padding: 10px 30px;
   font-weight: 300;
-
 }
-
 
 .title-wip {
   text-decoration: none;
@@ -59,7 +55,6 @@ body {
   margin: 20px 0;
   padding: 10px 30px;
   font-weight: 300;
-
 }
 
 .game-link:hover {
@@ -80,8 +75,6 @@ body {
   /* outline: none;  Disabling the outline */
 }
 
-
-
 .game-link-wip:hover {
   background-color: white;
   color: rgb(50, 50, 50);
@@ -99,7 +92,7 @@ body {
   background: none;
   color: white;
   /* Match your sketch's text color */
-  font-family: 'Press Start 2P', sans-serif;
+  font-family: "Press Start 2P", sans-serif;
   /* Match your sketch's font */
   font-size: 32px;
   /* Match your sketch's text size */
@@ -107,4 +100,18 @@ body {
   width: 60%;
   /* Adjust based on your needs */
   text-align: center;
+}
+
+.button {
+  font-family: "Press Start 2P", sans-serif;
+  color: white; /* Font color */
+  background-color: black; /* Background color */
+  border: none; /* Optional: removes the border */
+  padding: 10px 20px; /* Adjust based on your needs */
+  cursor: pointer; /* Changes cursor to pointer on hover */
+}
+
+.button:hover {
+  color: black; /* Font color on hover */
+  background-color: white; /* Background color on hover */
 }

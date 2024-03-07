@@ -8,6 +8,12 @@ const gameOrder = [
   "/orbit/orbit.html",
   "/dragHole/dragHole.html",
   "/paint/paint.html",
+  "/pong/pong.html",
+  "/flappyBirds/flappyBirds.html",
+  "/AngryLicks2/angryLicks2.html",
+  "/NeuraLick/neuraLick.html",
+  "/type/type.html",
+  "/pongVertical/pongVertical.html",
 ];
 
 function getCurrentGameIndex() {

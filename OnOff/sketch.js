@@ -2,6 +2,7 @@ let circleRadius = 20;
 let bubble1;
 let myFont;
 let showInstruction = true;
+let showAwesomeText = false; // New variable to control the display of "Awesome!" text
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -31,23 +32,19 @@ function draw() {
   background(0);
   bubble1.show();
 
-  // Check for right mouse button here
+  // Use the new flag to control the display of "Awesome!" text
+  if (showAwesomeText) {
+    noStroke();
+    fill(255);
+    text("Awesome!", windowWidth / 2, windowHeight - 50);
+    showInstruction = false; // Ensure instruction text is hidden when "Awesome!" is displayed
+  }
+
+  // Modify this section to only check for right mouse button
   if (bubble1.mouseIsPressed && mouseButton === RIGHT) {
     noStroke();
     fill(255);
     text("Woops! That's a right click", windowWidth / 2, windowHeight - 50);
-
-    // When the "Whoops!" text appears, hide the instruction text
-    showInstruction = false;
-  }
-
-  // Check for left mouse button here
-  if (bubble1.mouseIsPressed && mouseButton === LEFT) {
-    noStroke();
-    fill(255);
-    text("Awesome!", windowWidth / 2, windowHeight - 50);
-
-    // When the "Awesome!" text appears, hide the instruction text
     showInstruction = false;
   }
 
@@ -75,6 +72,14 @@ function mouseReleased() {
   // Set mouseIsPressed to false for both left and right mouse buttons
   if (mouseButton === LEFT || mouseButton === RIGHT) {
     bubble1.mouseIsPressed = false;
+  }
+
+  // When the left mouse button is released, show "Awesome!" text for 1 second
+  if (mouseButton === LEFT) {
+    showAwesomeText = true; // Show "Awesome!" text
+    setTimeout(() => {
+      showAwesomeText = false; // Hide "Awesome!" text after 1 second
+    }, 1000);
   }
 }
 

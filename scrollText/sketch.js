@@ -1,29 +1,29 @@
 let myFont;
-let macbethText = `First Witch
+let macbethText = `FIRST WITCH
 When shall we three meet again
 In thunder, lightning, or in rain?
 
-Second Witch
+SECOND WITCH
 When the hurlyburly's done,
 When the battle's lost and won.
 
-Third Witch
+THIRD WITCH
 That will be ere the set of sun.
 
-First Witch
+FIRST WITCH
 Where the place?
 
-Second Witch
+SECOND WITCH
 Upon the heath.
 
-Third Witch
+THIRD WITCH
 There to meet with Macbeth.
 
-All
+ALL
 Fair is foul, and foul is fair:
 Hover through the fog and filthy air.
 
-[Exeunt]
+[EXEUNT]
 
 SCENE II. A camp near Forres.
 
@@ -78,7 +78,7 @@ DUNCAN
 Dismay'd not this
 Our captains, Macbeth and Banquo?
 
-Sergeant
+SERGEANT
 Yes;
 As sparrows eagles, or the hare the lion.
 If I say sooth, I must report they were
@@ -93,7 +93,7 @@ DUNCAN
 So well thy words become thee as thy wounds;
 They smack of honour both. Go get him surgeons.
 
-[Exit Sergeant, attended]
+[EXIT SERGEANT, ATTENDED]
 
 Who comes here?
 
@@ -146,7 +146,7 @@ I'll see it done.
 DUNCAN
 What he hath lost noble Macbeth hath won.
 
-[Exeunt]`; // Add more text as needed
+[EXEUNT]`; // Add more text as needed
 
 let yOffset;
 

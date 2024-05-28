@@ -1,5 +1,9 @@
 let myFont;
-let macbethText = `FIRST WITCH
+let macbethText = `
+
+SCENE I. Three witches plan to meet Macbeth.
+
+FIRST WITCH
 When shall we three meet again
 In thunder, lightning, or in rain?
 

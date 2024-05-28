@@ -4,6 +4,7 @@ const FONT_SIZE = 16;
 let randomCircleRadius = 0;
 let myFont;
 let showInstructions = true; // This should ensure instructions are shown initially
+let isEraser = false; // Track if the eraser is selected
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -24,6 +25,17 @@ function setup() {
   canvas.addEventListener("mousedown", function () {
     showInstructions = false;
   });
+
+  // Toggle button for eraser and paintbrush
+  toggleButton = createButton("Pick up eraser");
+  toggleButton.position(windowWidth - 120, 10);
+  toggleButton.mousePressed(toggleTool);
+
+  // Styling the button
+  toggleButton.style("font-family", "Press Start 2P");
+  toggleButton.style("color", "white");
+  toggleButton.style("background-color", "black");
+  toggleButton.style("border", "2px solid white");
 }
 
 function draw() {
@@ -43,9 +55,9 @@ function draw() {
   }
 
   if (mouseIsPressed) {
-    randomCircleRadius = 70;
+    randomCircleRadius = random(40, 80);
 
-    fill(255);
+    fill(isEraser ? 0 : 255); // Use background color if eraser is selected
     strokeWeight(1);
     rectMode(CENTER);
     circle(mouseX, mouseY, randomCircleRadius);
@@ -54,7 +66,13 @@ function draw() {
   // Display instructions if the flag is true
 }
 
+function toggleTool() {
+  isEraser = !isEraser;
+  toggleButton.html(isEraser ? "Pick up paintbrush" : "Pick up eraser");
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   background(0);
+  toggleButton.position(windowWidth - 120, 10); // Ensure button stays in top right corner
 }

@@ -63,7 +63,7 @@ And fix'd his head upon our battlements.
 DUNCAN
 O valiant cousin! worthy gentleman!
 
-Sergeant
+SERGEANT
 As whence the sun 'gins his reflection
 Shipwrecking storms and direful thunders break,
 So from that spring whence comfort seem'd to come

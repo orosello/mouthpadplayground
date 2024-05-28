@@ -8,6 +8,8 @@ const gameOrder = [
   "../orbit/orbit.html",
   "../dragHole/dragHole.html",
   "../paint/paint.html",
+  "../scroll/scroll.html",
+  "../scrollText/scrollText.html",
   "../pong/pong.html",
   "../flappyBirds/flappyBirds.html",
   "../AngryLicks2/angryLicks2.html",

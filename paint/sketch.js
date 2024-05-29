@@ -28,7 +28,7 @@ function setup() {
 
   // Toggle button for eraser and paintbrush
   toggleButton = createButton("Pick up eraser");
-  toggleButton.position(windowWidth - 120, 10);
+  toggleButton.position(windowWidth - 160, 10);
   toggleButton.mousePressed(toggleTool);
 
   // Styling the button
@@ -36,6 +36,11 @@ function setup() {
   toggleButton.style("color", "white");
   toggleButton.style("background-color", "black");
   toggleButton.style("border", "2px solid white");
+  toggleButton.style("z-index", "1000"); // Ensure button is on top of canvas
+
+  // Apply the font to the button
+  toggleButton.style("font-family", "Press Start 2P");
+  toggleButton.style("font-size", "16px"); // Adjust font size if necessary
 }
 
 function draw() {
@@ -54,7 +59,20 @@ function draw() {
     );
   }
 
-  if (mouseIsPressed) {
+  // Define the safe area dimensions around the button
+  const safeAreaX = windowWidth - 160; // Adjust width for safe area around the button
+  const safeAreaY = 0; // Start from the top of the window
+  const safeAreaWidth = 160; // Adjust width for safe area around the button
+  const safeAreaHeight = 50; // Adjust height for safe area around the button
+
+  // Check if the mouse is within the safe area
+  const isInSafeArea =
+    mouseX >= safeAreaX &&
+    mouseX <= safeAreaX + safeAreaWidth &&
+    mouseY >= safeAreaY &&
+    mouseY <= safeAreaY + safeAreaHeight;
+
+  if (mouseIsPressed && !isInSafeArea) {
     randomCircleRadius = random(40, 80);
 
     fill(isEraser ? 0 : 255); // Use background color if eraser is selected
@@ -62,8 +80,6 @@ function draw() {
     rectMode(CENTER);
     circle(mouseX, mouseY, randomCircleRadius);
   }
-
-  // Display instructions if the flag is true
 }
 
 function toggleTool() {
@@ -74,5 +90,5 @@ function toggleTool() {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   background(0);
-  toggleButton.position(windowWidth - 120, 10); // Ensure button stays in top right corner
+  toggleButton.position(windowWidth - 160, 10); // Ensure button stays in top right corner
 }

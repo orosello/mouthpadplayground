@@ -11,7 +11,7 @@ function setup() {
 
 function draw() {
   background(0);
-  rotateY(angle);
+  rotateX(angle);
   stroke(255);
   noFill();
   box(250); // Draw a 3D box with 100 pixels size

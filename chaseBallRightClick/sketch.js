@@ -1,5 +1,5 @@
 // Constants
-const CIRCLE_RADIUS = 20;
+const CIRCLE_RADIUS = 50;
 const FONT_SIZE = 16;
 const BOTTOM_TEXT_Y_OFFSET = 80;
 
@@ -49,10 +49,13 @@ function draw() {
 // Handle mouse press and release events
 function mousePressed() {
   if (mouseButton === RIGHT && bubble.isMouseInside()) {
-    bubble.setPosition(
-      random(bubble.r, windowWidth - bubble.r),
-      random(bubble.r, windowHeight - bubble.r)
-    );
+    let newX, newY;
+    do {
+      newX = random(CIRCLE_RADIUS, windowWidth - CIRCLE_RADIUS);
+      newY = random(CIRCLE_RADIUS, windowHeight - CIRCLE_RADIUS);
+    } while (dist(newX, newY, bubble.x, bubble.y) < CIRCLE_RADIUS * 2); // Ensure new position is sufficiently different
+
+    bubble.setPosition(newX, newY);
     moveCount++; // Increment the move count each time the bubble moves
   }
 }
@@ -65,7 +68,10 @@ function mouseReleased() {
 // Handle window resize event
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  bubble.setPosition(windowWidth / 2, windowHeight / 2);
+  bubble.setPosition(
+    constrain(windowWidth / 2, CIRCLE_RADIUS, windowWidth - CIRCLE_RADIUS),
+    constrain(windowHeight / 2, CIRCLE_RADIUS, windowHeight - CIRCLE_RADIUS)
+  );
 }
 
 // Bubble class
@@ -80,16 +86,21 @@ class Bubble {
   }
 
   show() {
+    if (this.isMouseInside()) {
+      stroke(255);
+      strokeWeight(10);
+    } else {
+      noStroke();
+    }
     fill(this.mouseIsPressed ? 0 : 255);
-    this.mouseIsPressed ? stroke(255) : noStroke();
     this.x = lerp(this.x, this.targetX, 0.05);
     this.y = lerp(this.y, this.targetY, 0.05);
     circle(this.x, this.y, this.r * 2);
   }
 
   setPosition(x, y) {
-    this.targetX = x;
-    this.targetY = y;
+    this.targetX = constrain(x, CIRCLE_RADIUS, windowWidth - CIRCLE_RADIUS);
+    this.targetY = constrain(y, CIRCLE_RADIUS, windowHeight - CIRCLE_RADIUS);
   }
 
   isMouseInside() {

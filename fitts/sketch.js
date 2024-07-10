@@ -78,16 +78,24 @@ function selectTargetCircle() {
 // Function to draw circles
 function drawCircles() {
   // Draw circles
-  for (let circle of circles) {
+  for (let i = 0; i < circles.length; i++) {
+    let circle = circles[i];
+    let isHovered = dist(mouseX, mouseY, circle.x, circle.y) < circle.r;
+
     if (circle.color === baseCircleColor) {
-      // Check if the circle is gray
-      fill("black"); // Change fill to black
-      stroke("white"); // Change stroke to white
-      strokeWeight(1); // Make the circle stroke weight thinner
+      fill("black");
+      stroke("white");
+      strokeWeight(1);
     } else {
-      noStroke(); // Ensure circles don't have an outline
+      noStroke();
       fill(circle.color);
     }
+
+    if (i === targetCircleIndex && isHovered) {
+      stroke("white");
+      strokeWeight(10);
+    }
+
     ellipse(circle.x, circle.y, circle.r * 2);
   }
 }

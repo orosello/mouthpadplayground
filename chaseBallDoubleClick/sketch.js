@@ -1,5 +1,5 @@
 // Constants
-const CIRCLE_RADIUS = 20;
+const CIRCLE_RADIUS = 50;
 const FONT_SIZE = 16;
 const BOTTOM_TEXT_Y_OFFSET = 50;
 
@@ -83,8 +83,13 @@ class Bubble {
   }
 
   show() {
+    if (this.isMouseInside()) {
+      stroke(255);
+      strokeWeight(10);
+    } else {
+      noStroke();
+    }
     fill(this.mouseIsPressed ? 0 : 255);
-    this.mouseIsPressed ? stroke(255) : noStroke();
     this.x = lerp(this.x, this.targetX, 0.05);
     this.y = lerp(this.y, this.targetY, 0.05);
     circle(this.x, this.y, this.r * 2);

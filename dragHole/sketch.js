@@ -30,9 +30,10 @@ function setup() {
   // Create a canvas that fills the window
   canvas = createCanvas(windowWidth, windowHeight);
 
-  // Position the target circle in the center of the canvas
-  targetCircle.x = width / 2;
-  targetCircle.y = height / 2;
+  // Position the target circle in the center of the canvas with a margin
+  let margin = targetCircle.diameter;
+  targetCircle.x = constrain(width / 2, margin, width - margin);
+  targetCircle.y = constrain(height / 2, margin, height - margin);
 
   textFont(myFont);
   textSize(16);
@@ -98,7 +99,16 @@ function updateCirclePosition() {
 
 // Draw the main circle and the target circle
 function drawCircles() {
+  // Check if the mouse is hovering over the circle
+  checkMouseHover();
+
   // Draw the main circle with a white fill
+  if (circle.hovering) {
+    stroke(255);
+    strokeWeight(10);
+  } else {
+    noStroke();
+  }
   fill(255);
   if (circle.jitter) {
     // Add a random offset to the circle's position to create a jitter effect
@@ -112,10 +122,17 @@ function drawCircles() {
   // Draw the target circle with a white outline and no fill
   noFill();
   stroke(255);
+  strokeWeight(1);
   ellipse(targetCircle.x, targetCircle.y, targetCircle.diameter);
 
   // Reset the stroke for future drawing
   noStroke();
+}
+
+// Check if the mouse is hovering over the circle
+function checkMouseHover() {
+  let distance = dist(mouseX, mouseY, circle.x, circle.y);
+  circle.hovering = distance < circle.diameter / 2;
 }
 
 // Check if the main circle has reached the target
@@ -148,8 +165,16 @@ function animateCircleDisappearing() {
 
 // Reset the circle to a new random position and stop the disappearing animation
 function resetCircle() {
-  circle.x = random(0, width);
-  circle.y = random(0, height);
+  let margin = circleDiameter;
+  let safeDistance = circleDiameter + targetCircle.diameter;
+
+  do {
+    circle.x = random(margin, width - margin);
+    circle.y = random(margin, height - margin);
+  } while (
+    dist(circle.x, circle.y, targetCircle.x, targetCircle.y) < safeDistance
+  );
+
   circle.diameter = circleDiameter;
   circle.disappearing = false;
   circle.hovering = false; // Reset the hovering state when the circle is reset

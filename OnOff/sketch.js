@@ -1,4 +1,4 @@
-let circleRadius = 300;
+let circleRadius = 250;
 let bubble1;
 let myFont;
 let showInstruction = true;
@@ -101,11 +101,20 @@ class Bubble {
     if (this.mouseIsPressed) {
       fill(0);
       stroke(255);
+    } else if (this.isMouseOver()) {
+      fill(255);
+      stroke(255);
+      strokeWeight(10); // Add white stroke of 10 pixels when hovered
     } else {
       fill(255);
       noStroke();
     }
     circle(this.x, this.y, this.r * 2);
+  }
+
+  isMouseOver() {
+    let d = dist(mouseX, mouseY, this.x, this.y);
+    return d < this.r;
   }
 
   // move() {

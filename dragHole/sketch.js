@@ -30,9 +30,10 @@ function setup() {
   // Create a canvas that fills the window
   canvas = createCanvas(windowWidth, windowHeight);
 
-  // Position the target circle in the center of the canvas
-  targetCircle.x = width / 2;
-  targetCircle.y = height / 2;
+  // Position the target circle in the center of the canvas with a margin
+  let margin = targetCircle.diameter;
+  targetCircle.x = constrain(width / 2, margin, width - margin);
+  targetCircle.y = constrain(height / 2, margin, height - margin);
 
   textFont(myFont);
   textSize(16);
@@ -148,8 +149,16 @@ function animateCircleDisappearing() {
 
 // Reset the circle to a new random position and stop the disappearing animation
 function resetCircle() {
-  circle.x = random(0, width);
-  circle.y = random(0, height);
+  let margin = circleDiameter;
+  let safeDistance = circleDiameter + targetCircle.diameter;
+
+  do {
+    circle.x = random(margin, width - margin);
+    circle.y = random(margin, height - margin);
+  } while (
+    dist(circle.x, circle.y, targetCircle.x, targetCircle.y) < safeDistance
+  );
+
   circle.diameter = circleDiameter;
   circle.disappearing = false;
   circle.hovering = false; // Reset the hovering state when the circle is reset

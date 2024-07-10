@@ -1,5 +1,5 @@
 // Constants
-const CIRCLE_RADIUS = 20;
+const CIRCLE_RADIUS = 50;
 const FONT_SIZE = 16;
 const BOTTOM_TEXT_Y_OFFSET = 50;
 

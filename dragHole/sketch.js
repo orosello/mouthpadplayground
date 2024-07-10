@@ -99,7 +99,16 @@ function updateCirclePosition() {
 
 // Draw the main circle and the target circle
 function drawCircles() {
+  // Check if the mouse is hovering over the circle
+  checkMouseHover();
+
   // Draw the main circle with a white fill
+  if (circle.hovering) {
+    stroke(255);
+    strokeWeight(10);
+  } else {
+    noStroke();
+  }
   fill(255);
   if (circle.jitter) {
     // Add a random offset to the circle's position to create a jitter effect
@@ -113,10 +122,17 @@ function drawCircles() {
   // Draw the target circle with a white outline and no fill
   noFill();
   stroke(255);
+  strokeWeight(1);
   ellipse(targetCircle.x, targetCircle.y, targetCircle.diameter);
 
   // Reset the stroke for future drawing
   noStroke();
+}
+
+// Check if the mouse is hovering over the circle
+function checkMouseHover() {
+  let distance = dist(mouseX, mouseY, circle.x, circle.y);
+  circle.hovering = distance < circle.diameter / 2;
 }
 
 // Check if the main circle has reached the target

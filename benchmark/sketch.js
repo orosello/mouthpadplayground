@@ -14,6 +14,7 @@ let hoveredX = -1,
 let countdown = 60; // 60-second countdown timer
 let timerEnded = false; // flag to indicate if the timer has ended
 let clickTimestamps = []; // list to store timestamps of successful clicks
+let gameStarted = false; // flag to indicate if the game has started
 
 function disableRightClick() {
   window.addEventListener("contextmenu", preventDefault);
@@ -93,15 +94,16 @@ function mousePressed() {
 
   trialCount++; // Increment trial count on every click
 
-  if (trialCount === 1) {
-    startTime = millis(); // Initialize startTime when the first trial starts
-  }
-
   if (clickedX === targetX && clickedY === targetY) {
     successfulClicks++;
     clickTimestamps.push(millis()); // Record the timestamp of the successful click
     missedClick = null; // clear missed click on successful click
     pickNewTarget();
+
+    if (!gameStarted) {
+      startTime = millis(); // Initialize startTime when the first successful click occurs
+      gameStarted = true; // Set the flag to indicate the game has started
+    }
   } else {
     missedClick = { x: clickedX, y: clickedY };
     misclicks++;
@@ -143,8 +145,8 @@ function createMetrics() {
   metricsDiv.child(
     createDiv("% Successful: 0%").class("metric").id("percentSuccessful")
   );
-  metricsDiv.child(createDiv("BPS: 0").class("metric").id("bps"));
-  metricsDiv.child(createDiv("NTPM: 0").class("metric").id("ntpm"));
+  metricsDiv.child(createDiv("NTPM: 0").class("metric").id("ntpm")); // Moved NTPM before BPS
+  metricsDiv.child(createDiv("BPS: 0").class("metric").id("bps")); // Moved BPS after NTPM
   metricsDiv.child(createDiv("Last Click: 0s").class("metric").id("lastClick")); // Add last click metric
   metricsDiv.child(
     createDiv("Fastest Click: 0s").class("metric").id("fastestClick")
@@ -156,6 +158,8 @@ function createMetrics() {
 }
 
 function updateMetrics() {
+  if (!gameStarted || timerEnded) return; // Only update metrics if the game has started and the timer hasn't ended
+
   let elapsedTimeMinutes = (millis() - startTime) / 60000; // time in minutes
 
   if (elapsedTimeMinutes > 0) {
@@ -174,8 +178,8 @@ function updateMetrics() {
     select("#percentSuccessful").html(
       `% Successful: ${percentSuccessful.toFixed(2)}%`
     );
-    select("#bps").html(`BPS: ${bps.toFixed(2)}`);
-    select("#ntpm").html(`NTPM: ${ntpm.toFixed(2)}`);
+    select("#ntpm").html(`NTPM: ${ntpm.toFixed(2)}`); // Update NTPM before BPS
+    select("#bps").html(`BPS: ${bps.toFixed(2)}`); // Update BPS after NTPM
 
     // Update countdown timer
     let elapsedTimeSeconds = (millis() - startTime) / 1000;

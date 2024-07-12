@@ -4,38 +4,25 @@ let targetX, targetY;
 let trialCount = 0;
 let successfulClicks = 0;
 let misclicks = 0;
-let startTime = null; // Initialize as null
+let startTime = null;
 let bps = 0;
 let ntpm = 0;
-let netRate = 0; // variable for net rate
-let missedClick = null; // store missed click coordinates
+let netRate = 0;
+let missedClick = null;
 let hoveredX = -1,
-  hoveredY = -1; // store hovered cell coordinates
+  hoveredY = -1;
 let countdown = 60; // 60-second countdown timer
-let timerEnded = false; // flag to indicate if the timer has ended
-let clickTimestamps = []; // list to store timestamps of successful clicks
-let gameStarted = false; // flag to indicate if the game has started
-
-function disableRightClick() {
-  window.addEventListener("contextmenu", preventDefault);
-}
-
-function disableScroll() {
-  window.addEventListener("scroll", preventDefault, { passive: false });
-  window.addEventListener("wheel", preventDefault, { passive: false });
-  window.addEventListener("touchmove", preventDefault, { passive: false });
-}
-
-function preventDefault(e) {
-  e.preventDefault();
-}
+let timerEnded = false;
+let clickTimestamps = [];
+let gameStarted = false;
+let sendMetricsButton;
 
 function setup() {
   createCanvas(gridSize * cellSize, gridSize * cellSize);
   pickNewTarget();
   createMetrics();
-  disableScroll(); // Call the function to disable scrolling
-  disableRightClick(); // Call the function to disable right-clicks
+  disableScroll();
+  disableRightClick();
 }
 
 function draw() {
@@ -55,8 +42,8 @@ function draw() {
 }
 
 function drawGrid() {
-  stroke(128); // gray color
-  strokeWeight(1); // default stroke weight
+  stroke(128);
+  strokeWeight(1);
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
       noFill();
@@ -64,6 +51,7 @@ function drawGrid() {
     }
   }
 }
+
 function drawTarget() {
   fill("magenta");
   noStroke();
@@ -77,8 +65,8 @@ function drawMissedClick() {
 }
 
 function drawHoverHighlight() {
-  stroke(255); // white color for hover
-  strokeWeight(2); // thicker stroke for hovered cell
+  stroke(255);
+  strokeWeight(2);
   noFill();
   rect(hoveredX * cellSize, hoveredY * cellSize, cellSize, cellSize);
 }
@@ -92,24 +80,24 @@ function mousePressed() {
   let clickedX = floor(mouseX / cellSize);
   let clickedY = floor(mouseY / cellSize);
 
-  trialCount++; // Increment trial count on every click
+  trialCount++;
 
   if (clickedX === targetX && clickedY === targetY) {
     successfulClicks++;
-    clickTimestamps.push(millis()); // Record the timestamp of the successful click
-    missedClick = null; // clear missed click on successful click
+    clickTimestamps.push(millis());
+    missedClick = null;
     pickNewTarget();
 
     if (!gameStarted) {
-      startTime = millis(); // Initialize startTime when the first successful click occurs
-      gameStarted = true; // Set the flag to indicate the game has started
+      startTime = millis();
+      gameStarted = true;
     }
   } else {
     missedClick = { x: clickedX, y: clickedY };
     misclicks++;
   }
 
-  netRate = successfulClicks - misclicks; // Update net rate after each click
+  netRate = successfulClicks - misclicks;
 }
 
 function mouseReleased() {
@@ -145,28 +133,28 @@ function createMetrics() {
   metricsDiv.child(
     createDiv("% Successful: 0%").class("metric").id("percentSuccessful")
   );
-  metricsDiv.child(createDiv("NTPM: 0").class("metric").id("ntpm")); // Moved NTPM before BPS
-  metricsDiv.child(createDiv("BPS: 0").class("metric").id("bps")); // Moved BPS after NTPM
-  metricsDiv.child(createDiv("Last Click: 0s").class("metric").id("lastClick")); // Add last click metric
+  metricsDiv.child(createDiv("NTPM: 0").class("metric").id("ntpm"));
+  metricsDiv.child(createDiv("BPS: 0").class("metric").id("bps"));
+  metricsDiv.child(createDiv("Last Click: 0s").class("metric").id("lastClick"));
   metricsDiv.child(
     createDiv("Fastest Click: 0s").class("metric").id("fastestClick")
-  ); // Add fastest click metric
+  );
   metricsDiv.child(
     createDiv("Average Click Time: 0s").class("metric").id("averageClickTime")
-  ); // Add average click time metric
-  metricsDiv.child(createDiv("Countdown: 60").class("metric").id("countdown")); // Add countdown timer
+  );
+  metricsDiv.child(createDiv("Countdown: 60").class("metric").id("countdown"));
 }
 
 function updateMetrics() {
-  if (!gameStarted || timerEnded) return; // Only update metrics if the game has started and the timer hasn't ended
+  if (!gameStarted || timerEnded) return;
 
-  let elapsedTimeMinutes = (millis() - startTime) / 60000; // time in minutes
+  let elapsedTimeMinutes = (millis() - startTime) / 60000;
 
   if (elapsedTimeMinutes > 0) {
-    ntpm = successfulClicks / elapsedTimeMinutes; // Calculate NTPM as successful clicks per minute
+    ntpm = successfulClicks / elapsedTimeMinutes;
     let totalGridCells = gridSize * gridSize;
     let gridSizeLog2 = Math.log2(totalGridCells);
-    bps = (ntpm * gridSizeLog2) / 60; // BPS calculation based on NTPM and grid size log2
+    bps = (ntpm * gridSizeLog2) / 60;
 
     let totalClicks = successfulClicks + misclicks;
     let percentSuccessful =
@@ -178,30 +166,25 @@ function updateMetrics() {
     select("#percentSuccessful").html(
       `% Successful: ${percentSuccessful.toFixed(2)}%`
     );
-    select("#ntpm").html(`NTPM: ${ntpm.toFixed(2)}`); // Update NTPM before BPS
-    select("#bps").html(`BPS: ${bps.toFixed(2)}`); // Update BPS after NTPM
+    select("#ntpm").html(`NTPM: ${ntpm.toFixed(2)}`);
+    select("#bps").html(`BPS: ${bps.toFixed(2)}`);
 
-    // Update countdown timer
     let elapsedTimeSeconds = (millis() - startTime) / 1000;
     countdown = max(60 - floor(elapsedTimeSeconds), 0);
     select("#countdown").html(`Countdown: ${countdown}`);
 
-    // Check if countdown has reached 0
-    if (countdown === 0) {
-      timerEnded = true; // Set the flag to indicate the timer has ended
+    if (countdown === 0 && !timerEnded) {
+      timerEnded = true;
+      createSendMetricsButton();
     }
 
-    // Calculate last click time
     if (clickTimestamps.length > 1) {
       let lastClickTime =
         (clickTimestamps[clickTimestamps.length - 1] -
           clickTimestamps[clickTimestamps.length - 2]) /
         1000;
       select("#lastClick").html(`Last Click: ${lastClickTime.toFixed(2)}s`);
-    }
 
-    // Calculate fastest click
-    if (clickTimestamps.length > 1) {
       let clickIntervals = [];
       for (let i = 1; i < clickTimestamps.length; i++) {
         clickIntervals.push(
@@ -212,10 +195,7 @@ function updateMetrics() {
       select("#fastestClick").html(
         `Fastest Click: ${fastestClick.toFixed(2)}s`
       );
-    }
 
-    // Calculate average click time
-    if (clickTimestamps.length > 1) {
       let totalTime =
         (clickTimestamps[clickTimestamps.length - 1] - clickTimestamps[0]) /
         1000;
@@ -225,4 +205,41 @@ function updateMetrics() {
       );
     }
   }
+}
+
+function createSendMetricsButton() {
+  sendMetricsButton = createButton("Send Metrics");
+  sendMetricsButton.position(width / 2 - 50, height - 50);
+  sendMetricsButton.mousePressed(saveMetricsAndRedirect);
+}
+
+function saveMetricsAndRedirect() {
+  let metrics = {
+    trialCount,
+    netRate,
+    gridSize,
+    percentSuccessful: ((successfulClicks / trialCount) * 100).toFixed(2),
+    ntpm: ntpm.toFixed(2),
+    bps: bps.toFixed(2),
+    lastClick: select("#lastClick").html().split(": ")[1],
+    fastestClick: select("#fastestClick").html().split(": ")[1],
+    averageClickTime: select("#averageClickTime").html().split(": ")[1],
+  };
+
+  localStorage.setItem("benchmarkMetrics", JSON.stringify(metrics));
+  window.location.href = "../type/type.html";
+}
+
+function disableRightClick() {
+  window.addEventListener("contextmenu", preventDefault);
+}
+
+function disableScroll() {
+  window.addEventListener("scroll", preventDefault, { passive: false });
+  window.addEventListener("wheel", preventDefault, { passive: false });
+  window.addEventListener("touchmove", preventDefault, { passive: false });
+}
+
+function preventDefault(e) {
+  e.preventDefault();
 }

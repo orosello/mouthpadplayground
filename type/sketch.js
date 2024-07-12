@@ -8,7 +8,7 @@ let totalKeysPerRow = 10;
 let extraKeys = [" ", "<"];
 let sendButton;
 const googleScriptURL =
-  "https://script.google.com/macros/s/AKfycbxK1eGUy3-n4cmqWa5b5gUy6EhdCHu41pka4Dg5FJ3hlh4xINJldonEExfqCtmXRygV/exec"; // Replace with your actual URL
+  "https://script.google.com/macros/s/AKfycbzTJNZEfGtoMpLNPh1rPPl8a4nxNmhr2_EI3QIU9cpN3jHtbEDbN1Rt2WpnBaAStyGm/exec"; // Replace with your actual URL
 
 function preload() {
   customFont = loadFont("../assets/led-counter-7/led_counter-7.ttf");
@@ -106,6 +106,30 @@ function mousePressed() {
   }
 }
 
+function sendMessage() {
+  if (inputText.trim() === "") return;
+
+  let message = inputText;
+  let metrics = JSON.parse(localStorage.getItem("benchmarkMetrics"));
+
+  let data = {
+    name: message,
+    ...metrics,
+  };
+
+  jsonp(googleScriptURL, data, function (response) {
+    console.log("Response:", response);
+    if (response.result === "success") {
+      console.log("Message and metrics sent successfully!");
+      localStorage.removeItem("benchmarkMetrics"); // Clear the stored metrics
+    } else {
+      console.error("Error sending message and metrics.");
+    }
+  });
+
+  inputText = ""; // Clear the input text
+}
+
 function keyPressed() {
   if (key.length === 1) {
     inputText += key;
@@ -114,23 +138,6 @@ function keyPressed() {
   } else if (keyCode === RETURN || keyCode === ENTER) {
     sendMessage();
   }
-}
-
-function sendMessage() {
-  if (inputText.trim() === "") return; // Don't send empty messages
-
-  let message = inputText;
-  inputText = ""; // Clear the input text
-
-  jsonp(googleScriptURL, { message: message }, function (data) {
-    console.log("Response:", data);
-    if (data.result === "success") {
-      // You could add some visual feedback here
-      console.log("Message sent successfully!");
-    } else {
-      console.error("Error sending message.");
-    }
-  });
 }
 
 function jsonp(url, data, callback) {

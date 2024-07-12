@@ -80,24 +80,33 @@ function mousePressed() {
   let clickedX = floor(mouseX / cellSize);
   let clickedY = floor(mouseY / cellSize);
 
-  trialCount++;
-
   if (clickedX === targetX && clickedY === targetY) {
+    if (!gameStarted) {
+      // Reset metrics and start the game
+      startTime = millis();
+      gameStarted = true;
+      trialCount = 0;
+      successfulClicks = 0;
+      misclicks = 0;
+      netRate = 0;
+      clickTimestamps = [];
+    }
+
+    trialCount++;
     successfulClicks++;
     clickTimestamps.push(millis());
     missedClick = null;
     pickNewTarget();
-
-    if (!gameStarted) {
-      startTime = millis();
-      gameStarted = true;
-    }
-  } else {
-    missedClick = { x: clickedX, y: clickedY };
+  } else if (gameStarted) {
+    // Only count misclicks after the game has started
+    trialCount++;
     misclicks++;
+    missedClick = { x: clickedX, y: clickedY };
   }
 
-  netRate = successfulClicks - misclicks;
+  if (gameStarted) {
+    netRate = successfulClicks - misclicks;
+  }
 }
 
 function mouseReleased() {

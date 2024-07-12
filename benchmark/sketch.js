@@ -238,6 +238,7 @@ function saveMetricsAndRedirect() {
 
   localStorage.setItem("benchmarkMetrics", JSON.stringify(metrics));
   window.location.href = "../type/type.html";
+  // window.location.href = "../benchmark/benchmark.html";
 }
 
 function disableRightClick() {

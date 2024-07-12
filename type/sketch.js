@@ -149,6 +149,8 @@ function sendMessage() {
     if (response.result === "success") {
       console.log("Message and metrics sent successfully!");
       localStorage.removeItem("benchmarkMetrics");
+      // Navigate to the benchmark page
+      window.location.href = "../benchmark/benchmark.html";
     } else {
       console.error("Error sending message and metrics.");
     }

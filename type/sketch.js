@@ -2,16 +2,20 @@ let inputText = "";
 let blink = true;
 let lastBlinkTime = 0;
 let customFont;
+let pressStart2PFont;
 let keyWidth = 40;
 let keyHeight = 40;
 let totalKeysPerRow = 10;
 let extraKeys = [" ", "<"];
 let sendButton;
 const googleScriptURL =
-  "https://script.google.com/macros/s/AKfycbzTJNZEfGtoMpLNPh1rPPl8a4nxNmhr2_EI3QIU9cpN3jHtbEDbN1Rt2WpnBaAStyGm/exec"; // Replace with your actual URL
+  "https://script.google.com/macros/s/AKfycbzTJNZEfGtoMpLNPh1rPPl8a4nxNmhr2_EI3QIU9cpN3jHtbEDbN1Rt2WpnBaAStyGm/exec";
 
 function preload() {
   customFont = loadFont("../assets/led-counter-7/led_counter-7.ttf");
+  pressStart2PFont = loadFont(
+    "../assets/Press_Start_2P/PressStart2P-Regular.ttf"
+  );
 }
 
 function setup() {
@@ -20,8 +24,15 @@ function setup() {
   textSize(32);
 
   sendButton = createButton("Send");
-  sendButton.position(width / 2 - 20, height / 2 + 200);
+  sendButton.position(width / 2 - 50, height - 150);
   sendButton.mousePressed(sendMessage);
+  sendButton.style("font-size", "14px");
+  sendButton.style("background-color", "black");
+  sendButton.style("color", "white");
+  sendButton.style("border", "2px solid white");
+  sendButton.style("font-family", '"Press Start 2P", Arial, serif');
+  sendButton.style("padding", "5px 10px");
+  sendButton.style("cursor", "pointer");
 }
 
 function draw() {
@@ -40,6 +51,22 @@ function draw() {
   }
 
   drawKeyboard();
+  drawInstructions();
+}
+
+function drawInstructions() {
+  textFont(pressStart2PFont);
+  textSize(16);
+  fill(255);
+  textAlign(CENTER, BOTTOM);
+  text(
+    "Please write your name and click 'Send' to share\nyour results with Augmental. Thank you!",
+    width / 2,
+    height - 80
+  );
+  textAlign(LEFT, BASELINE);
+  textFont(customFont);
+  textSize(32);
 }
 
 function drawKeyboard() {
@@ -121,13 +148,13 @@ function sendMessage() {
     console.log("Response:", response);
     if (response.result === "success") {
       console.log("Message and metrics sent successfully!");
-      localStorage.removeItem("benchmarkMetrics"); // Clear the stored metrics
+      localStorage.removeItem("benchmarkMetrics");
     } else {
       console.error("Error sending message and metrics.");
     }
   });
 
-  inputText = ""; // Clear the input text
+  inputText = "";
 }
 
 function keyPressed() {
@@ -162,4 +189,5 @@ function jsonp(url, data, callback) {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  sendButton.position(width / 2 - 50, height - 150);
 }

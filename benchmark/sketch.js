@@ -217,8 +217,9 @@ function updateMetrics() {
 }
 
 function createSendMetricsButton() {
-  sendMetricsButton = createButton("Send Metrics");
-  sendMetricsButton.position(width / 2 - 50, height - 50);
+  sendMetricsButton = createButton("Send Results");
+  sendMetricsButton.position(20, windowHeight / 2);
+  sendMetricsButton.class("send-metrics-button");
   sendMetricsButton.mousePressed(saveMetricsAndRedirect);
 }
 

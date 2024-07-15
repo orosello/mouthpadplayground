@@ -1,0 +1,38 @@
+const SPREADSHEET_ID = "1m8pJEf-g7FF1gVPq37z599k8tK8qTWo0lpstpShi-ZM";
+
+function doGet(e) {
+  var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = spreadsheet.getActiveSheet();
+  var callback = e.parameter.callback;
+
+  var result = {};
+
+  if (e.parameter.name) {
+    var row = [
+      new Date(),
+      e.parameter.name,
+      e.parameter.inputDevice, // Add this line
+      e.parameter.trialCount,
+      e.parameter.netRate,
+      e.parameter.gridSize,
+      e.parameter.percentSuccessful,
+      e.parameter.ntpm,
+      e.parameter.bps,
+      e.parameter.lastClick,
+      e.parameter.fastestClick,
+      e.parameter.averageClickTime,
+    ];
+
+    sheet.appendRow(row);
+    result = { result: "success", message: "Data recorded successfully" };
+  } else {
+    result = { result: "error", message: "No data received" };
+  }
+
+  var output = ContentService.createTextOutput(
+    callback + "(" + JSON.stringify(result) + ")"
+  );
+  output.setMimeType(ContentService.MimeType.JAVASCRIPT);
+
+  return output;
+}

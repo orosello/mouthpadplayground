@@ -16,10 +16,11 @@ let inputDevices = [
   "MouthPad^ (Tongue Control Only)",
   "Lip/Chin Joystick (e.g., Quadstick, Quadjoy)",
   "Sip-and-Puff (e.g., Jouse)",
-  "Head Tracking (e.g., Glassouse)",
-  "Eye tracking (e.g., Tobii)",
-  "Mouth Stick",
-  "Standard Mouse",
+  "Head-tracking (e.g., Glassouse)",
+  "Eye-tracking (e.g., Tobii)",
+  "Mouth stick",
+  "Mouse (Standard Handheld)",
+  "Trackpad (Standard Laptop)",
   "Other",
 ];
 let selectedDevice = "";

@@ -73,7 +73,7 @@ function draw() {
 }
 
 function drawElements() {
-  let yOffset = height * 0.1; // Starting position
+  let yOffset = height * 0.05; // Starting position
 
   // Element 1: What's your name text
   drawInstructions(yOffset);
@@ -96,12 +96,12 @@ function drawElements() {
   yOffset += radioButtons.length * 30 + 50;
 
   // Element 6: Send button
-  drawSendButton(yOffset);
+  drawSendButton(yOffset - 30);
 }
 
 function drawInstructions(y) {
   textFont(pressStart2PFont);
-  textSize(16);
+  textSize(14);
   fill(255);
   textAlign(CENTER, TOP);
   text("1. What's your first and last name?", width / 2, y);
@@ -155,7 +155,7 @@ function drawKeyboard(startY) {
 
 function drawInputDevicesPrompt(y) {
   textFont(pressStart2PFont);
-  textSize(16);
+  textSize(14);
   fill(255);
   textAlign(CENTER, TOP);
   text("2. Which input device did you use?", width / 2, y);

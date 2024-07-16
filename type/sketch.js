@@ -38,24 +38,34 @@ function setup() {
   textFont(customFont);
   textSize(32);
 
+  createRadioButtons();
+  createSendButton();
+}
+
+function createRadioButtons() {
   for (let i = 0; i < inputDevices.length; i++) {
     let radio = createRadio();
     radio.option(inputDevices[i]);
-    radio.style("color", "white");
-    radio.style("font-family", '"Press Start 2P", Arial, serif');
-    radio.style("font-size", "12px");
-    radio.style("display", "flex");
-    radio.style("align-items", "center");
-    radio.style("gap", "10px");
-    radio.style("padding-left", "5px");
-    radio.elt.querySelector("input").style.marginRight = "5px";
-    // Add this line to move the radio button up by 2 pixels
-    radio.elt.querySelector("input").style.position = "relative";
-    radio.elt.querySelector("input").style.top = "-5px";
-    radio.style("accent-color", "magenta");
+    styleRadioButton(radio);
     radioButtons.push(radio);
   }
+}
 
+function styleRadioButton(radio) {
+  radio.style("color", "white");
+  radio.style("font-family", '"Press Start 2P", Arial, serif');
+  radio.style("font-size", "12px");
+  radio.style("display", "flex");
+  radio.style("align-items", "center");
+  radio.style("gap", "10px");
+  radio.style("padding-left", "5px");
+  radio.elt.querySelector("input").style.marginRight = "5px";
+  radio.elt.querySelector("input").style.position = "relative";
+  radio.elt.querySelector("input").style.top = "-5px";
+  radio.style("accent-color", "magenta");
+}
+
+function createSendButton() {
   sendButton = createButton("Send");
   sendButton.mousePressed(sendMessage);
   sendButton.style("font-size", "18px");
@@ -73,29 +83,24 @@ function draw() {
 }
 
 function drawElements() {
-  let yOffset = height * 0.05; // Starting position
+  let yOffset = height * 0.05;
 
-  // Element 1: What's your name text
   drawInstructions(yOffset);
   yOffset += 50;
 
-  // Element 2: Blinker cursor
   drawInputText(yOffset);
   yOffset += 50;
 
-  // Element 3: On screen keyboard
+  window.keyboardStartY = yOffset;
   drawKeyboard(yOffset);
   yOffset += calculateKeyboardHeight() + 50;
 
-  // Element 4: Which input device did you use text
   drawInputDevicesPrompt(yOffset);
-  yOffset += 80; // Increased from 50 to 70 to add more space
+  yOffset += 80;
 
-  // Element 5: List of radial buttons
   drawInputDevices(yOffset);
   yOffset += radioButtons.length * 30 + 50;
 
-  // Element 6: Send button
   drawSendButton(yOffset - 30);
 }
 
@@ -126,31 +131,30 @@ function drawKeyboard(startY) {
   let startX = width / 2 - (totalKeysPerRow * keyWidth) / 2;
 
   textAlign(CENTER, CENTER);
-  textSize(24); // Adjust this value if needed for better fit
+  textSize(24);
 
   for (let i = 0; i < keys.length; i++) {
     let x = startX + (i % totalKeysPerRow) * keyWidth;
     let y = startY + Math.floor(i / totalKeysPerRow) * keyHeight;
-    noFill();
-    stroke(255);
-    rect(x, y, keyWidth, keyHeight, 5);
-    fill(128);
-    noStroke();
-    text(keys[i], x + keyWidth / 2, y + keyHeight / 2);
+    drawKey(x, y, keys[i]);
   }
 
-  let extraX = startX + (keys.length % totalKeysPerRow) * keyWidth;
-  let extraY = startY + Math.floor(keys.length / totalKeysPerRow) * keyHeight;
+  let extraX = startX;
+  let extraY = startY + Math.ceil(keys.length / totalKeysPerRow) * keyHeight;
 
   for (let i = 0; i < extraKeys.length; i++) {
-    noFill();
-    stroke(255);
-    rect(extraX, extraY, keyWidth, keyHeight, 5);
-    fill(128);
-    noStroke();
-    text(extraKeys[i], extraX + keyWidth / 2, extraY + keyHeight / 2);
+    drawKey(extraX, extraY, extraKeys[i]);
     extraX += keyWidth;
   }
+}
+
+function drawKey(x, y, key) {
+  noFill();
+  stroke(255);
+  rect(x, y, keyWidth, keyHeight, 5);
+  fill(128);
+  noStroke();
+  text(key, x + keyWidth / 2, y + keyHeight / 2);
 }
 
 function drawInputDevicesPrompt(y) {
@@ -181,33 +185,48 @@ function drawSendButton(y) {
 function calculateKeyboardHeight() {
   let keys = "QWERTYUIOPASDFGHJKLZXCVBNM";
   let rows = Math.ceil(keys.length / totalKeysPerRow);
-  return rows * keyHeight;
+  return rows * keyHeight + keyHeight; // Add extra row for space and backspace
 }
 
 function mousePressed() {
   let startX = width / 2 - (totalKeysPerRow * keyWidth) / 2;
-  let startY = height * 0.1 + 100; // Adjusted for new layout
-  let keys = "QWERTYUIOPASDFGHJKLZXCVBNM" + extraKeys.join("");
+  let startY = window.keyboardStartY;
+  let keys = "QWERTYUIOPASDFGHJKLZXCVBNM";
+  let rows = Math.ceil(keys.length / totalKeysPerRow);
 
-  for (let i = 0; i < keys.length; i++) {
-    let x = startX + (i % totalKeysPerRow) * keyWidth;
-    let y = startY + Math.floor(i / totalKeysPerRow) * keyHeight;
-    if (
-      mouseX > x &&
-      mouseX < x + keyWidth &&
-      mouseY > y &&
-      mouseY < y + keyHeight
-    ) {
-      if (i < keys.length - extraKeys.length) {
-        inputText += keys[i];
-      } else if (keys[i] === "<") {
-        inputText = inputText.slice(0, -1);
-      } else {
-        inputText += " ";
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < totalKeysPerRow; col++) {
+      let index = row * totalKeysPerRow + col;
+      if (index >= keys.length) break;
+
+      let x = startX + col * keyWidth;
+      let y = startY + row * keyHeight;
+
+      if (isMouseOverKey(x, y)) {
+        inputText += keys[index];
+        return;
       }
-      break;
     }
   }
+
+  let extraStartY = startY + rows * keyHeight;
+  for (let i = 0; i < extraKeys.length; i++) {
+    let x = startX + i * keyWidth;
+    if (isMouseOverKey(x, extraStartY)) {
+      if (extraKeys[i] === "<") {
+        inputText = inputText.slice(0, -1);
+      } else {
+        inputText += extraKeys[i];
+      }
+      return;
+    }
+  }
+}
+
+function isMouseOverKey(x, y) {
+  return (
+    mouseX > x && mouseX < x + keyWidth && mouseY > y && mouseY < y + keyHeight
+  );
 }
 
 function sendMessage() {

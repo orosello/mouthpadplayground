@@ -104,7 +104,7 @@ function drawInstructions(y) {
   textSize(16);
   fill(255);
   textAlign(CENTER, TOP);
-  text("1. What's your name?", width / 2, y);
+  text("1. What's your first and last name?", width / 2, y);
 }
 
 function drawInputText(y) {

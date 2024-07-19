@@ -1,44 +1,54 @@
-let gridSize = 30;
-let cellSize = 24; // consistent cell size in pixels
-let targetX, targetY;
-let trialCount = 0;
-let successfulClicks = 0;
-let misclicks = 0;
-let startTime = null;
-let bps = 0;
-let ntpm = 0;
-let netRate = 0;
-let missedClick = null;
-let hoveredX = -1,
-  hoveredY = -1;
-let countdown = 60; // 60-second countdown timer
-let timerEnded = false;
-let clickTimestamps = [];
-let gameStarted = false;
-let sendMetricsButton;
+// Game Configuration
+const CONFIG = {
+  gridSize: 30,
+  cellSize: 24, // pixels
+  gameDuration: 60, // seconds
+  nearTargetSize: 1,
+};
 
-// Variables for Fitts' law calculations
-let lastClickX = -1,
-  lastClickY = -1;
-let totalIndexOfDifficulty = 0;
-let totalAcquireTime = 0;
-let fittsBps = 0;
+// Game State
+let gameState = {
+  targetX: 0,
+  targetY: 0,
+  trialCount: 0,
+  successfulClicks: 0,
+  misclicks: 0,
+  startTime: null,
+  hoveredX: -1,
+  hoveredY: -1,
+  missedClick: null,
+  lastClickX: -1,
+  lastClickY: -1,
+  clickTimestamps: [],
+  gameStarted: false,
+  timerEnded: false,
+};
 
-// Variables for additional timing metrics
-let nearTargetTime = 0;
-let inTargetTime = 0;
-let clickGenerationTime = 0;
-let lastNearTargetTime = 0;
-let lastInTargetTime = 0;
-let isNearTarget = false;
-let isInTarget = false;
+// Metrics
+let metrics = {
+  bps: 0,
+  ntpm: 0,
+  netRate: 0,
+  totalIndexOfDifficulty: 0,
+  totalAcquireTime: 0,
+  fittsBps: 0,
+  nearTargetTime: 0,
+  inTargetTime: 0,
+  clickGenerationTime: 0,
+  lastNearTargetTime: 0,
+  lastInTargetTime: 0,
+  isNearTarget: false,
+  isInTarget: false,
+};
 
 function setup() {
-  createCanvas(gridSize * cellSize, gridSize * cellSize);
+  createCanvas(
+    CONFIG.gridSize * CONFIG.cellSize,
+    CONFIG.gridSize * CONFIG.cellSize
+  );
   pickNewTarget();
-  createMetrics();
-  disableScroll();
-  disableRightClick();
+  createMetricsDisplay();
+  disableDefaultBehaviors();
   updateInitialMetricDisplay();
 }
 
@@ -47,288 +57,302 @@ function draw() {
   updateHover();
   drawGrid();
   drawTarget();
-  if (missedClick) {
-    drawMissedClick();
-  }
-  if (hoveredX !== -1 && hoveredY !== -1) {
-    drawHoverHighlight();
-    updateTimingMetrics();
-  }
-  if (startTime !== null && !timerEnded) {
+  drawMissedClick();
+  drawHoverHighlight();
+  updateTimingMetrics();
+  if (gameState.gameStarted && !gameState.timerEnded) {
     updateMetrics();
   }
 }
 
-function drawGrid() {
-  stroke(128);
-  strokeWeight(1);
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-      noFill();
-      rect(i * cellSize, j * cellSize, cellSize, cellSize);
-    }
-  }
-}
-
-function drawTarget() {
-  fill("magenta");
-  noStroke();
-  rect(targetX * cellSize, targetY * cellSize, cellSize, cellSize);
-}
-
-function drawMissedClick() {
-  fill("white");
-  noStroke();
-  rect(missedClick.x * cellSize, missedClick.y * cellSize, cellSize, cellSize);
-}
-
-function drawHoverHighlight() {
-  stroke(255);
-  strokeWeight(2);
-  noFill();
-  rect(hoveredX * cellSize, hoveredY * cellSize, cellSize, cellSize);
-}
-
-function updateHover() {
-  hoveredX = floor(mouseX / cellSize);
-  hoveredY = floor(mouseY / cellSize);
-
-  if (
-    hoveredX < 0 ||
-    hoveredX >= gridSize ||
-    hoveredY < 0 ||
-    hoveredY >= gridSize
-  ) {
-    hoveredX = -1;
-    hoveredY = -1;
-  }
-}
-
-function updateTimingMetrics() {
-  if (!gameStarted) return;
-
-  let currentTime = millis();
-  let distanceToTarget = dist(hoveredX, hoveredY, targetX, targetY);
-
-  if (distanceToTarget <= sqrt(2)) {
-    if (!isNearTarget) {
-      isNearTarget = true;
-      lastNearTargetTime = currentTime;
-    }
-    nearTargetTime += currentTime - lastNearTargetTime;
-    lastNearTargetTime = currentTime;
-  } else {
-    isNearTarget = false;
-    lastNearTargetTime = 0;
-  }
-
-  if (hoveredX === targetX && hoveredY === targetY) {
-    if (!isInTarget) {
-      isInTarget = true;
-      lastInTargetTime = currentTime;
-    }
-    inTargetTime += currentTime - lastInTargetTime;
-    lastInTargetTime = currentTime;
-  } else {
-    isInTarget = false;
-    lastInTargetTime = 0;
-  }
-}
-
 function mousePressed() {
-  let clickedX = floor(mouseX / cellSize);
-  let clickedY = floor(mouseY / cellSize);
+  const clickedX = floor(mouseX / CONFIG.cellSize);
+  const clickedY = floor(mouseY / CONFIG.cellSize);
 
-  if (clickedX === targetX && clickedY === targetY) {
-    let currentTime = millis();
-    if (!gameStarted) {
-      startTime = currentTime;
-      gameStarted = true;
-      resetMetrics();
-      lastClickX = clickedX;
-      lastClickY = clickedY;
-      trialCount = 1;
-      successfulClicks = 1;
-      updateMetricDisplay("trialCount", trialCount);
-    } else {
-      trialCount++;
-      successfulClicks++;
-      clickTimestamps.push(currentTime);
-
-      if (isInTarget && lastInTargetTime !== 0) {
-        clickGenerationTime += currentTime - lastInTargetTime;
-      }
-
-      if (lastClickX !== -1 && lastClickY !== -1) {
-        let distance =
-          dist(lastClickX, lastClickY, clickedX, clickedY) * cellSize;
-        let width = cellSize; // The width of the target
-        let indexOfDifficulty = Math.log2((distance + width) / width);
-        let acquireTime =
-          (currentTime - clickTimestamps[clickTimestamps.length - 2]) / 1000; // in seconds
-
-        if (acquireTime > 0) {
-          // Prevent division by zero
-          totalIndexOfDifficulty += indexOfDifficulty;
-          totalAcquireTime += acquireTime;
-
-          // Calculate and log Fitts' law metrics for this click
-          let clickFittsBps = indexOfDifficulty / acquireTime;
-          console.log(
-            `Click ${successfulClicks}: Distance = ${distance.toFixed(
-              2
-            )}, ID = ${indexOfDifficulty.toFixed(
-              2
-            )}, Time = ${acquireTime.toFixed(
-              2
-            )}s, Fitts' BPS = ${clickFittsBps.toFixed(2)} bits/s`
-          );
-        }
-      }
-
-      lastClickX = clickedX;
-      lastClickY = clickedY;
-    }
-
-    missedClick = null;
-    pickNewTarget();
-    resetTimingStates();
-  } else if (gameStarted) {
-    trialCount++;
-    misclicks++;
-    missedClick = { x: clickedX, y: clickedY };
+  if (clickedX === gameState.targetX && clickedY === gameState.targetY) {
+    handleSuccessfulClick(clickedX, clickedY);
+  } else if (gameState.gameStarted) {
+    handleMissedClick(clickedX, clickedY);
   }
 
-  if (gameStarted) {
-    netRate = successfulClicks - misclicks;
+  if (gameState.gameStarted) {
+    metrics.netRate = gameState.successfulClicks - gameState.misclicks;
   }
 }
 
 function mouseReleased() {
-  missedClick = null;
+  gameState.missedClick = null;
 }
 
-function resetMetrics() {
-  trialCount = 0;
-  successfulClicks = 0;
-  misclicks = 0;
-  netRate = 0;
-  clickTimestamps = [];
-  totalIndexOfDifficulty = 0;
-  totalAcquireTime = 0;
-  nearTargetTime = 0;
-  inTargetTime = 0;
-  clickGenerationTime = 0;
+function handleSuccessfulClick(clickedX, clickedY) {
+  const currentTime = millis();
+  if (!gameState.gameStarted) {
+    startGame(currentTime);
+  } else {
+    recordSuccessfulClick(currentTime, clickedX, clickedY);
+  }
+  gameState.missedClick = null;
+  pickNewTarget();
   resetTimingStates();
 }
 
-function resetTimingStates() {
-  isNearTarget = false;
-  isInTarget = false;
-  lastNearTargetTime = 0;
-  lastInTargetTime = 0;
+function startGame(currentTime) {
+  gameState.startTime = currentTime;
+  gameState.gameStarted = true;
+  resetMetrics();
+  gameState.lastClickX = gameState.targetX;
+  gameState.lastClickY = gameState.targetY;
+  gameState.trialCount = 1;
+  gameState.successfulClicks = 1;
+  updateMetricDisplay("trialCount", gameState.trialCount);
 }
 
-function pickNewTarget() {
-  do {
-    targetX = floor(random(gridSize));
-    targetY = floor(random(gridSize));
-  } while (targetX === lastClickX && targetY === lastClickY);
+function recordSuccessfulClick(currentTime, clickedX, clickedY) {
+  gameState.trialCount++;
+  gameState.successfulClicks++;
+  gameState.clickTimestamps.push(currentTime);
+
+  if (metrics.isInTarget && metrics.lastInTargetTime !== 0) {
+    metrics.clickGenerationTime += currentTime - metrics.lastInTargetTime;
+  }
+
+  if (gameState.lastClickX !== -1 && gameState.lastClickY !== -1) {
+    calculateFittsLawMetrics(currentTime, clickedX, clickedY);
+  }
+
+  gameState.lastClickX = clickedX;
+  gameState.lastClickY = clickedY;
 }
 
-function updateMetrics() {
-  let elapsedTimeMinutes = (millis() - startTime) / 60000;
-  let elapsedTimeSeconds = elapsedTimeMinutes * 60;
+function calculateFittsLawMetrics(currentTime, clickedX, clickedY) {
+  const distance =
+    dist(gameState.lastClickX, gameState.lastClickY, clickedX, clickedY) *
+    CONFIG.cellSize;
+  const width = CONFIG.cellSize;
+  const indexOfDifficulty = Math.log2((distance + width) / width);
+  const acquireTime =
+    (currentTime -
+      gameState.clickTimestamps[gameState.clickTimestamps.length - 2]) /
+    1000; // in seconds
 
-  if (elapsedTimeSeconds > 0) {
-    ntpm = successfulClicks / elapsedTimeMinutes;
-    let totalGridCells = gridSize * gridSize;
-    let gridSizeLog2 = Math.log2(totalGridCells);
-    bps = (ntpm * gridSizeLog2) / 60;
+  if (acquireTime > 0) {
+    metrics.totalIndexOfDifficulty += indexOfDifficulty;
+    metrics.totalAcquireTime += acquireTime;
 
-    // Calculate overall Fitts' law BPS
-    if (totalAcquireTime > 0) {
-      // Prevent division by zero
-      fittsBps = totalIndexOfDifficulty / totalAcquireTime;
-    }
-
-    let totalClicks = successfulClicks + misclicks;
-    let percentSuccessful =
-      totalClicks > 0 ? (successfulClicks / totalClicks) * 100 : 0;
-
-    updateMetricDisplay("trialCount", trialCount);
-    updateMetricDisplay("netRate", netRate);
-    updateMetricDisplay(
-      "percentSuccessful",
-      percentSuccessful.toFixed(2) + "%"
-    );
-    updateMetricDisplay("ntpm", ntpm.toFixed(2));
-    updateMetricDisplay("bps", bps.toFixed(2));
-    updateMetricDisplay("fittsBps", fittsBps.toFixed(2));
-    updateMetricDisplay(
-      "nearTargetTime",
-      (nearTargetTime / 1000).toFixed(2) + "s"
-    );
-    updateMetricDisplay("inTargetTime", (inTargetTime / 1000).toFixed(2) + "s");
-    updateMetricDisplay(
-      "clickGenerationTime",
-      (clickGenerationTime / 1000).toFixed(2) + "s"
-    );
-
-    if (clickTimestamps.length > 1) {
-      let lastClickTime =
-        (clickTimestamps[clickTimestamps.length - 1] -
-          clickTimestamps[clickTimestamps.length - 2]) /
-        1000;
-      updateMetricDisplay("lastClick", lastClickTime.toFixed(2) + "s");
-
-      let clickIntervals = [];
-      for (let i = 1; i < clickTimestamps.length; i++) {
-        clickIntervals.push(
-          (clickTimestamps[i] - clickTimestamps[i - 1]) / 1000
-        );
-      }
-      let fastestClick = Math.min(...clickIntervals);
-      updateMetricDisplay("fastestClick", fastestClick.toFixed(2) + "s");
-
-      let totalTime =
-        (clickTimestamps[clickTimestamps.length - 1] - clickTimestamps[0]) /
-        1000;
-      let averageClickTime = totalTime / (clickTimestamps.length - 1);
-      updateMetricDisplay(
-        "averageClickTime",
-        averageClickTime.toFixed(2) + "s"
-      );
-    }
-
-    countdown = max(60 - floor(elapsedTimeSeconds), 0);
-    updateMetricDisplay("countdown", countdown);
-
-    if (countdown === 0 && !timerEnded) {
-      timerEnded = true;
-      createSendMetricsButton();
-    }
-
-    // Log overall Fitts' law metrics
+    const clickFittsBps = indexOfDifficulty / acquireTime;
     console.log(
-      `Overall: Total ID = ${totalIndexOfDifficulty.toFixed(
+      `Click ${gameState.successfulClicks}: Distance = ${distance.toFixed(
         2
-      )}, Total Time = ${totalAcquireTime.toFixed(
+      )}, ID = ${indexOfDifficulty.toFixed(2)}, Time = ${acquireTime.toFixed(
         2
-      )}s, Fitts' BPS = ${fittsBps.toFixed(2)} bits/s`
+      )}s, Fitts' BPS = ${clickFittsBps.toFixed(2)} bits/s`
     );
   }
 }
 
-function updateMetricDisplay(id, value) {
-  select(`#${id}`).html(
-    `${
-      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
-    }: ${value}`
+function handleMissedClick(clickedX, clickedY) {
+  gameState.trialCount++;
+  gameState.misclicks++;
+  gameState.missedClick = { x: clickedX, y: clickedY };
+}
+
+function updateHover() {
+  gameState.hoveredX = floor(mouseX / CONFIG.cellSize);
+  gameState.hoveredY = floor(mouseY / CONFIG.cellSize);
+
+  if (
+    gameState.hoveredX < 0 ||
+    gameState.hoveredX >= CONFIG.gridSize ||
+    gameState.hoveredY < 0 ||
+    gameState.hoveredY >= CONFIG.gridSize
+  ) {
+    gameState.hoveredX = -1;
+    gameState.hoveredY = -1;
+  }
+}
+
+function checkIfNearTarget(x, y, targetX, targetY) {
+  for (let dx = -CONFIG.nearTargetSize; dx <= CONFIG.nearTargetSize; dx++) {
+    for (let dy = -CONFIG.nearTargetSize; dy <= CONFIG.nearTargetSize; dy++) {
+      if (dx === 0 && dy === 0) continue; // Skip the target itself
+
+      let adjacentX = targetX + dx;
+      let adjacentY = targetY + dy;
+
+      if (x === adjacentX && y === adjacentY) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function updateTimingMetrics() {
+  if (!gameState.gameStarted) return;
+
+  const currentTime = millis();
+
+  if (
+    checkIfNearTarget(
+      gameState.hoveredX,
+      gameState.hoveredY,
+      gameState.targetX,
+      gameState.targetY
+    )
+  ) {
+    if (!metrics.isNearTarget) {
+      metrics.isNearTarget = true;
+      metrics.lastNearTargetTime = currentTime;
+    }
+    metrics.nearTargetTime += currentTime - metrics.lastNearTargetTime;
+    metrics.lastNearTargetTime = currentTime;
+  } else {
+    metrics.isNearTarget = false;
+    metrics.lastNearTargetTime = 0;
+  }
+
+  if (
+    gameState.hoveredX === gameState.targetX &&
+    gameState.hoveredY === gameState.targetY
+  ) {
+    if (!metrics.isInTarget) {
+      metrics.isInTarget = true;
+      metrics.lastInTargetTime = currentTime;
+    }
+    metrics.inTargetTime += currentTime - metrics.lastInTargetTime;
+    metrics.lastInTargetTime = currentTime;
+  } else {
+    metrics.isInTarget = false;
+    metrics.lastInTargetTime = 0;
+  }
+}
+
+function updateMetrics() {
+  const elapsedTimeMinutes = (millis() - gameState.startTime) / 60000;
+  const elapsedTimeSeconds = elapsedTimeMinutes * 60;
+
+  if (elapsedTimeSeconds > 0) {
+    calculateAndUpdateMetrics(elapsedTimeMinutes, elapsedTimeSeconds);
+    updateCountdown(elapsedTimeSeconds);
+    logOverallFittsLawMetrics();
+  }
+}
+
+function calculateAndUpdateMetrics(elapsedTimeMinutes, elapsedTimeSeconds) {
+  metrics.ntpm = gameState.successfulClicks / elapsedTimeMinutes;
+  const totalGridCells = CONFIG.gridSize * CONFIG.gridSize;
+  const gridSizeLog2 = Math.log2(totalGridCells);
+  metrics.bps = (metrics.ntpm * gridSizeLog2) / 60;
+
+  if (metrics.totalAcquireTime > 0) {
+    metrics.fittsBps =
+      metrics.totalIndexOfDifficulty / metrics.totalAcquireTime;
+  }
+
+  const totalClicks = gameState.successfulClicks + gameState.misclicks;
+  const percentSuccessful =
+    totalClicks > 0 ? (gameState.successfulClicks / totalClicks) * 100 : 0;
+
+  updateMetricDisplays(percentSuccessful);
+  updateClickTimeMetrics();
+}
+
+function updateMetricDisplays(percentSuccessful) {
+  updateMetricDisplay("trialCount", gameState.trialCount);
+  updateMetricDisplay("netRate", metrics.netRate);
+  updateMetricDisplay("percentSuccessful", percentSuccessful.toFixed(2) + "%");
+  updateMetricDisplay("ntpm", metrics.ntpm.toFixed(2));
+  updateMetricDisplay("bps", metrics.bps.toFixed(2));
+  updateMetricDisplay("fittsBps", metrics.fittsBps.toFixed(2));
+  updateMetricDisplay(
+    "nearTargetTime",
+    (metrics.nearTargetTime / 1000).toFixed(2) + "s"
+  );
+  updateMetricDisplay(
+    "inTargetTime",
+    (metrics.inTargetTime / 1000).toFixed(2) + "s"
+  );
+  updateMetricDisplay(
+    "clickGenerationTime",
+    (metrics.clickGenerationTime / 1000).toFixed(2) + "s"
   );
 }
 
-function createMetrics() {
+function updateClickTimeMetrics() {
+  if (gameState.clickTimestamps.length > 1) {
+    const lastClickTime =
+      (gameState.clickTimestamps[gameState.clickTimestamps.length - 1] -
+        gameState.clickTimestamps[gameState.clickTimestamps.length - 2]) /
+      1000;
+    updateMetricDisplay("lastClick", lastClickTime.toFixed(2) + "s");
+
+    const clickIntervals = gameState.clickTimestamps
+      .slice(1)
+      .map((time, index) => (time - gameState.clickTimestamps[index]) / 1000);
+    const fastestClick = Math.min(...clickIntervals);
+    updateMetricDisplay("fastestClick", fastestClick.toFixed(2) + "s");
+
+    const totalTime =
+      (gameState.clickTimestamps[gameState.clickTimestamps.length - 1] -
+        gameState.clickTimestamps[0]) /
+      1000;
+    const averageClickTime = totalTime / (gameState.clickTimestamps.length - 1);
+    updateMetricDisplay("averageClickTime", averageClickTime.toFixed(2) + "s");
+  }
+}
+
+function updateCountdown(elapsedTimeSeconds) {
+  const countdown = max(CONFIG.gameDuration - floor(elapsedTimeSeconds), 0);
+  updateMetricDisplay("countdown", countdown);
+
+  if (countdown === 0 && !gameState.timerEnded) {
+    gameState.timerEnded = true;
+    createSendMetricsButton();
+  }
+}
+
+function logOverallFittsLawMetrics() {
+  console.log(
+    `Overall: Total ID = ${metrics.totalIndexOfDifficulty.toFixed(
+      2
+    )}, Total Time = ${metrics.totalAcquireTime.toFixed(
+      2
+    )}s, Fitts' BPS = ${metrics.fittsBps.toFixed(2)} bits/s`
+  );
+}
+
+function pickNewTarget() {
+  do {
+    gameState.targetX = floor(random(CONFIG.gridSize));
+    gameState.targetY = floor(random(CONFIG.gridSize));
+  } while (
+    gameState.targetX === gameState.lastClickX &&
+    gameState.targetY === gameState.lastClickY
+  );
+}
+
+function resetMetrics() {
+  gameState.trialCount = 0;
+  gameState.successfulClicks = 0;
+  gameState.misclicks = 0;
+  metrics.netRate = 0;
+  gameState.clickTimestamps = [];
+  metrics.totalIndexOfDifficulty = 0;
+  metrics.totalAcquireTime = 0;
+  metrics.nearTargetTime = 0;
+  metrics.inTargetTime = 0;
+  metrics.clickGenerationTime = 0;
+  resetTimingStates();
+}
+
+function resetTimingStates() {
+  metrics.isNearTarget = false;
+  metrics.isInTarget = false;
+  metrics.lastNearTargetTime = 0;
+  metrics.lastInTargetTime = 0;
+}
+
+function createMetricsDisplay() {
   let metricsDiv = createDiv().id("metrics");
   let metricIds = [
     "trialCount",
@@ -361,8 +385,8 @@ function createMetrics() {
 }
 
 function updateInitialMetricDisplay() {
-  updateMetricDisplay("countdown", countdown);
-  updateMetricDisplay("gridSize", `${gridSize}x${gridSize}`);
+  updateMetricDisplay("countdown", CONFIG.gameDuration);
+  updateMetricDisplay("gridSize", `${CONFIG.gridSize}x${CONFIG.gridSize}`);
   updateMetricDisplay("trialCount", 0);
   updateMetricDisplay("netRate", 0);
   updateMetricDisplay("percentSuccessful", "0.00%");
@@ -377,44 +401,105 @@ function updateInitialMetricDisplay() {
   updateMetricDisplay("averageClickTime", "0.00s");
 }
 
+function updateMetricDisplay(id, value) {
+  select(`#${id}`).html(
+    `${
+      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
+    }: ${value}`
+  );
+}
+
 function createSendMetricsButton() {
-  sendMetricsButton = createButton("Send Results");
+  let sendMetricsButton = createButton("Send Results");
   sendMetricsButton.position(20, windowHeight / 2);
   sendMetricsButton.class("send-metrics-button");
   sendMetricsButton.mousePressed(saveMetricsAndRedirect);
 }
 
 function saveMetricsAndRedirect() {
-  let metrics = {
-    trialCount,
-    netRate,
-    gridSize: `${gridSize}x${gridSize}`,
-    percentSuccessful: ((successfulClicks / trialCount) * 100).toFixed(2),
-    ntpm: ntpm.toFixed(2),
-    bps: bps.toFixed(2),
-    fittsBps: fittsBps.toFixed(2),
-    nearTargetTime: (nearTargetTime / 1000).toFixed(2),
-    inTargetTime: (inTargetTime / 1000).toFixed(2),
-    clickGenerationTime: (clickGenerationTime / 1000).toFixed(2),
+  let metricsToSave = {
+    trialCount: gameState.trialCount,
+    netRate: metrics.netRate,
+    gridSize: `${CONFIG.gridSize}x${CONFIG.gridSize}`,
+    percentSuccessful: (
+      (gameState.successfulClicks / gameState.trialCount) *
+      100
+    ).toFixed(2),
+    ntpm: metrics.ntpm.toFixed(2),
+    bps: metrics.bps.toFixed(2),
+    fittsBps: metrics.fittsBps.toFixed(2),
+    nearTargetTime: (metrics.nearTargetTime / 1000).toFixed(2),
+    inTargetTime: (metrics.inTargetTime / 1000).toFixed(2),
+    clickGenerationTime: (metrics.clickGenerationTime / 1000).toFixed(2),
     lastClick: select("#lastClick").html().split(": ")[1],
     fastestClick: select("#fastestClick").html().split(": ")[1],
     averageClickTime: select("#averageClickTime").html().split(": ")[1],
   };
 
-  localStorage.setItem("benchmarkMetrics", JSON.stringify(metrics));
+  localStorage.setItem("benchmarkMetrics", JSON.stringify(metricsToSave));
   window.location.href = "../type/type.html";
 }
 
-function disableRightClick() {
-  window.addEventListener("contextmenu", preventDefault);
+function drawGrid() {
+  stroke(128);
+  strokeWeight(1);
+  for (let i = 0; i < CONFIG.gridSize; i++) {
+    for (let j = 0; j < CONFIG.gridSize; j++) {
+      noFill();
+      rect(
+        i * CONFIG.cellSize,
+        j * CONFIG.cellSize,
+        CONFIG.cellSize,
+        CONFIG.cellSize
+      );
+    }
+  }
 }
 
-function disableScroll() {
-  window.addEventListener("scroll", preventDefault, { passive: false });
-  window.addEventListener("wheel", preventDefault, { passive: false });
-  window.addEventListener("touchmove", preventDefault, { passive: false });
+function drawTarget() {
+  fill("magenta");
+  noStroke();
+  rect(
+    gameState.targetX * CONFIG.cellSize,
+    gameState.targetY * CONFIG.cellSize,
+    CONFIG.cellSize,
+    CONFIG.cellSize
+  );
 }
 
-function preventDefault(e) {
-  e.preventDefault();
+function drawMissedClick() {
+  if (gameState.missedClick) {
+    fill("white");
+    noStroke();
+    rect(
+      gameState.missedClick.x * CONFIG.cellSize,
+      gameState.missedClick.y * CONFIG.cellSize,
+      CONFIG.cellSize,
+      CONFIG.cellSize
+    );
+  }
+}
+
+function drawHoverHighlight() {
+  if (gameState.hoveredX !== -1 && gameState.hoveredY !== -1) {
+    stroke(255);
+    strokeWeight(2);
+    noFill();
+    rect(
+      gameState.hoveredX * CONFIG.cellSize,
+      gameState.hoveredY * CONFIG.cellSize,
+      CONFIG.cellSize,
+      CONFIG.cellSize
+    );
+  }
+}
+
+function disableDefaultBehaviors() {
+  document.addEventListener("contextmenu", (event) => event.preventDefault());
+  document.addEventListener("wheel", (event) => event.preventDefault(), {
+    passive: false,
+  });
+  document.addEventListener("touchmove", (event) => event.preventDefault(), {
+    passive: false,
+  });
 }

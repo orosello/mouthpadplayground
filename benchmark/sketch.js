@@ -39,6 +39,8 @@ let metrics = {
   lastInTargetTime: 0,
   isNearTarget: false,
   isInTarget: false,
+  clickGenerationStartTime: 0,
+  currentClickGenerationTime: 0,
 };
 
 function setup() {
@@ -91,6 +93,10 @@ function handleSuccessfulClick(clickedX, clickedY) {
   } else {
     recordSuccessfulClick(currentTime, clickedX, clickedY);
   }
+
+  // Add the current click generation time to the total
+  metrics.clickGenerationTime += metrics.currentClickGenerationTime;
+
   gameState.missedClick = null;
   pickNewTarget();
   resetTimingStates();
@@ -111,10 +117,6 @@ function recordSuccessfulClick(currentTime, clickedX, clickedY) {
   gameState.trialCount++;
   gameState.successfulClicks++;
   gameState.clickTimestamps.push(currentTime);
-
-  if (metrics.isInTarget && metrics.lastInTargetTime !== 0) {
-    metrics.clickGenerationTime += currentTime - metrics.lastInTargetTime;
-  }
 
   if (gameState.lastClickX !== -1 && gameState.lastClickY !== -1) {
     calculateFittsLawMetrics(currentTime, clickedX, clickedY);
@@ -175,10 +177,8 @@ function checkIfNearTarget(x, y, targetX, targetY) {
   for (let dx = -CONFIG.nearTargetSize; dx <= CONFIG.nearTargetSize; dx++) {
     for (let dy = -CONFIG.nearTargetSize; dy <= CONFIG.nearTargetSize; dy++) {
       if (dx === 0 && dy === 0) continue; // Skip the target itself
-
       let adjacentX = targetX + dx;
       let adjacentY = targetY + dy;
-
       if (x === adjacentX && y === adjacentY) {
         return true;
       }
@@ -188,10 +188,11 @@ function checkIfNearTarget(x, y, targetX, targetY) {
 }
 
 function updateTimingMetrics() {
-  if (!gameState.gameStarted) return;
+  if (!gameState.gameStarted || gameState.timerEnded) return; // Add timerEnded check
 
   const currentTime = millis();
 
+  // Near target logic
   if (
     checkIfNearTarget(
       gameState.hoveredX,
@@ -211,6 +212,7 @@ function updateTimingMetrics() {
     metrics.lastNearTargetTime = 0;
   }
 
+  // In target logic
   if (
     gameState.hoveredX === gameState.targetX &&
     gameState.hoveredY === gameState.targetY
@@ -218,13 +220,29 @@ function updateTimingMetrics() {
     if (!metrics.isInTarget) {
       metrics.isInTarget = true;
       metrics.lastInTargetTime = currentTime;
+      metrics.clickGenerationStartTime = currentTime; // Start timing when entering target
     }
     metrics.inTargetTime += currentTime - metrics.lastInTargetTime;
     metrics.lastInTargetTime = currentTime;
+
+    // Update current click generation time
+    metrics.currentClickGenerationTime =
+      currentTime - metrics.clickGenerationStartTime;
   } else {
+    if (metrics.isInTarget) {
+      // Reset click generation time if cursor leaves target without clicking
+      metrics.clickGenerationStartTime = 0;
+      metrics.currentClickGenerationTime = 0;
+    }
     metrics.isInTarget = false;
     metrics.lastInTargetTime = 0;
   }
+
+  // Update the display in real-time
+  updateMetricDisplay(
+    "clickGenerationTime",
+    (metrics.currentClickGenerationTime / 1000).toFixed(2) + "s"
+  );
 }
 
 function updateMetrics() {
@@ -350,6 +368,8 @@ function resetTimingStates() {
   metrics.isInTarget = false;
   metrics.lastNearTargetTime = 0;
   metrics.lastInTargetTime = 0;
+  metrics.clickGenerationStartTime = 0;
+  metrics.currentClickGenerationTime = 0;
 }
 
 function createMetricsDisplay() {

@@ -178,14 +178,15 @@ function handleMissedClick(clickedX, clickedY) {
 }
 
 function updateHover() {
-  gameState.hoveredX = floor(mouseX / CONFIG.cellSize);
-  gameState.hoveredY = floor(mouseY / CONFIG.cellSize);
+  const { cellSize, gridSize } = CONFIG;
+  gameState.hoveredX = floor(mouseX / cellSize);
+  gameState.hoveredY = floor(mouseY / cellSize);
 
   if (
     gameState.hoveredX < 0 ||
-    gameState.hoveredX >= CONFIG.gridSize ||
+    gameState.hoveredX >= gridSize ||
     gameState.hoveredY < 0 ||
-    gameState.hoveredY >= CONFIG.gridSize
+    gameState.hoveredY >= gridSize
   ) {
     gameState.hoveredX = -1;
     gameState.hoveredY = -1;
@@ -193,17 +194,12 @@ function updateHover() {
 }
 
 function checkIfNearTarget(x, y, targetX, targetY) {
-  for (let dx = -CONFIG.nearTargetSize; dx <= CONFIG.nearTargetSize; dx++) {
-    for (let dy = -CONFIG.nearTargetSize; dy <= CONFIG.nearTargetSize; dy++) {
-      if (dx === 0 && dy === 0) continue; // Skip the target itself
-      let adjacentX = targetX + dx;
-      let adjacentY = targetY + dy;
-      if (x === adjacentX && y === adjacentY) {
-        return true;
-      }
-    }
-  }
-  return false;
+  const { nearTargetSize } = CONFIG;
+  return (
+    Math.abs(x - targetX) <= nearTargetSize &&
+    Math.abs(y - targetY) <= nearTargetSize &&
+    (x !== targetX || y !== targetY)
+  );
 }
 
 function updateTimingMetrics() {
@@ -373,13 +369,15 @@ function logOverallFittsLawMetrics() {
 }
 
 function pickNewTarget() {
+  const { gridSize } = CONFIG;
+  let newX, newY;
   do {
-    gameState.targetX = floor(random(CONFIG.gridSize));
-    gameState.targetY = floor(random(CONFIG.gridSize));
-  } while (
-    gameState.targetX === gameState.lastClickX &&
-    gameState.targetY === gameState.lastClickY
-  );
+    newX = floor(random(gridSize));
+    newY = floor(random(gridSize));
+  } while (newX === gameState.lastClickX && newY === gameState.lastClickY);
+
+  gameState.targetX = newX;
+  gameState.targetY = newY;
 }
 
 function resetMetrics() {
@@ -441,14 +439,11 @@ function updateInitialMetricDisplay() {
 
 function updateMetricDisplay(id, value) {
   let displayName = id;
-  if (id === "BPS" || id === "NTPM" || id === "Fitts BPS") {
-    displayName = id; // Keep these acronyms as-is
-  } else {
+  if (!["BPS", "NTPM", "Fitts BPS"].includes(id)) {
     displayName =
       id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1");
   }
 
-  // Use vanilla JavaScript to update the element
   const element = document.getElementById(id);
   if (element) {
     element.textContent = `${displayName}: ${value}`;

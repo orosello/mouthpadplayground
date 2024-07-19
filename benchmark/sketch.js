@@ -31,7 +31,7 @@ let metrics = {
   netRate: 0,
   totalIndexOfDifficulty: 0,
   totalAcquireTime: 0,
-  fittsBps: 0,
+  fittsBPS: 0,
   nearTargetTime: 0,
   inTargetTime: 0,
   clickGenerationTime: 0,
@@ -41,6 +41,7 @@ let metrics = {
   isInTarget: false,
   clickGenerationStartTime: 0,
   currentClickGenerationTime: 0,
+  timeToNearTarget: 0,
 };
 
 const METRIC_IDS = [
@@ -48,9 +49,10 @@ const METRIC_IDS = [
   "netRate",
   "gridSize",
   "percentSuccessful",
-  "ntpm",
-  "bps",
-  "fittsBps",
+  "NTPM",
+  "BPS",
+  "Fitts BPS",
+  "timeToNearTarget",
   "nearTargetTime",
   "inTargetTime",
   "clickGenerationTime",
@@ -158,13 +160,13 @@ function calculateFittsLawMetrics(currentTime, clickedX, clickedY) {
     metrics.totalIndexOfDifficulty += indexOfDifficulty;
     metrics.totalAcquireTime += acquireTime;
 
-    const clickFittsBps = indexOfDifficulty / acquireTime;
+    const clickFittsBPS = indexOfDifficulty / acquireTime;
     console.log(
       `Click ${gameState.successfulClicks}: Distance = ${distance.toFixed(
         2
       )}, ID = ${indexOfDifficulty.toFixed(2)}, Time = ${acquireTime.toFixed(
         2
-      )}s, Fitts' BPS = ${clickFittsBps.toFixed(2)} bits/s`
+      )}s, Fitts' BPS = ${clickFittsBPS.toFixed(2)} bits/s`
     );
   }
 }
@@ -284,13 +286,19 @@ function calculateAndUpdateMetrics(elapsedTimeMinutes, elapsedTimeSeconds) {
   metrics.bps = (metrics.ntpm * gridSizeLog2) / 60;
 
   if (metrics.totalAcquireTime > 0) {
-    metrics.fittsBps =
+    metrics.fittsBPS =
       metrics.totalIndexOfDifficulty / metrics.totalAcquireTime;
   }
 
   const totalClicks = gameState.successfulClicks + gameState.misclicks;
   const percentSuccessful =
     totalClicks > 0 ? (gameState.successfulClicks / totalClicks) * 100 : 0;
+
+  // Calculate time to near target
+  metrics.timeToNearTarget = Math.max(
+    0,
+    elapsedTimeSeconds - (metrics.nearTargetTime + metrics.inTargetTime) / 1000
+  );
 
   updateMetricDisplays(percentSuccessful);
   updateClickTimeMetrics();
@@ -300,9 +308,13 @@ function updateMetricDisplays(percentSuccessful) {
   updateMetricDisplay("trialCount", gameState.trialCount);
   updateMetricDisplay("netRate", metrics.netRate);
   updateMetricDisplay("percentSuccessful", percentSuccessful.toFixed(2) + "%");
-  updateMetricDisplay("ntpm", metrics.ntpm.toFixed(2));
-  updateMetricDisplay("bps", metrics.bps.toFixed(2));
-  updateMetricDisplay("fittsBps", metrics.fittsBps.toFixed(2));
+  updateMetricDisplay("NTPM", metrics.ntpm.toFixed(2));
+  updateMetricDisplay("BPS", metrics.bps.toFixed(2));
+  updateMetricDisplay("Fitts BPS", metrics.fittsBPS.toFixed(2));
+  updateMetricDisplay(
+    "timeToNearTarget",
+    metrics.timeToNearTarget.toFixed(2) + "s"
+  );
   updateMetricDisplay(
     "nearTargetTime",
     (metrics.nearTargetTime / 1000).toFixed(2) + "s"
@@ -356,7 +368,7 @@ function logOverallFittsLawMetrics() {
       2
     )}, Total Time = ${metrics.totalAcquireTime.toFixed(
       2
-    )}s, Fitts' BPS = ${metrics.fittsBps.toFixed(2)} bits/s`
+    )}s, Fitts' BPS = ${metrics.fittsBPS.toFixed(2)} bits/s`
   );
 }
 
@@ -381,6 +393,7 @@ function resetMetrics() {
   metrics.nearTargetTime = 0;
   metrics.inTargetTime = 0;
   metrics.clickGenerationTime = 0;
+  metrics.timeToNearTarget = 0;
   resetTimingStates();
 }
 
@@ -394,18 +407,18 @@ function resetTimingStates() {
 }
 
 function createMetricsDisplay() {
-  let metricsDiv = createDiv().id("metrics");
+  let metricsDiv = document.createElement("div");
+  metricsDiv.id = "metrics";
   METRIC_IDS.forEach((id) => {
-    metricsDiv.child(
-      createDiv(
-        `${
-          id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
-        }: 0`
-      )
-        .class("metric")
-        .id(id)
-    );
+    let metricElement = document.createElement("div");
+    metricElement.className = "metric";
+    metricElement.id = id;
+    metricElement.textContent = `${
+      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
+    }: 0`;
+    metricsDiv.appendChild(metricElement);
   });
+  document.body.appendChild(metricsDiv);
 }
 
 function updateInitialMetricDisplay() {
@@ -414,9 +427,10 @@ function updateInitialMetricDisplay() {
   updateMetricDisplay("trialCount", 0);
   updateMetricDisplay("netRate", 0);
   updateMetricDisplay("percentSuccessful", "0.00%");
-  updateMetricDisplay("ntpm", "0.00");
-  updateMetricDisplay("bps", "0.00");
-  updateMetricDisplay("fittsBps", "0.00");
+  updateMetricDisplay("NTPM", "0.00");
+  updateMetricDisplay("BPS", "0.00");
+  updateMetricDisplay("Fitts BPS", "0.00");
+  updateMetricDisplay("timeToNearTarget", "0.00s");
   updateMetricDisplay("nearTargetTime", "0.00s");
   updateMetricDisplay("inTargetTime", "0.00s");
   updateMetricDisplay("clickGenerationTime", "0.00s");
@@ -426,18 +440,32 @@ function updateInitialMetricDisplay() {
 }
 
 function updateMetricDisplay(id, value) {
-  select(`#${id}`).html(
-    `${
-      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
-    }: ${value}`
-  );
+  let displayName = id;
+  if (id === "BPS" || id === "NTPM" || id === "Fitts BPS") {
+    displayName = id; // Keep these acronyms as-is
+  } else {
+    displayName =
+      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1");
+  }
+
+  // Use vanilla JavaScript to update the element
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent = `${displayName}: ${value}`;
+  } else {
+    console.warn(`Element with id '${id}' not found`);
+  }
 }
 
 function createSendMetricsButton() {
-  let sendMetricsButton = createButton("Send Results");
-  sendMetricsButton.position(20, windowHeight / 2);
-  sendMetricsButton.class("send-metrics-button");
-  sendMetricsButton.mousePressed(saveMetricsAndRedirect);
+  let sendMetricsButton = document.createElement("button");
+  sendMetricsButton.textContent = "Send Results";
+  sendMetricsButton.style.position = "absolute";
+  sendMetricsButton.style.top = "50%";
+  sendMetricsButton.style.left = "20px";
+  sendMetricsButton.className = "send-metrics-button";
+  sendMetricsButton.addEventListener("click", saveMetricsAndRedirect);
+  document.body.appendChild(sendMetricsButton);
 }
 
 function saveMetricsAndRedirect() {
@@ -449,15 +477,20 @@ function saveMetricsAndRedirect() {
       (gameState.successfulClicks / gameState.trialCount) *
       100
     ).toFixed(2),
-    ntpm: metrics.ntpm.toFixed(2),
-    bps: metrics.bps.toFixed(2),
-    fittsBps: metrics.fittsBps.toFixed(2),
+    NTPM: metrics.ntpm.toFixed(2),
+    BPS: metrics.bps.toFixed(2),
+    "Fitts BPS": metrics.fittsBPS.toFixed(2),
+    timeToNearTarget: metrics.timeToNearTarget.toFixed(2),
     nearTargetTime: (metrics.nearTargetTime / 1000).toFixed(2),
     inTargetTime: (metrics.inTargetTime / 1000).toFixed(2),
     clickGenerationTime: (metrics.clickGenerationTime / 1000).toFixed(2),
-    lastClick: select("#lastClick").html().split(": ")[1],
-    fastestClick: select("#fastestClick").html().split(": ")[1],
-    averageClickTime: select("#averageClickTime").html().split(": ")[1],
+    lastClick: document.getElementById("lastClick").textContent.split(": ")[1],
+    fastestClick: document
+      .getElementById("fastestClick")
+      .textContent.split(": ")[1],
+    averageClickTime: document
+      .getElementById("averageClickTime")
+      .textContent.split(": ")[1],
   };
 
   localStorage.setItem("benchmarkMetrics", JSON.stringify(metricsToSave));

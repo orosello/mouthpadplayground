@@ -249,15 +249,20 @@ function updateInTargetMetrics(currentTime) {
     }
     metrics.inTargetTime += currentTime - metrics.lastInTargetTime;
     metrics.lastInTargetTime = currentTime;
-    metrics.currentClickGenerationTime =
-      currentTime - metrics.clickGenerationStartTime;
   } else {
     if (metrics.isInTarget) {
-      metrics.clickGenerationStartTime = 0;
-      metrics.currentClickGenerationTime = 0;
+      metrics.clickGenerationStartTime = 0; // Reset click generation time when leaving target
     }
     metrics.isInTarget = false;
     metrics.lastInTargetTime = 0;
+  }
+
+  // Update current click generation time
+  if (metrics.clickGenerationStartTime > 0) {
+    metrics.currentClickGenerationTime =
+      currentTime - metrics.clickGenerationStartTime;
+  } else {
+    metrics.currentClickGenerationTime = 0;
   }
 }
 

@@ -17,12 +17,29 @@ let clickTimestamps = [];
 let gameStarted = false;
 let sendMetricsButton;
 
+// Variables for Fitts' law calculations
+let lastClickX = -1,
+  lastClickY = -1;
+let totalIndexOfDifficulty = 0;
+let totalAcquireTime = 0;
+let fittsBps = 0;
+
+// Variables for additional timing metrics
+let nearTargetTime = 0;
+let inTargetTime = 0;
+let clickGenerationTime = 0;
+let lastNearTargetTime = 0;
+let lastInTargetTime = 0;
+let isNearTarget = false;
+let isInTarget = false;
+
 function setup() {
   createCanvas(gridSize * cellSize, gridSize * cellSize);
   pickNewTarget();
   createMetrics();
   disableScroll();
   disableRightClick();
+  updateInitialMetricDisplay();
 }
 
 function draw() {
@@ -35,6 +52,7 @@ function draw() {
   }
   if (hoveredX !== -1 && hoveredY !== -1) {
     drawHoverHighlight();
+    updateTimingMetrics();
   }
   if (startTime !== null && !timerEnded) {
     updateMetrics();
@@ -71,48 +89,6 @@ function drawHoverHighlight() {
   rect(hoveredX * cellSize, hoveredY * cellSize, cellSize, cellSize);
 }
 
-function pickNewTarget() {
-  targetX = floor(random(gridSize));
-  targetY = floor(random(gridSize));
-}
-
-function mousePressed() {
-  let clickedX = floor(mouseX / cellSize);
-  let clickedY = floor(mouseY / cellSize);
-
-  if (clickedX === targetX && clickedY === targetY) {
-    if (!gameStarted) {
-      // Reset metrics and start the game
-      startTime = millis();
-      gameStarted = true;
-      trialCount = 0;
-      successfulClicks = 0;
-      misclicks = 0;
-      netRate = 0;
-      clickTimestamps = [];
-    }
-
-    trialCount++;
-    successfulClicks++;
-    clickTimestamps.push(millis());
-    missedClick = null;
-    pickNewTarget();
-  } else if (gameStarted) {
-    // Only count misclicks after the game has started
-    trialCount++;
-    misclicks++;
-    missedClick = { x: clickedX, y: clickedY };
-  }
-
-  if (gameStarted) {
-    netRate = successfulClicks - misclicks;
-  }
-}
-
-function mouseReleased() {
-  missedClick = null;
-}
-
 function updateHover() {
   hoveredX = floor(mouseX / cellSize);
   hoveredY = floor(mouseY / cellSize);
@@ -128,71 +104,183 @@ function updateHover() {
   }
 }
 
-function createMetrics() {
-  let metricsDiv = createDiv().id("metrics");
-  metricsDiv.child(
-    createDiv("Trial Count: 0").class("metric").id("trialCount")
-  );
-  metricsDiv.child(createDiv("Net Rate: 0").class("metric").id("netRate"));
-  metricsDiv.child(
-    createDiv(`Grid Size: ${gridSize}x${gridSize}`)
-      .class("metric")
-      .id("gridSize")
-  );
-  metricsDiv.child(
-    createDiv("% Successful: 0%").class("metric").id("percentSuccessful")
-  );
-  metricsDiv.child(createDiv("NTPM: 0").class("metric").id("ntpm"));
-  metricsDiv.child(createDiv("BPS: 0").class("metric").id("bps"));
-  metricsDiv.child(createDiv("Last Click: 0s").class("metric").id("lastClick"));
-  metricsDiv.child(
-    createDiv("Fastest Click: 0s").class("metric").id("fastestClick")
-  );
-  metricsDiv.child(
-    createDiv("Average Click Time: 0s").class("metric").id("averageClickTime")
-  );
-  metricsDiv.child(createDiv("Countdown: 60").class("metric").id("countdown"));
+function updateTimingMetrics() {
+  if (!gameStarted) return;
+
+  let currentTime = millis();
+  let distanceToTarget = dist(hoveredX, hoveredY, targetX, targetY);
+
+  if (distanceToTarget <= sqrt(2) && !isNearTarget) {
+    isNearTarget = true;
+    lastNearTargetTime = currentTime;
+  } else if (distanceToTarget > sqrt(2)) {
+    if (isNearTarget) {
+      nearTargetTime += currentTime - lastNearTargetTime;
+    }
+    isNearTarget = false;
+    lastNearTargetTime = 0;
+  }
+
+  if (hoveredX === targetX && hoveredY === targetY) {
+    if (!isInTarget) {
+      isInTarget = true;
+      lastInTargetTime = currentTime;
+    }
+  } else {
+    if (isInTarget) {
+      inTargetTime += currentTime - lastInTargetTime;
+    }
+    isInTarget = false;
+    lastInTargetTime = 0;
+  }
+}
+
+function mousePressed() {
+  let clickedX = floor(mouseX / cellSize);
+  let clickedY = floor(mouseY / cellSize);
+
+  if (clickedX === targetX && clickedY === targetY) {
+    let currentTime = millis();
+    if (!gameStarted) {
+      startTime = currentTime;
+      gameStarted = true;
+      resetMetrics();
+      lastClickX = clickedX;
+      lastClickY = clickedY;
+      trialCount = 1;
+      successfulClicks = 1;
+      updateMetricDisplay("trialCount", trialCount);
+    } else {
+      trialCount++;
+      successfulClicks++;
+      clickTimestamps.push(currentTime);
+
+      if (isInTarget && lastInTargetTime !== 0) {
+        clickGenerationTime += currentTime - lastInTargetTime;
+      }
+
+      if (lastClickX !== -1 && lastClickY !== -1) {
+        let distance =
+          dist(lastClickX, lastClickY, clickedX, clickedY) * cellSize;
+        let width = cellSize; // The width of the target
+        let indexOfDifficulty = Math.log2((distance + width) / width);
+        let acquireTime =
+          (currentTime - clickTimestamps[clickTimestamps.length - 2]) / 1000; // in seconds
+
+        if (acquireTime > 0) {
+          // Prevent division by zero
+          totalIndexOfDifficulty += indexOfDifficulty;
+          totalAcquireTime += acquireTime;
+
+          // Calculate and log Fitts' law metrics for this click
+          let clickFittsBps = indexOfDifficulty / acquireTime;
+          console.log(
+            `Click ${successfulClicks}: Distance = ${distance.toFixed(
+              2
+            )}, ID = ${indexOfDifficulty.toFixed(
+              2
+            )}, Time = ${acquireTime.toFixed(
+              2
+            )}s, Fitts' BPS = ${clickFittsBps.toFixed(2)} bits/s`
+          );
+        }
+      }
+
+      lastClickX = clickedX;
+      lastClickY = clickedY;
+    }
+
+    missedClick = null;
+    pickNewTarget();
+    resetTimingStates();
+  } else if (gameStarted) {
+    trialCount++;
+    misclicks++;
+    missedClick = { x: clickedX, y: clickedY };
+  }
+
+  if (gameStarted) {
+    netRate = successfulClicks - misclicks;
+  }
+}
+
+function mouseReleased() {
+  missedClick = null;
+}
+
+function resetMetrics() {
+  trialCount = 0;
+  successfulClicks = 0;
+  misclicks = 0;
+  netRate = 0;
+  clickTimestamps = [];
+  totalIndexOfDifficulty = 0;
+  totalAcquireTime = 0;
+  nearTargetTime = 0;
+  inTargetTime = 0;
+  clickGenerationTime = 0;
+  resetTimingStates();
+}
+
+function resetTimingStates() {
+  isNearTarget = false;
+  isInTarget = false;
+  lastNearTargetTime = 0;
+  lastInTargetTime = 0;
+}
+
+function pickNewTarget() {
+  do {
+    targetX = floor(random(gridSize));
+    targetY = floor(random(gridSize));
+  } while (targetX === lastClickX && targetY === lastClickY);
 }
 
 function updateMetrics() {
-  if (!gameStarted || timerEnded) return;
-
   let elapsedTimeMinutes = (millis() - startTime) / 60000;
+  let elapsedTimeSeconds = elapsedTimeMinutes * 60;
 
-  if (elapsedTimeMinutes > 0) {
+  if (elapsedTimeSeconds > 0) {
     ntpm = successfulClicks / elapsedTimeMinutes;
     let totalGridCells = gridSize * gridSize;
     let gridSizeLog2 = Math.log2(totalGridCells);
     bps = (ntpm * gridSizeLog2) / 60;
 
+    // Calculate overall Fitts' law BPS
+    if (totalAcquireTime > 0) {
+      // Prevent division by zero
+      fittsBps = totalIndexOfDifficulty / totalAcquireTime;
+    }
+
     let totalClicks = successfulClicks + misclicks;
     let percentSuccessful =
       totalClicks > 0 ? (successfulClicks / totalClicks) * 100 : 0;
 
-    select("#trialCount").html(`Trial Count: ${trialCount}`);
-    select("#netRate").html(`Net Rate: ${netRate}`);
-    select("#gridSize").html(`Grid Size: ${gridSize}x${gridSize}`);
-    select("#percentSuccessful").html(
-      `% Successful: ${percentSuccessful.toFixed(2)}%`
+    updateMetricDisplay("trialCount", trialCount);
+    updateMetricDisplay("netRate", netRate);
+    updateMetricDisplay(
+      "percentSuccessful",
+      percentSuccessful.toFixed(2) + "%"
     );
-    select("#ntpm").html(`NTPM: ${ntpm.toFixed(2)}`);
-    select("#bps").html(`BPS: ${bps.toFixed(2)}`);
-
-    let elapsedTimeSeconds = (millis() - startTime) / 1000;
-    countdown = max(60 - floor(elapsedTimeSeconds), 0);
-    select("#countdown").html(`Countdown: ${countdown}`);
-
-    if (countdown === 0 && !timerEnded) {
-      timerEnded = true;
-      createSendMetricsButton();
-    }
+    updateMetricDisplay("ntpm", ntpm.toFixed(2));
+    updateMetricDisplay("bps", bps.toFixed(2));
+    updateMetricDisplay("fittsBps", fittsBps.toFixed(2));
+    updateMetricDisplay(
+      "nearTargetTime",
+      (nearTargetTime / 1000).toFixed(2) + "s"
+    );
+    updateMetricDisplay("inTargetTime", (inTargetTime / 1000).toFixed(2) + "s");
+    updateMetricDisplay(
+      "clickGenerationTime",
+      (clickGenerationTime / 1000).toFixed(2) + "s"
+    );
 
     if (clickTimestamps.length > 1) {
       let lastClickTime =
         (clickTimestamps[clickTimestamps.length - 1] -
           clickTimestamps[clickTimestamps.length - 2]) /
         1000;
-      select("#lastClick").html(`Last Click: ${lastClickTime.toFixed(2)}s`);
+      updateMetricDisplay("lastClick", lastClickTime.toFixed(2) + "s");
 
       let clickIntervals = [];
       for (let i = 1; i < clickTimestamps.length; i++) {
@@ -201,19 +289,92 @@ function updateMetrics() {
         );
       }
       let fastestClick = Math.min(...clickIntervals);
-      select("#fastestClick").html(
-        `Fastest Click: ${fastestClick.toFixed(2)}s`
-      );
+      updateMetricDisplay("fastestClick", fastestClick.toFixed(2) + "s");
 
       let totalTime =
         (clickTimestamps[clickTimestamps.length - 1] - clickTimestamps[0]) /
         1000;
       let averageClickTime = totalTime / (clickTimestamps.length - 1);
-      select("#averageClickTime").html(
-        `Average Click Time: ${averageClickTime.toFixed(2)}s`
+      updateMetricDisplay(
+        "averageClickTime",
+        averageClickTime.toFixed(2) + "s"
       );
     }
+
+    countdown = max(60 - floor(elapsedTimeSeconds), 0);
+    updateMetricDisplay("countdown", countdown);
+
+    if (countdown === 0 && !timerEnded) {
+      timerEnded = true;
+      createSendMetricsButton();
+    }
+
+    // Log overall Fitts' law metrics
+    console.log(
+      `Overall: Total ID = ${totalIndexOfDifficulty.toFixed(
+        2
+      )}, Total Time = ${totalAcquireTime.toFixed(
+        2
+      )}s, Fitts' BPS = ${fittsBps.toFixed(2)} bits/s`
+    );
   }
+}
+
+function updateMetricDisplay(id, value) {
+  select(`#${id}`).html(
+    `${
+      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
+    }: ${value}`
+  );
+}
+
+function createMetrics() {
+  let metricsDiv = createDiv().id("metrics");
+  let metricIds = [
+    "trialCount",
+    "netRate",
+    "gridSize",
+    "percentSuccessful",
+    "ntpm",
+    "bps",
+    "fittsBps",
+    "nearTargetTime",
+    "inTargetTime",
+    "clickGenerationTime",
+    "lastClick",
+    "fastestClick",
+    "averageClickTime",
+    "countdown",
+  ];
+
+  metricIds.forEach((id) => {
+    metricsDiv.child(
+      createDiv(
+        `${
+          id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
+        }: 0`
+      )
+        .class("metric")
+        .id(id)
+    );
+  });
+}
+
+function updateInitialMetricDisplay() {
+  updateMetricDisplay("countdown", countdown);
+  updateMetricDisplay("gridSize", `${gridSize}x${gridSize}`);
+  updateMetricDisplay("trialCount", 0);
+  updateMetricDisplay("netRate", 0);
+  updateMetricDisplay("percentSuccessful", "0.00%");
+  updateMetricDisplay("ntpm", "0.00");
+  updateMetricDisplay("bps", "0.00");
+  updateMetricDisplay("fittsBps", "0.00");
+  updateMetricDisplay("nearTargetTime", "0.00s");
+  updateMetricDisplay("inTargetTime", "0.00s");
+  updateMetricDisplay("clickGenerationTime", "0.00s");
+  updateMetricDisplay("lastClick", "0.00s");
+  updateMetricDisplay("fastestClick", "0.00s");
+  updateMetricDisplay("averageClickTime", "0.00s");
 }
 
 function createSendMetricsButton() {
@@ -227,10 +388,14 @@ function saveMetricsAndRedirect() {
   let metrics = {
     trialCount,
     netRate,
-    gridSize,
+    gridSize: `${gridSize}x${gridSize}`,
     percentSuccessful: ((successfulClicks / trialCount) * 100).toFixed(2),
     ntpm: ntpm.toFixed(2),
     bps: bps.toFixed(2),
+    fittsBps: fittsBps.toFixed(2),
+    nearTargetTime: (nearTargetTime / 1000).toFixed(2),
+    inTargetTime: (inTargetTime / 1000).toFixed(2),
+    clickGenerationTime: (clickGenerationTime / 1000).toFixed(2),
     lastClick: select("#lastClick").html().split(": ")[1],
     fastestClick: select("#fastestClick").html().split(": ")[1],
     averageClickTime: select("#averageClickTime").html().split(": ")[1],
@@ -238,7 +403,6 @@ function saveMetricsAndRedirect() {
 
   localStorage.setItem("benchmarkMetrics", JSON.stringify(metrics));
   window.location.href = "../type/type.html";
-  // window.location.href = "../benchmark/benchmark.html";
 }
 
 function disableRightClick() {

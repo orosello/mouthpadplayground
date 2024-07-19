@@ -43,6 +43,23 @@ let metrics = {
   currentClickGenerationTime: 0,
 };
 
+const METRIC_IDS = [
+  "trialCount",
+  "netRate",
+  "gridSize",
+  "percentSuccessful",
+  "ntpm",
+  "bps",
+  "fittsBps",
+  "nearTargetTime",
+  "inTargetTime",
+  "clickGenerationTime",
+  "lastClick",
+  "fastestClick",
+  "averageClickTime",
+  "countdown",
+];
+
 function setup() {
   createCanvas(
     CONFIG.gridSize * CONFIG.cellSize,
@@ -135,7 +152,7 @@ function calculateFittsLawMetrics(currentTime, clickedX, clickedY) {
   const acquireTime =
     (currentTime -
       gameState.clickTimestamps[gameState.clickTimestamps.length - 2]) /
-    1000; // in seconds
+    1000;
 
   if (acquireTime > 0) {
     metrics.totalIndexOfDifficulty += indexOfDifficulty;
@@ -188,11 +205,18 @@ function checkIfNearTarget(x, y, targetX, targetY) {
 }
 
 function updateTimingMetrics() {
-  if (!gameState.gameStarted || gameState.timerEnded) return; // Add timerEnded check
+  if (!gameState.gameStarted || gameState.timerEnded) return;
 
   const currentTime = millis();
+  updateNearTargetMetrics(currentTime);
+  updateInTargetMetrics(currentTime);
+  updateMetricDisplay(
+    "clickGenerationTime",
+    (metrics.currentClickGenerationTime / 1000).toFixed(2) + "s"
+  );
+}
 
-  // Near target logic
+function updateNearTargetMetrics(currentTime) {
   if (
     checkIfNearTarget(
       gameState.hoveredX,
@@ -211,8 +235,9 @@ function updateTimingMetrics() {
     metrics.isNearTarget = false;
     metrics.lastNearTargetTime = 0;
   }
+}
 
-  // In target logic
+function updateInTargetMetrics(currentTime) {
   if (
     gameState.hoveredX === gameState.targetX &&
     gameState.hoveredY === gameState.targetY
@@ -220,29 +245,20 @@ function updateTimingMetrics() {
     if (!metrics.isInTarget) {
       metrics.isInTarget = true;
       metrics.lastInTargetTime = currentTime;
-      metrics.clickGenerationStartTime = currentTime; // Start timing when entering target
+      metrics.clickGenerationStartTime = currentTime;
     }
     metrics.inTargetTime += currentTime - metrics.lastInTargetTime;
     metrics.lastInTargetTime = currentTime;
-
-    // Update current click generation time
     metrics.currentClickGenerationTime =
       currentTime - metrics.clickGenerationStartTime;
   } else {
     if (metrics.isInTarget) {
-      // Reset click generation time if cursor leaves target without clicking
       metrics.clickGenerationStartTime = 0;
       metrics.currentClickGenerationTime = 0;
     }
     metrics.isInTarget = false;
     metrics.lastInTargetTime = 0;
   }
-
-  // Update the display in real-time
-  updateMetricDisplay(
-    "clickGenerationTime",
-    (metrics.currentClickGenerationTime / 1000).toFixed(2) + "s"
-  );
 }
 
 function updateMetrics() {
@@ -374,24 +390,7 @@ function resetTimingStates() {
 
 function createMetricsDisplay() {
   let metricsDiv = createDiv().id("metrics");
-  let metricIds = [
-    "trialCount",
-    "netRate",
-    "gridSize",
-    "percentSuccessful",
-    "ntpm",
-    "bps",
-    "fittsBps",
-    "nearTargetTime",
-    "inTargetTime",
-    "clickGenerationTime",
-    "lastClick",
-    "fastestClick",
-    "averageClickTime",
-    "countdown",
-  ];
-
-  metricIds.forEach((id) => {
+  METRIC_IDS.forEach((id) => {
     metricsDiv.child(
       createDiv(
         `${

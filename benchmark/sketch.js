@@ -110,13 +110,14 @@ function updateTimingMetrics() {
   let currentTime = millis();
   let distanceToTarget = dist(hoveredX, hoveredY, targetX, targetY);
 
-  if (distanceToTarget <= sqrt(2) && !isNearTarget) {
-    isNearTarget = true;
-    lastNearTargetTime = currentTime;
-  } else if (distanceToTarget > sqrt(2)) {
-    if (isNearTarget) {
-      nearTargetTime += currentTime - lastNearTargetTime;
+  if (distanceToTarget <= sqrt(2)) {
+    if (!isNearTarget) {
+      isNearTarget = true;
+      lastNearTargetTime = currentTime;
     }
+    nearTargetTime += currentTime - lastNearTargetTime;
+    lastNearTargetTime = currentTime;
+  } else {
     isNearTarget = false;
     lastNearTargetTime = 0;
   }
@@ -126,10 +127,9 @@ function updateTimingMetrics() {
       isInTarget = true;
       lastInTargetTime = currentTime;
     }
+    inTargetTime += currentTime - lastInTargetTime;
+    lastInTargetTime = currentTime;
   } else {
-    if (isInTarget) {
-      inTargetTime += currentTime - lastInTargetTime;
-    }
     isInTarget = false;
     lastInTargetTime = 0;
   }

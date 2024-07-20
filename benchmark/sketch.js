@@ -51,7 +51,7 @@ const METRIC_IDS = [
   "percentSuccessful",
   "NTPM",
   "BPS",
-  "Fitts BPS",
+  "BPSfitts",
   "timeToNearTarget",
   "nearTargetTime",
   "inTargetTime",
@@ -306,7 +306,7 @@ function updateMetricDisplays(percentSuccessful) {
   updateMetricDisplay("percentSuccessful", percentSuccessful.toFixed(2) + "%");
   updateMetricDisplay("NTPM", metrics.ntpm.toFixed(2));
   updateMetricDisplay("BPS", metrics.bps.toFixed(2));
-  updateMetricDisplay("Fitts BPS", metrics.fittsBPS.toFixed(2));
+  updateMetricDisplay("BPSfitts", metrics.fittsBPS.toFixed(2));
   updateMetricDisplay(
     "timeToNearTarget",
     metrics.timeToNearTarget.toFixed(2) + "s"
@@ -331,20 +331,20 @@ function updateClickTimeMetrics() {
       (gameState.clickTimestamps[gameState.clickTimestamps.length - 1] -
         gameState.clickTimestamps[gameState.clickTimestamps.length - 2]) /
       1000;
-    updateMetricDisplay("lastClick", lastClickTime.toFixed(2) + "s");
+    updateMetricDisplay("lastClick", lastClickTime.toFixed(2));
 
     const clickIntervals = gameState.clickTimestamps
       .slice(1)
       .map((time, index) => (time - gameState.clickTimestamps[index]) / 1000);
     const fastestClick = Math.min(...clickIntervals);
-    updateMetricDisplay("fastestClick", fastestClick.toFixed(2) + "s");
+    updateMetricDisplay("fastestClick", fastestClick.toFixed(2));
 
     const totalTime =
       (gameState.clickTimestamps[gameState.clickTimestamps.length - 1] -
         gameState.clickTimestamps[0]) /
       1000;
     const averageClickTime = totalTime / (gameState.clickTimestamps.length - 1);
-    updateMetricDisplay("averageClickTime", averageClickTime.toFixed(2) + "s");
+    updateMetricDisplay("averageClickTime", averageClickTime.toFixed(2));
   }
 }
 
@@ -421,25 +421,25 @@ function createMetricsDisplay() {
 
 function updateInitialMetricDisplay() {
   updateMetricDisplay("countdown", CONFIG.gameDuration);
-  updateMetricDisplay("gridSize", `${CONFIG.gridSize}x${CONFIG.gridSize}`);
+  updateMetricDisplay("gridSize", CONFIG.gridSize);
   updateMetricDisplay("trialCount", 0);
   updateMetricDisplay("netRate", 0);
   updateMetricDisplay("percentSuccessful", "0.00%");
   updateMetricDisplay("NTPM", "0.00");
   updateMetricDisplay("BPS", "0.00");
-  updateMetricDisplay("Fitts BPS", "0.00");
+  updateMetricDisplay("BPSfitts", "0.00");
   updateMetricDisplay("timeToNearTarget", "0.00s");
   updateMetricDisplay("nearTargetTime", "0.00s");
   updateMetricDisplay("inTargetTime", "0.00s");
   updateMetricDisplay("clickGenerationTime", "0.00s");
-  updateMetricDisplay("lastClick", "0.00s");
-  updateMetricDisplay("fastestClick", "0.00s");
-  updateMetricDisplay("averageClickTime", "0.00s");
+  updateMetricDisplay("lastClick", "0.00");
+  updateMetricDisplay("fastestClick", "0.00");
+  updateMetricDisplay("averageClickTime", "0.00");
 }
 
 function updateMetricDisplay(id, value) {
   let displayName = id;
-  if (!["BPS", "NTPM", "Fitts BPS"].includes(id)) {
+  if (!["BPS", "NTPM", "BPSfitts"].includes(id)) {
     displayName =
       id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1");
   }
@@ -467,26 +467,34 @@ function saveMetricsAndRedirect() {
   let metricsToSave = {
     trialCount: gameState.trialCount,
     netRate: metrics.netRate,
-    gridSize: `${CONFIG.gridSize}x${CONFIG.gridSize}`,
+    gridSize: CONFIG.gridSize,
     percentSuccessful: (
       (gameState.successfulClicks / gameState.trialCount) *
       100
     ).toFixed(2),
     NTPM: metrics.ntpm.toFixed(2),
     BPS: metrics.bps.toFixed(2),
-    "Fitts BPS": metrics.fittsBPS.toFixed(2),
+    BPSfitts: metrics.fittsBPS.toFixed(2),
     timeToNearTarget: metrics.timeToNearTarget.toFixed(2),
     nearTargetTime: (metrics.nearTargetTime / 1000).toFixed(2),
     inTargetTime: (metrics.inTargetTime / 1000).toFixed(2),
     clickGenerationTime: (metrics.clickGenerationTime / 1000).toFixed(2),
-    lastClick: document.getElementById("lastClick").textContent.split(": ")[1],
+    lastClick: document
+      .getElementById("lastClick")
+      .textContent.split(": ")[1]
+      .replace("s", ""),
     fastestClick: document
       .getElementById("fastestClick")
-      .textContent.split(": ")[1],
+      .textContent.split(": ")[1]
+      .replace("s", ""),
     averageClickTime: document
       .getElementById("averageClickTime")
-      .textContent.split(": ")[1],
+      .textContent.split(": ")[1]
+      .replace("s", ""),
   };
+
+  // Log the metrics to the console
+  console.log("Benchmark Metrics:", metricsToSave);
 
   localStorage.setItem("benchmarkMetrics", JSON.stringify(metricsToSave));
   window.location.href = "../type/type.html";

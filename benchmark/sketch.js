@@ -444,8 +444,22 @@ function updateMetricDisplay(id, value) {
       id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1");
   }
 
+  // Adjust display names for BPS and BPSfitts
+  if (id === "BPS") {
+    displayName = "BPS (Neuralink)";
+  } else if (id === "BPSfitts") {
+    displayName = "BPS (Fitts)";
+  }
+
   const element = document.getElementById(id);
   if (element) {
+    // Add 's' to last click, fastest click, and average click time if not already present
+    if (
+      ["lastClick", "fastestClick", "averageClickTime"].includes(id) &&
+      !value.endsWith("s")
+    ) {
+      value = value + "s";
+    }
     element.textContent = `${displayName}: ${value}`;
   } else {
     console.warn(`Element with id '${id}' not found`);

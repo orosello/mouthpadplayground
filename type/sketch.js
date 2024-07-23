@@ -51,7 +51,22 @@ function createCheckboxes() {
 }
 
 function styleCheckbox(checkbox) {
-  checkbox.style("color", "white");
+  const grayOptions = [
+    "Lip/Chin Joystick (e.g., Quadstick, Quadjoy)",
+    "Sip-and-Puff (e.g., Jouse)",
+    "Head-tracking (e.g., Glassouse)",
+    "Eye-tracking (e.g., Tobii)",
+    "Mouth stick",
+    "Mouse (Standard Handheld)",
+    "Trackpad (Standard Laptop)",
+    "Other",
+  ];
+
+  if (grayOptions.includes(checkbox.elt.innerText)) {
+    checkbox.style("color", "gray");
+  } else {
+    checkbox.style("color", "white");
+  }
   checkbox.style("font-family", '"Press Start 2P", Arial, serif');
   checkbox.style("font-size", "12px");
   checkbox.style("display", "flex");

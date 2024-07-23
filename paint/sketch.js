@@ -1,49 +1,78 @@
 const BOTTOM_TEXT_Y_OFFSET = 50;
 const FONT_SIZE = 16;
+const SAFE_AREA_WIDTH = 160;
+const SAFE_AREA_HEIGHT = 50;
 
 let randomCircleRadius = 0;
 let myFont;
 let showInstructions = true; // This should ensure instructions are shown initially
 let isEraser = false; // Track if the eraser is selected
+let currentRadius;
+let isDrawing = false;
+
+let mainCanvas;
+let pg; // Off-screen graphics buffer
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  mainCanvas = createCanvas(windowWidth, windowHeight);
+  pg = createGraphics(windowWidth, windowHeight); // Initialize the off-screen buffer
   colorMode(RGB);
   background(0);
 
   // Disable right-click context menu
   canvas = document.querySelector("canvas");
-  canvas.oncontextmenu = function (e) {
-    e.preventDefault();
-  };
+  canvas.oncontextmenu = (e) => e.preventDefault();
 
   // Event listener for mouse click to hide instructions
-  canvas.addEventListener("mousedown", function () {
-    showInstructions = false;
-  });
+  canvas.addEventListener("mousedown", () => (showInstructions = false));
+
+  // Add custom font to the document's head
+  const style = document.createElement("style");
+  style.innerHTML = `
+    @font-face {
+      font-family: 'Press Start 2P';
+      src: url('../assets/Press_Start_2P/PressStart2P-Regular.ttf') format('truetype');
+    }
+    .custom-font {
+      font-family: 'Press Start 2P', sans-serif;
+    }
+  `;
+  document.head.appendChild(style);
 
   // Toggle button for eraser and paintbrush
   toggleButton = createButton("Pick up eraser");
-  toggleButton.position(windowWidth - 160, 10);
   toggleButton.mousePressed(toggleTool);
 
   // Styling the button
-  toggleButton.style("font-family", "Press Start 2P");
+  toggleButton.class("custom-font"); // Apply the custom font class
   toggleButton.style("color", "white");
   toggleButton.style("background-color", "black");
   toggleButton.style("border", "2px solid white");
   toggleButton.style("z-index", "1000"); // Ensure button is on top of canvas
+  toggleButton.style("font-size", "12px"); // Adjust font size to 12px
+  toggleButton.style("padding", "10px 15px"); // Increased horizontal padding
+  toggleButton.style("white-space", "nowrap"); // Prevent text wrapping
+  toggleButton.style("min-width", "180px"); // Set a minimum width
 
-  // Apply the font to the button
-  toggleButton.style("font-family", "Press Start 2P");
-  toggleButton.style("font-size", "16px"); // Adjust font size if necessary
+  // Position the button after styling
+  positionButton();
+
+  currentRadius = random(40, 80);
+  textFont(myFont); // Ensure the font is loaded and set
+}
+
+function positionButton() {
+  toggleButton.position(windowWidth - 280, 30); // Fixed position with 20px margin to the right
 }
 
 function draw() {
+  background(0); // Clear the background at the beginning of each frame
+  image(pg, 0, 0); // Draw the off-screen buffer onto the main canvas
+
   if (showInstructions) {
     // Set text properties
     textFont(myFont);
@@ -60,25 +89,33 @@ function draw() {
   }
 
   // Define the safe area dimensions around the button
-  const safeAreaX = windowWidth - 160; // Adjust width for safe area around the button
+  const safeAreaX = windowWidth - SAFE_AREA_WIDTH; // Adjust width for safe area around the button
   const safeAreaY = 0; // Start from the top of the window
-  const safeAreaWidth = 160; // Adjust width for safe area around the button
-  const safeAreaHeight = 50; // Adjust height for safe area around the button
 
   // Check if the mouse is within the safe area
   const isInSafeArea =
     mouseX >= safeAreaX &&
-    mouseX <= safeAreaX + safeAreaWidth &&
+    mouseX <= safeAreaX + SAFE_AREA_WIDTH &&
     mouseY >= safeAreaY &&
-    mouseY <= safeAreaY + safeAreaHeight;
+    mouseY <= safeAreaY + SAFE_AREA_HEIGHT;
 
   if (mouseIsPressed && !isInSafeArea) {
-    randomCircleRadius = random(40, 80);
+    isDrawing = true;
+    pg.fill(isEraser ? 0 : 255); // Use background color if eraser is selected
+    pg.noStroke();
+    pg.circle(mouseX, mouseY, currentRadius);
 
-    fill(isEraser ? 0 : 255); // Use background color if eraser is selected
+    // Generate new radius for next paint
+    currentRadius = random(60, 80);
+  } else {
+    isDrawing = false;
+    // Draw preview circle
+    push();
+    noFill();
+    stroke(255);
     strokeWeight(1);
-    rectMode(CENTER);
-    circle(mouseX, mouseY, randomCircleRadius);
+    circle(mouseX, mouseY, currentRadius);
+    pop();
   }
 }
 
@@ -89,6 +126,11 @@ function toggleTool() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  pg.resizeCanvas(windowWidth, windowHeight); // Resize the off-screen buffer
   background(0);
-  toggleButton.position(windowWidth - 160, 10); // Ensure button stays in top right corner
+  positionButton(); // Ensure button stays in top right corner with 20px padding
+}
+
+function mouseReleased() {
+  isDrawing = false;
 }

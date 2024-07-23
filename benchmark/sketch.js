@@ -501,11 +501,26 @@ function updateMetricDisplay(id, value) {
       id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1");
   }
 
-  // Adjust display names for BPS and BPSfitts
-  if (id === "BPS") {
-    displayName = "BPS (Neuralink)";
-  } else if (id === "BPSfitts") {
-    displayName = "BPS (Fitts)";
+  // Adjust display names for specific metrics
+  switch (id) {
+    case "BPS":
+      displayName = "BPS (NLink)";
+      break;
+    case "BPSfitts":
+      displayName = "BPS (Fitts)";
+      break;
+    case "percentSuccessful":
+      displayName = "Success";
+      break;
+    case "clickGenerationTime":
+      displayName = "Click Gen Time";
+      break;
+    case "averageClickTime":
+      displayName = "Avg Click Time";
+      break;
+    case "timeToNearTarget":
+      displayName = "Time to Near Trgt";
+      break;
   }
 
   const element = document.getElementById(id);

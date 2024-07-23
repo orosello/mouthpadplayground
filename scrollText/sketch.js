@@ -84,8 +84,7 @@ Our captains, Macbeth and Banquo?
 
 SERGEANT
 Yes;
-As sparrows eagles, or the hare the lion.
-If I say sooth, I must report they were
+As sparrows eagles, or the hare the lion. If I say sooth, I must report they were
 As cannons overcharged with double cracks, so they
 Doubly redoubled strokes upon the foe:
 Except they meant to bathe in reeking wounds,
@@ -164,6 +163,11 @@ function setup() {
   textSize(16); // Adjust text size as needed
   fill(255); // White color
   yOffset = windowHeight / 2 - textAscent(); // Initialize yOffset to half the window height minus the text ascent
+
+  // Disable right-click context menu
+  document.addEventListener("contextmenu", function (event) {
+    event.preventDefault();
+  });
 }
 
 function draw() {

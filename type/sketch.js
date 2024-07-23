@@ -24,7 +24,7 @@ let inputDevices = [
   "Other",
 ];
 let selectedDevice = "";
-let radioButtons = [];
+let checkboxes = [];
 
 function preload() {
   customFont = loadFont("../assets/led-counter-7/led_counter-7.ttf");
@@ -38,31 +38,49 @@ function setup() {
   textFont(customFont);
   textSize(32);
 
-  createRadioButtons();
+  createCheckboxes();
   createSendButton();
 }
 
-function createRadioButtons() {
+function createCheckboxes() {
   for (let i = 0; i < inputDevices.length; i++) {
-    let radio = createRadio();
-    radio.option(inputDevices[i]);
-    styleRadioButton(radio);
-    radioButtons.push(radio);
+    let checkbox = createCheckbox(inputDevices[i], false);
+    styleCheckbox(checkbox);
+    checkboxes.push(checkbox);
   }
 }
 
-function styleRadioButton(radio) {
-  radio.style("color", "white");
-  radio.style("font-family", '"Press Start 2P", Arial, serif');
-  radio.style("font-size", "12px");
-  radio.style("display", "flex");
-  radio.style("align-items", "center");
-  radio.style("gap", "10px");
-  radio.style("padding-left", "5px");
-  radio.elt.querySelector("input").style.marginRight = "5px";
-  radio.elt.querySelector("input").style.position = "relative";
-  radio.elt.querySelector("input").style.top = "-5px";
-  radio.style("accent-color", "magenta");
+function styleCheckbox(checkbox) {
+  checkbox.style("color", "white");
+  checkbox.style("font-family", '"Press Start 2P", Arial, serif');
+  checkbox.style("font-size", "12px");
+  checkbox.style("display", "flex");
+  checkbox.style("align-items", "center");
+  checkbox.style("gap", "5px"); // Reduced gap
+  checkbox.style("padding-left", "0px");
+  checkbox.style("margin-bottom", "0px");
+
+  let input = checkbox.elt.querySelector("input");
+  input.style.width = "20px"; // Reduced size
+  input.style.height = "20px"; // Reduced size
+  input.style.marginRight = "5px";
+  input.style.accentColor = "magenta";
+  input.style.verticalAlign = "middle"; // Align checkbox vertically
+
+  let label = checkbox.elt.querySelector("label");
+  label.style.display = "flex";
+  label.style.alignItems = "center";
+
+  checkbox.changed(onCheckboxChanged);
+}
+
+function onCheckboxChanged() {
+  for (let cb of checkboxes) {
+    if (cb !== this) {
+      cb.checked(false);
+    }
+  }
+  selectedDevice = this.checked() ? this.elt.innerText : "";
 }
 
 function createSendButton() {
@@ -99,7 +117,7 @@ function drawElements() {
   yOffset += 80;
 
   drawInputDevices(yOffset);
-  yOffset += radioButtons.length * 30 + 50;
+  yOffset += checkboxes.length * 28 + 50; // Reduced vertical spacing
 
   drawSendButton(yOffset - 30);
 }
@@ -166,15 +184,8 @@ function drawInputDevicesPrompt(y) {
 }
 
 function drawInputDevices(startY) {
-  for (let i = 0; i < radioButtons.length; i++) {
-    radioButtons[i].position(width / 2 - 200, startY + i * 30);
-  }
-
-  for (let radio of radioButtons) {
-    if (radio.value()) {
-      selectedDevice = radio.value();
-      break;
-    }
+  for (let i = 0; i < checkboxes.length; i++) {
+    checkboxes[i].position(width / 2 - 200, startY + i * 28); // Reduced vertical spacing
   }
 }
 

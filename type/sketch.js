@@ -243,10 +243,15 @@ function isMouseOverKey(x, y) {
 }
 
 function sendMessage() {
-  if (inputText.trim() === "" || selectedDevice === "") return;
+  if (inputText.trim() === "" || selectedDevice === "") {
+    console.log("Input text or selected device is empty");
+    return;
+  }
 
   let message = inputText.trim();
   let metrics = JSON.parse(localStorage.getItem("benchmarkMetrics"));
+
+  console.log("Preparing to send data:", { message, selectedDevice, metrics });
 
   let data = {
     name: message,
@@ -254,18 +259,73 @@ function sendMessage() {
     ...metrics,
   };
 
+  // Show "Thank you!" message immediately
+  showThankYouMessage();
+  console.log("Thank you message should be displayed now");
+
   jsonp(googleScriptURL, data, function (response) {
-    console.log("Response:", response);
-    if (response.result === "success") {
+    console.log("JSONP response received:", response);
+    if (response && response.result === "success") {
       console.log("Message, metrics, and input device sent successfully!");
       localStorage.removeItem("benchmarkMetrics");
-      window.location.href = "../benchmark/benchmark.html";
+      // Delay redirect by 1 second
+      setTimeout(() => {
+        console.log("Redirecting to benchmark page");
+        window.location.href = "../benchmark/benchmark.html";
+      }, 1000);
     } else {
-      console.error("Error sending message, metrics, and input device.");
+      console.error(
+        "Error sending message, metrics, and input device.",
+        response
+      );
+      // Remove "Thank you!" message if there's an error
+      removeThankYouMessage();
     }
   });
 
   inputText = "";
+}
+
+// Ensure these functions are defined
+function showThankYouMessage() {
+  console.log("Attempting to show Thank you message");
+  removeThankYouMessage();
+
+  let overlay = createDiv();
+  overlay.id("thank-you-overlay");
+  overlay.style("position", "fixed");
+  overlay.style("top", "0");
+  overlay.style("left", "0");
+  overlay.style("width", "100%");
+  overlay.style("height", "100%");
+  overlay.style("background-color", "rgba(0, 0, 0, 0.8)"); // 80% opacity
+  overlay.style("display", "flex");
+  overlay.style("justify-content", "center");
+  overlay.style("align-items", "center");
+  overlay.style("z-index", "1000");
+
+  let thankYouDiv = createDiv();
+  thankYouDiv.parent(overlay);
+  thankYouDiv.style("font-family", '"Press Start 2P", Arial, serif');
+  thankYouDiv.style("color", "white");
+  thankYouDiv.style("text-align", "center");
+
+  let sendingText = createDiv("Thank you!");
+  sendingText.parent(thankYouDiv);
+  sendingText.style("font-size", "36px");
+  sendingText.style("margin-bottom", "20px"); // Add some padding
+
+  let thankYouText = createDiv("Sending...");
+  thankYouText.parent(thankYouDiv);
+  thankYouText.style("font-size", "18px"); // Half the size of the "Sending..." text
+}
+
+function removeThankYouMessage() {
+  console.log("Attempting to remove Thank you message");
+  let existingMessage = select("#thank-you-overlay");
+  if (existingMessage) {
+    existingMessage.remove();
+  }
 }
 
 function keyPressed() {

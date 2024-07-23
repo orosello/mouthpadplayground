@@ -354,8 +354,65 @@ function updateCountdown(elapsedTimeSeconds) {
 
   if (countdown === 0 && !gameState.timerEnded) {
     gameState.timerEnded = true;
-    createSendMetricsButton();
+    endGame();
   }
+}
+
+function endGame() {
+  // Hide canvas
+  document.querySelector("canvas").style.display = "none";
+
+  // Create and show large buttons
+  createLargeButtons();
+}
+
+function createLargeButtons() {
+  const buttonContainer = document.createElement("div");
+  buttonContainer.style.position = "absolute";
+  buttonContainer.style.top = "50%";
+  buttonContainer.style.left = "50%";
+  buttonContainer.style.transform = "translate(-50%, -50%)";
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.gap = "20px";
+
+  const sendResultsButton = createLargeButton(
+    "Send Results",
+    saveMetricsAndRedirect
+  );
+  const retryButton = createLargeButton("Retry", () => location.reload());
+
+  buttonContainer.appendChild(sendResultsButton);
+  buttonContainer.appendChild(retryButton);
+  document.body.appendChild(buttonContainer);
+}
+
+function createLargeButton(text, onClick) {
+  const button = document.createElement("button");
+  button.textContent = text;
+  button.style.fontSize = "24px";
+  button.style.fontFamily = "'Press Start 2P', cursive";
+  button.style.padding = "15px 30px";
+  button.style.cursor = "pointer";
+  button.style.backgroundColor = "black";
+  button.style.color = "white";
+  button.style.border = "2px solid white";
+  button.style.borderRadius = "5px";
+  button.style.textTransform = "uppercase";
+  button.style.transition = "background-color 0.3s, color 0.3s";
+
+  // Hover effect
+  button.addEventListener("mouseover", () => {
+    button.style.backgroundColor = "white";
+    button.style.color = "black";
+  });
+
+  button.addEventListener("mouseout", () => {
+    button.style.backgroundColor = "black";
+    button.style.color = "white";
+  });
+
+  button.addEventListener("click", onClick);
+  return button;
 }
 
 function logOverallFittsLawMetrics() {
@@ -464,17 +521,6 @@ function updateMetricDisplay(id, value) {
   } else {
     console.warn(`Element with id '${id}' not found`);
   }
-}
-
-function createSendMetricsButton() {
-  let sendMetricsButton = document.createElement("button");
-  sendMetricsButton.textContent = "Send Results";
-  sendMetricsButton.style.position = "absolute";
-  sendMetricsButton.style.top = "50%";
-  sendMetricsButton.style.left = "20px";
-  sendMetricsButton.className = "send-metrics-button";
-  sendMetricsButton.addEventListener("click", saveMetricsAndRedirect);
-  document.body.appendChild(sendMetricsButton);
 }
 
 function saveMetricsAndRedirect() {

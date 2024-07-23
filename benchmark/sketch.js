@@ -62,6 +62,8 @@ const METRIC_IDS = [
   "countdown",
 ];
 
+const metricElements = {};
+
 function setup() {
   createCanvas(
     CONFIG.gridSize * CONFIG.cellSize,
@@ -71,22 +73,48 @@ function setup() {
   createMetricsDisplay();
   disableDefaultBehaviors();
   updateInitialMetricDisplay();
+
+  // Add event listeners here instead of using p5.js built-in functions
+  canvas.addEventListener("mousedown", handleMousePressed);
+  canvas.addEventListener("mouseup", handleMouseReleased);
+
+  // Start the game loop
+  requestAnimationFrame(gameLoop);
 }
 
-function draw() {
-  background(0);
+let lastTime = 0;
+function gameLoop(currentTime) {
+  if (!lastTime) lastTime = currentTime;
+  const deltaTime = currentTime - lastTime;
+  lastTime = currentTime;
+
+  updateGame(deltaTime);
+  drawGame();
+
+  requestAnimationFrame(gameLoop);
+}
+
+function updateGame(deltaTime) {
   updateHover();
-  drawGrid();
-  drawTarget();
-  drawMissedClick();
-  drawHoverHighlight();
   updateTimingMetrics();
   if (gameState.gameStarted && !gameState.timerEnded) {
     updateMetrics();
   }
 }
 
-function mousePressed() {
+function drawGame() {
+  background(0);
+  drawGrid();
+  drawTarget();
+  drawMissedClick();
+  drawHoverHighlight();
+}
+
+function handleMousePressed(event) {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = event.clientX - rect.left;
+  const mouseY = event.clientY - rect.top;
+
   const clickedX = floor(mouseX / CONFIG.cellSize);
   const clickedY = floor(mouseY / CONFIG.cellSize);
 
@@ -101,7 +129,7 @@ function mousePressed() {
   }
 }
 
-function mouseReleased() {
+function handleMouseReleased() {
   gameState.missedClick = null;
 }
 
@@ -472,6 +500,7 @@ function createMetricsDisplay() {
       id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
     }: 0`;
     metricsDiv.appendChild(metricElement);
+    metricElements[id] = metricElement;
   });
   document.body.appendChild(metricsDiv);
 }
@@ -495,7 +524,7 @@ function updateInitialMetricDisplay() {
 }
 
 function updateMetricDisplay(id, value) {
-  const element = document.getElementById(id);
+  const element = metricElements[id];
   if (!element) {
     console.warn(`Element with id '${id}' not found`);
     return;
@@ -598,16 +627,9 @@ function saveMetricsAndRedirect() {
 function drawGrid() {
   stroke(128);
   strokeWeight(1);
-  for (let i = 0; i < CONFIG.gridSize; i++) {
-    for (let j = 0; j < CONFIG.gridSize; j++) {
-      noFill();
-      rect(
-        i * CONFIG.cellSize,
-        j * CONFIG.cellSize,
-        CONFIG.cellSize,
-        CONFIG.cellSize
-      );
-    }
+  for (let i = 0; i <= CONFIG.gridSize; i++) {
+    line(i * CONFIG.cellSize, 0, i * CONFIG.cellSize, height);
+    line(0, i * CONFIG.cellSize, width, i * CONFIG.cellSize);
   }
 }
 

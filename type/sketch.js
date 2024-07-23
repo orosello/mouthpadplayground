@@ -103,25 +103,20 @@ function draw() {
 }
 
 function drawElements() {
-  let yOffset = height * 0.05;
+  // Cache frequently used values
+  const centerX = width / 2;
+  const yOffset = height * 0.05;
 
   drawInstructions(yOffset);
-  yOffset += 50;
+  drawInputText(yOffset + 50);
 
-  drawInputText(yOffset);
-  yOffset += 50;
+  window.keyboardStartY = yOffset + 100;
+  drawKeyboard(window.keyboardStartY);
 
-  window.keyboardStartY = yOffset;
-  drawKeyboard(yOffset);
-  yOffset += calculateKeyboardHeight() + 50;
-
-  drawInputDevicesPrompt(yOffset);
-  yOffset += 80;
-
-  drawInputDevices(yOffset);
-  yOffset += checkboxes.length * 28; // Reverted to original spacing
-
-  drawSendButton(yOffset + 20); // Added some extra space before the send button
+  const devicePromptY = window.keyboardStartY + calculateKeyboardHeight() + 50;
+  drawInputDevicesPrompt(devicePromptY);
+  drawInputDevices(devicePromptY + 80);
+  drawSendButton(devicePromptY + 80 + checkboxes.length * 28 + 20);
 }
 
 function drawInstructions(y) {
@@ -147,34 +142,38 @@ function drawInputText(y) {
 }
 
 function drawKeyboard(startY) {
-  let keys = "QWERTYUIOPASDFGHJKLZXCVBNM";
-  let startX = width / 2 - (totalKeysPerRow * keyWidth) / 2;
+  const keys = "QWERTYUIOPASDFGHJKLZXCVBNM";
+  const startX = width / 2 - (totalKeysPerRow * keyWidth) / 2;
 
   textAlign(CENTER, CENTER);
   textSize(24);
 
+  // Pre-calculate common values
+  const halfKeyWidth = keyWidth / 2;
+  const halfKeyHeight = keyHeight / 2;
+
   for (let i = 0; i < keys.length; i++) {
-    let x = startX + (i % totalKeysPerRow) * keyWidth;
-    let y = startY + Math.floor(i / totalKeysPerRow) * keyHeight;
-    drawKey(x, y, keys[i]);
+    const x = startX + (i % totalKeysPerRow) * keyWidth;
+    const y = startY + Math.floor(i / totalKeysPerRow) * keyHeight;
+    drawKey(x, y, keys[i], halfKeyWidth, halfKeyHeight);
   }
 
   let extraX = startX;
-  let extraY = startY + Math.ceil(keys.length / totalKeysPerRow) * keyHeight;
+  const extraY = startY + Math.ceil(keys.length / totalKeysPerRow) * keyHeight;
 
   for (let i = 0; i < extraKeys.length; i++) {
-    drawKey(extraX, extraY, extraKeys[i]);
+    drawKey(extraX, extraY, extraKeys[i], halfKeyWidth, halfKeyHeight);
     extraX += keyWidth;
   }
 }
 
-function drawKey(x, y, key) {
+function drawKey(x, y, key, halfKeyWidth, halfKeyHeight) {
   noFill();
   stroke(255);
   rect(x, y, keyWidth, keyHeight, 5);
   fill(128);
   noStroke();
-  text(key, x + keyWidth / 2, y + keyHeight / 2);
+  text(key, x + halfKeyWidth, y + halfKeyHeight);
 }
 
 function drawInputDevicesPrompt(y) {

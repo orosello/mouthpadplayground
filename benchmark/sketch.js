@@ -495,6 +495,26 @@ function updateInitialMetricDisplay() {
 }
 
 function updateMetricDisplay(id, value) {
+  const element = document.getElementById(id);
+  if (!element) {
+    console.warn(`Element with id '${id}' not found`);
+    return;
+  }
+
+  if (id === "countdown") {
+    // Special handling for countdown
+    if (value <= 60) {
+      element.textContent = value;
+      element.style.fontSize = "5em"; // Make font 5 times larger
+      element.style.fontWeight = "bold";
+      element.style.marginTop = "20px"; // Move 5px down
+      element.style.display = "block"; // Ensure it's on its own line
+    } else {
+      element.textContent = "60"; // Display 60 at the start
+    }
+    return;
+  }
+
   let displayName = id;
   if (!["BPS", "NTPM", "BPSfitts"].includes(id)) {
     displayName =
@@ -523,19 +543,19 @@ function updateMetricDisplay(id, value) {
       break;
   }
 
-  const element = document.getElementById(id);
-  if (element) {
-    // Add 's' to last click, fastest click, and average click time if not already present
-    if (
-      ["lastClick", "fastestClick", "averageClickTime"].includes(id) &&
-      !value.endsWith("s")
-    ) {
-      value = value + "s";
-    }
-    element.textContent = `${displayName}: ${value}`;
-  } else {
-    console.warn(`Element with id '${id}' not found`);
+  // Add 's' to last click, fastest click, and average click time if not already present
+  if (
+    ["lastClick", "fastestClick", "averageClickTime"].includes(id) &&
+    !value.toString().endsWith("s")
+  ) {
+    value = value + "s";
   }
+
+  element.textContent = `${displayName}: ${value}`;
+  element.style.fontSize = ""; // Reset font size for other metrics
+  element.style.fontWeight = ""; // Reset font weight for other metrics
+  element.style.marginTop = ""; // Reset margin for other metrics
+  element.style.display = ""; // Reset display for other metrics
 }
 
 function saveMetricsAndRedirect() {

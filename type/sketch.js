@@ -22,7 +22,7 @@ let inputDevices = [
   "Mouse (Standard Handheld)",
   "Trackpad (Standard Laptop)",
   "Other",
-];
+].map((device) => device.trim());
 let selectedDevice = "";
 let checkboxes = [];
 
@@ -58,7 +58,8 @@ function styleCheckbox(checkbox) {
   checkbox.style("align-items", "center");
   checkbox.style("gap", "5px"); // Reduced gap
   checkbox.style("padding-left", "0px");
-  checkbox.style("margin-bottom", "0px");
+  checkbox.style("margin-bottom", "0");
+  checkbox.style("line-height", "1"); // Add this line to remove extra vertical space
 
   let input = checkbox.elt.querySelector("input");
   input.style.width = "20px"; // Reduced size
@@ -118,9 +119,9 @@ function drawElements() {
   yOffset += 80;
 
   drawInputDevices(yOffset);
-  yOffset += checkboxes.length * 28 + 50; // Reduced vertical spacing
+  yOffset += checkboxes.length * 28; // Reverted to original spacing
 
-  drawSendButton(yOffset - 30);
+  drawSendButton(yOffset + 20); // Added some extra space before the send button
 }
 
 function drawInstructions(y) {
@@ -186,7 +187,7 @@ function drawInputDevicesPrompt(y) {
 
 function drawInputDevices(startY) {
   for (let i = 0; i < checkboxes.length; i++) {
-    checkboxes[i].position(width / 2 - 200, startY + i * 28); // Reduced vertical spacing
+    checkboxes[i].position(width / 2 - 200, startY + i * 28); // Reverted to original spacing
   }
 }
 
@@ -244,12 +245,12 @@ function isMouseOverKey(x, y) {
 function sendMessage() {
   if (inputText.trim() === "" || selectedDevice === "") return;
 
-  let message = inputText;
+  let message = inputText.trim();
   let metrics = JSON.parse(localStorage.getItem("benchmarkMetrics"));
 
   let data = {
     name: message,
-    inputDevice: selectedDevice,
+    inputDevice: selectedDevice.replace(/\s+/g, " ").trim(),
     ...metrics,
   };
 

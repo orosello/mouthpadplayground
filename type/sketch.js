@@ -71,10 +71,11 @@ function styleCheckbox(checkbox) {
   label.style.display = "flex";
   label.style.alignItems = "center";
 
-  checkbox.changed(onCheckboxChanged);
+  checkbox.changed(onCheckboxChangedRadioBehavior);
 }
 
-function onCheckboxChanged() {
+// Ensure only one checkbox can be selected at a time (radio button behavior)
+function onCheckboxChangedRadioBehavior() {
   for (let cb of checkboxes) {
     if (cb !== this) {
       cb.checked(false);

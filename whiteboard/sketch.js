@@ -2,6 +2,8 @@ const BOTTOM_TEXT_Y_OFFSET = 50;
 const FONT_SIZE = 16;
 const SAFE_AREA_WIDTH = 160;
 const SAFE_AREA_HEIGHT = 50;
+const TRACE_WIDTH = 50; // Define a constant for the trace width
+const TRACE_LIFETIME = 3000; // Trace lifetime in milliseconds
 
 let randomCircleRadius = 0;
 let myFont;
@@ -12,6 +14,10 @@ let isDrawing = false;
 
 let mainCanvas;
 let pg; // Off-screen graphics buffer
+
+let prevMouseX, prevMouseY; // Variables to store previous mouse positions
+
+let traces = []; // Array to store trace segments
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -66,22 +72,38 @@ function draw() {
     );
   }
 
-  if (isDrawing) {
-    pg.fill(255); // Use white color for painting
-    pg.noStroke();
-    pg.circle(mouseX, mouseY, currentRadius);
+  // Draw existing traces
+  pg.clear();
+  let currentTime = millis();
+  traces = traces.filter((trace) => currentTime - trace.time < TRACE_LIFETIME);
+  for (let trace of traces) {
+    pg.stroke(255);
+    pg.strokeWeight(TRACE_WIDTH);
+    pg.line(trace.x1, trace.y1, trace.x2, trace.y2);
+  }
 
-    // Generate new radius for next paint
-    currentRadius = random(60, 80);
+  if (isDrawing) {
+    // Add new trace segment
+    traces.push({
+      x1: prevMouseX,
+      y1: prevMouseY,
+      x2: mouseX,
+      y2: mouseY,
+      time: millis(),
+    });
   } else {
     // Draw preview circle
     push();
     noFill();
     stroke(255);
     strokeWeight(1);
-    circle(mouseX, mouseY, currentRadius);
+    circle(mouseX, mouseY, TRACE_WIDTH);
     pop();
   }
+
+  // Update previous mouse positions
+  prevMouseX = mouseX;
+  prevMouseY = mouseY;
 }
 
 function windowResized() {
@@ -92,4 +114,9 @@ function windowResized() {
 
 function mousePressed() {
   isDrawing = !isDrawing; // Toggle drawing mode
+  if (isDrawing) {
+    // Initialize previous mouse positions when starting to draw
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+  }
 }

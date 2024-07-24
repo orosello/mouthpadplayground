@@ -3,7 +3,7 @@ const FONT_SIZE = 16;
 const SAFE_AREA_WIDTH = 160;
 const SAFE_AREA_HEIGHT = 50;
 const TRACE_WIDTH = 50; // Define a constant for the trace width
-const TRACE_LIFETIME = 3000; // Trace lifetime in milliseconds
+const TRACE_LIFETIME = 2000; // Trace lifetime in milliseconds
 
 let randomCircleRadius = 0;
 let myFont;
@@ -54,10 +54,11 @@ function setup() {
 }
 
 function draw() {
-  background(0); // Clear the background at the beginning of each frame
-  image(pg, 0, 0); // Draw the off-screen buffer onto the main canvas
-
+  // Only clear the background if instructions are shown
   if (showInstructions) {
+    background(0);
+    image(pg, 0, 0); // Draw the off-screen buffer onto the main canvas
+
     // Set text properties
     textFont(myFont);
     textSize(FONT_SIZE);
@@ -72,8 +73,10 @@ function draw() {
     );
   }
 
+  // Clear the off-screen buffer
+  pg.background(0);
+
   // Draw existing traces
-  pg.clear();
   let currentTime = millis();
   traces = traces.filter((trace) => currentTime - trace.time < TRACE_LIFETIME);
   for (let trace of traces) {
@@ -91,8 +94,18 @@ function draw() {
       y2: mouseY,
       time: millis(),
     });
-  } else {
-    // Draw preview circle
+
+    // Draw the new trace segment directly
+    pg.stroke(255);
+    pg.strokeWeight(TRACE_WIDTH);
+    pg.line(prevMouseX, prevMouseY, mouseX, mouseY);
+  }
+
+  // Draw the off-screen buffer onto the main canvas
+  image(pg, 0, 0);
+
+  if (!isDrawing) {
+    // Draw preview circle on the main canvas
     push();
     noFill();
     stroke(255);

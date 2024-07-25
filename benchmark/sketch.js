@@ -45,9 +45,11 @@ let metrics = {
 };
 
 const METRIC_IDS = [
+  "timer",
+  "targetSize",
+  "gridSize",
   "trialCount",
   "netRate",
-  "gridSize",
   "percentSuccessful",
   "NTPM",
   "BPS",
@@ -293,13 +295,21 @@ function updateInTargetMetrics(currentTime) {
 }
 
 function updateMetrics() {
-  const elapsedTimeMinutes = (millis() - gameState.startTime) / 60000;
-  const elapsedTimeSeconds = elapsedTimeMinutes * 60;
+  const elapsedTimeSeconds = min(
+    (millis() - gameState.startTime) / 1000,
+    CONFIG.gameDuration
+  );
+  const elapsedTimeMinutes = elapsedTimeSeconds / 60;
 
-  if (elapsedTimeSeconds > 0) {
+  if (elapsedTimeSeconds > 0 && elapsedTimeSeconds <= CONFIG.gameDuration) {
     calculateAndUpdateMetrics(elapsedTimeMinutes, elapsedTimeSeconds);
     updateCountdown(elapsedTimeSeconds);
     logOverallFittsLawMetrics();
+  }
+
+  if (elapsedTimeSeconds >= CONFIG.gameDuration && !gameState.timerEnded) {
+    gameState.timerEnded = true;
+    endGame();
   }
 }
 
@@ -324,11 +334,12 @@ function calculateAndUpdateMetrics(elapsedTimeMinutes, elapsedTimeSeconds) {
     elapsedTimeSeconds - (metrics.nearTargetTime + metrics.inTargetTime) / 1000
   );
 
-  updateMetricDisplays(percentSuccessful);
+  updateMetricDisplays(percentSuccessful, elapsedTimeSeconds);
   updateClickTimeMetrics();
 }
 
-function updateMetricDisplays(percentSuccessful) {
+function updateMetricDisplays(percentSuccessful, elapsedTimeSeconds) {
+  updateMetricDisplay("timer", elapsedTimeSeconds.toFixed(2) + "s");
   updateMetricDisplay("trialCount", gameState.trialCount);
   updateMetricDisplay("netRate", metrics.netRate);
   updateMetricDisplay("percentSuccessful", percentSuccessful.toFixed(2) + "%");
@@ -379,6 +390,7 @@ function updateClickTimeMetrics() {
 function updateCountdown(elapsedTimeSeconds) {
   const countdown = max(CONFIG.gameDuration - floor(elapsedTimeSeconds), 0);
   updateMetricDisplay("countdown", countdown);
+  updateMetricDisplay("timer", elapsedTimeSeconds.toFixed(2) + "s");
 
   if (countdown === 0 && !gameState.timerEnded) {
     gameState.timerEnded = true;
@@ -506,7 +518,8 @@ function createMetricsDisplay() {
 }
 
 function updateInitialMetricDisplay() {
-  updateMetricDisplay("countdown", CONFIG.gameDuration);
+  updateMetricDisplay("timer", "0.00s");
+  updateMetricDisplay("targetSize", CONFIG.cellSize + "px");
   updateMetricDisplay("gridSize", CONFIG.gridSize);
   updateMetricDisplay("trialCount", 0);
   updateMetricDisplay("netRate", 0);
@@ -518,9 +531,10 @@ function updateInitialMetricDisplay() {
   updateMetricDisplay("nearTargetTime", "0.00s");
   updateMetricDisplay("inTargetTime", "0.00s");
   updateMetricDisplay("clickGenerationTime", "0.00s");
-  updateMetricDisplay("lastClick", "0.00");
-  updateMetricDisplay("fastestClick", "0.00");
-  updateMetricDisplay("averageClickTime", "0.00");
+  updateMetricDisplay("lastClick", "0.00s");
+  updateMetricDisplay("fastestClick", "0.00s");
+  updateMetricDisplay("averageClickTime", "0.00s");
+  updateMetricDisplay("countdown", CONFIG.gameDuration);
 }
 
 function updateMetricDisplay(id, value) {
@@ -589,9 +603,14 @@ function updateMetricDisplay(id, value) {
 
 function saveMetricsAndRedirect() {
   let metricsToSave = {
+    timer: min(
+      (millis() - gameState.startTime) / 1000,
+      CONFIG.gameDuration
+    ).toFixed(2),
+    targetSize: CONFIG.cellSize,
+    gridSize: CONFIG.gridSize,
     trialCount: gameState.trialCount,
     netRate: metrics.netRate,
-    gridSize: CONFIG.gridSize,
     percentSuccessful: (
       (gameState.successfulClicks / gameState.trialCount) *
       100

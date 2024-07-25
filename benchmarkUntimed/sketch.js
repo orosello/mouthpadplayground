@@ -45,9 +45,9 @@ let metrics = {
 const METRIC_IDS = [
   "timer",
   "targetSize",
+  "gridSize",
   "trialCount",
   "netRate",
-  "gridSize",
   "percentSuccessful",
   "NTPM",
   "BPS",
@@ -362,20 +362,20 @@ function updateClickTimeMetrics() {
       (gameState.clickTimestamps[gameState.clickTimestamps.length - 1] -
         gameState.clickTimestamps[gameState.clickTimestamps.length - 2]) /
       1000;
-    updateMetricDisplay("lastClick", lastClickTime.toFixed(2));
+    updateMetricDisplay("lastClick", lastClickTime.toFixed(2) + "s");
 
     const clickIntervals = gameState.clickTimestamps
       .slice(1)
       .map((time, index) => (time - gameState.clickTimestamps[index]) / 1000);
     const fastestClick = Math.min(...clickIntervals);
-    updateMetricDisplay("fastestClick", fastestClick.toFixed(2));
+    updateMetricDisplay("fastestClick", fastestClick.toFixed(2) + "s");
 
     const totalTime =
       (gameState.clickTimestamps[gameState.clickTimestamps.length - 1] -
         gameState.clickTimestamps[0]) /
       1000;
     const averageClickTime = totalTime / (gameState.clickTimestamps.length - 1);
-    updateMetricDisplay("averageClickTime", averageClickTime.toFixed(2));
+    updateMetricDisplay("averageClickTime", averageClickTime.toFixed(2) + "s");
   }
 }
 
@@ -499,9 +499,9 @@ function updateInitialMetricDisplay() {
   updateMetricDisplay("nearTargetTime", "0.00s");
   updateMetricDisplay("inTargetTime", "0.00s");
   updateMetricDisplay("clickGenerationTime", "0.00s");
-  updateMetricDisplay("lastClick", "0.00");
-  updateMetricDisplay("fastestClick", "0.00");
-  updateMetricDisplay("averageClickTime", "0.00");
+  updateMetricDisplay("lastClick", "0.00s");
+  updateMetricDisplay("fastestClick", "0.00s");
+  updateMetricDisplay("averageClickTime", "0.00s");
 }
 
 function updateMetricDisplay(id, value) {
@@ -561,9 +561,9 @@ function saveMetricsAndRedirect() {
       .textContent.split(": ")[1]
       .replace("s", ""),
     targetSize: CONFIG.cellSize,
+    gridSize: CONFIG.gridSize,
     trialCount: gameState.trialCount,
     netRate: metrics.netRate,
-    gridSize: CONFIG.gridSize,
     percentSuccessful: (
       (gameState.successfulClicks / gameState.trialCount) *
       100

@@ -70,6 +70,7 @@ function setup() {
   );
   pickNewTarget();
   createMetricsDisplay();
+  createGridSizeSelector();
   disableDefaultBehaviors();
   updateInitialMetricDisplay();
 
@@ -488,7 +489,7 @@ function createMetricsDisplay() {
 function updateInitialMetricDisplay() {
   updateMetricDisplay("timer", "0.00s");
   updateMetricDisplay("targetSize", `${CONFIG.cellSize}px`);
-  updateMetricDisplay("gridSize", CONFIG.gridSize);
+  updateMetricDisplay("gridSize", `${CONFIG.gridSize}x${CONFIG.gridSize}`);
   updateMetricDisplay("trialCount", 0);
   updateMetricDisplay("netRate", 0);
   updateMetricDisplay("percentSuccessful", "0.00%");
@@ -651,4 +652,83 @@ function disableDefaultBehaviors() {
   document.addEventListener("touchmove", (event) => event.preventDefault(), {
     passive: false,
   });
+}
+
+function createGridSizeSelector() {
+  const selector = document.createElement("select");
+  selector.id = "gridSizeSelector";
+  selector.style.position = "fixed";
+  selector.style.left = "15px";
+  selector.style.bottom = "15px";
+  selector.style.fontFamily = "'Press Start 2P', cursive";
+  selector.style.fontSize = "16px";
+  selector.style.padding = "5px";
+  selector.style.backgroundColor = "black";
+  selector.style.color = "white";
+  selector.style.border = "2px solid white";
+  selector.style.borderRadius = "4px";
+  selector.style.cursor = "pointer";
+
+  const options = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+  options.forEach((size) => {
+    const option = document.createElement("option");
+    option.value = size;
+    option.text = `${size}x${size}`;
+    if (size === CONFIG.gridSize) {
+      option.selected = true;
+    }
+    selector.appendChild(option);
+  });
+
+  selector.addEventListener("change", (event) => {
+    CONFIG.gridSize = parseInt(event.target.value);
+    resizeCanvas(
+      CONFIG.gridSize * CONFIG.cellSize,
+      CONFIG.gridSize * CONFIG.cellSize
+    );
+    resetGame();
+    updateMetricDisplay("gridSize", `${CONFIG.gridSize}x${CONFIG.gridSize}`);
+  });
+
+  document.body.appendChild(selector);
+}
+
+function resetGame() {
+  gameState = {
+    targetX: 0,
+    targetY: 0,
+    trialCount: 0,
+    successfulClicks: 0,
+    misclicks: 0,
+    startTime: null,
+    hoveredX: -1,
+    hoveredY: -1,
+    missedClick: null,
+    lastClickX: -1,
+    lastClickY: -1,
+    clickTimestamps: [],
+    gameStarted: false,
+  };
+
+  metrics = {
+    bps: 0,
+    ntpm: 0,
+    netRate: 0,
+    totalIndexOfDifficulty: 0,
+    totalAcquireTime: 0,
+    fittsBPS: 0,
+    nearTargetTime: 0,
+    inTargetTime: 0,
+    clickGenerationTime: 0,
+    lastNearTargetTime: 0,
+    lastInTargetTime: 0,
+    isNearTarget: false,
+    isInTarget: false,
+    clickGenerationStartTime: 0,
+    currentClickGenerationTime: 0,
+    timeToNearTarget: 0,
+  };
+
+  pickNewTarget();
+  updateInitialMetricDisplay();
 }

@@ -2,8 +2,8 @@ const BOTTOM_TEXT_Y_OFFSET = 50;
 const FONT_SIZE = 16;
 const SAFE_AREA_WIDTH = 160;
 const SAFE_AREA_HEIGHT = 50;
+const BRUSH_WIDTH = 40; // Set a constant brush width
 
-let randomCircleRadius = 0;
 let myFont;
 let showInstructions = true; // This should ensure instructions are shown initially
 let isEraser = false; // Track if the eraser is selected
@@ -12,6 +12,8 @@ let isDrawing = false;
 
 let mainCanvas;
 let pg; // Off-screen graphics buffer
+
+let prevX, prevY; // Add these variables to store the previous mouse position
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -47,26 +49,37 @@ function setup() {
   toggleButton = createButton("Pick up eraser");
   toggleButton.mousePressed(toggleTool);
 
-  // Styling the button
-  toggleButton.class("custom-font"); // Apply the custom font class
-  toggleButton.style("color", "white");
-  toggleButton.style("background-color", "black");
-  toggleButton.style("border", "2px solid white");
-  toggleButton.style("z-index", "1000"); // Ensure button is on top of canvas
-  toggleButton.style("font-size", "12px"); // Adjust font size to 12px
-  toggleButton.style("padding", "10px 15px"); // Increased horizontal padding
-  toggleButton.style("white-space", "nowrap"); // Prevent text wrapping
-  toggleButton.style("min-width", "180px"); // Set a minimum width
+  // Clear canvas button
+  clearButton = createButton("Clear canvas");
+  clearButton.mousePressed(() => window.location.reload());
 
-  // Position the button after styling
-  positionButton();
+  // Styling the buttons
+  [toggleButton, clearButton].forEach((button) => {
+    button.class("custom-font");
+    button.style("color", "white");
+    button.style("background-color", "black");
+    button.style("border", "2px solid white");
+    button.style("z-index", "1000");
+    button.style("font-size", "12px");
+    button.style("padding", "10px 15px");
+    button.style("white-space", "nowrap");
+    button.style("width", "240px"); // Increased width by 20px
+    button.style("text-align", "center");
+  });
 
-  currentRadius = random(40, 80);
+  // Position the buttons
+  positionButtons();
+
+  currentRadius = BRUSH_WIDTH;
   textFont(myFont); // Ensure the font is loaded and set
+
+  prevX = null;
+  prevY = null;
 }
 
-function positionButton() {
-  toggleButton.position(windowWidth - 280, 30); // Fixed position with 20px margin to the right
+function positionButtons() {
+  toggleButton.position(windowWidth - 260, 30); // Adjusted position
+  clearButton.position(windowWidth - 260, 80); // Adjusted position
 }
 
 function draw() {
@@ -101,20 +114,26 @@ function draw() {
 
   if (mouseIsPressed && !isInSafeArea) {
     isDrawing = true;
-    pg.fill(isEraser ? 0 : 255); // Use background color if eraser is selected
-    pg.noStroke();
-    pg.circle(mouseX, mouseY, currentRadius);
+    pg.strokeWeight(BRUSH_WIDTH);
+    pg.stroke(isEraser ? 0 : 255);
+    pg.noFill();
 
-    // Generate new radius for next paint
-    currentRadius = random(60, 80);
+    if (prevX !== null && prevY !== null) {
+      pg.line(prevX, prevY, mouseX, mouseY);
+    }
+
+    prevX = mouseX;
+    prevY = mouseY;
   } else {
     isDrawing = false;
+    prevX = null;
+    prevY = null;
     // Draw preview circle
     push();
     noFill();
     stroke(255);
     strokeWeight(1);
-    circle(mouseX, mouseY, currentRadius);
+    circle(mouseX, mouseY, BRUSH_WIDTH);
     pop();
   }
 }
@@ -128,9 +147,11 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   pg.resizeCanvas(windowWidth, windowHeight); // Resize the off-screen buffer
   background(0);
-  positionButton(); // Ensure button stays in top right corner with 20px padding
+  positionButtons(); // Ensure buttons stay in the correct position
 }
 
 function mouseReleased() {
   isDrawing = false;
+  prevX = null;
+  prevY = null;
 }

@@ -158,14 +158,14 @@ function handleMouseReleased() {
 
 function handleSuccessfulClick(clickedX, clickedY) {
   const currentTime = millis();
-  if (!gameStarted) {
+  if (!gameState.gameStarted) {
     startGame(currentTime);
     gameStarted = true;
-    window.removeEventListener("resize", handleResize); // Remove resize listener once game starts
-    removeAllWarnings(); // Remove all warnings when the game starts
-  } else {
-    recordSuccessfulClick(currentTime, clickedX, clickedY);
+    window.removeEventListener("resize", handleResize);
+    removeAllWarnings();
   }
+
+  recordSuccessfulClick(currentTime, clickedX, clickedY);
 
   // Add the current click generation time to the total
   metrics.clickGenerationTime += metrics.currentClickGenerationTime;
@@ -173,17 +173,23 @@ function handleSuccessfulClick(clickedX, clickedY) {
   gameState.missedClick = null;
   pickNewTarget();
   resetTimingStates();
+
+  // Force a redraw to update the target position immediately
+  drawGame();
 }
 
 function startGame(currentTime) {
   gameState.startTime = currentTime;
   gameState.gameStarted = true;
   resetMetrics();
-  gameState.lastClickX = gameState.targetX;
-  gameState.lastClickY = gameState.targetY;
-  gameState.trialCount = 1;
-  gameState.successfulClicks = 1;
+  gameState.lastClickX = -1; // Set to -1 to ensure first click is recorded properly
+  gameState.lastClickY = -1;
+  gameState.trialCount = 0;
+  gameState.successfulClicks = 0;
   updateMetricDisplay("trialCount", gameState.trialCount);
+
+  // Move the target for the first time
+  pickNewTarget();
 }
 
 function recordSuccessfulClick(currentTime, clickedX, clickedY) {

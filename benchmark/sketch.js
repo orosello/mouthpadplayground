@@ -4,6 +4,7 @@ const CONFIG = {
   cellSize: 24, // pixels
   gameDuration: 60, // seconds
   nearTargetSize: 1,
+  originalCellSize: 24, // Store the original cell size
 };
 
 // Game State
@@ -66,15 +67,29 @@ const METRIC_IDS = [
 
 const metricElements = {};
 
+let resizeTimeout;
+let gameStarted = false;
+
 function setup() {
+  checkAndAdjustGridSize();
   createCanvas(
     CONFIG.gridSize * CONFIG.cellSize,
     CONFIG.gridSize * CONFIG.cellSize
   );
+
+  // Center the canvas
+  const canvasElement = document.querySelector("canvas");
+  canvasElement.style.position = "absolute";
+  canvasElement.style.top = "50%";
+  canvasElement.style.left = "50%";
+  canvasElement.style.transform = "translate(-50%, -50%)";
+  canvasElement.style.zIndex = "2";
+
   pickNewTarget();
   createMetricsDisplay();
   disableDefaultBehaviors();
   updateInitialMetricDisplay();
+  checkZoomLevel();
 
   // Add event listeners here instead of using p5.js built-in functions
   canvas.addEventListener("mousedown", handleMousePressed);
@@ -82,6 +97,12 @@ function setup() {
 
   // Start the game loop
   requestAnimationFrame(gameLoop);
+
+  // Add this function to periodically check zoom level
+  setupZoomCheck();
+
+  // Add event listener for window resize
+  window.addEventListener("resize", handleResize);
 }
 
 let lastTime = 0;
@@ -137,8 +158,11 @@ function handleMouseReleased() {
 
 function handleSuccessfulClick(clickedX, clickedY) {
   const currentTime = millis();
-  if (!gameState.gameStarted) {
+  if (!gameStarted) {
     startGame(currentTime);
+    gameStarted = true;
+    window.removeEventListener("resize", handleResize); // Remove resize listener once game starts
+    removeAllWarnings(); // Remove all warnings when the game starts
   } else {
     recordSuccessfulClick(currentTime, clickedX, clickedY);
   }
@@ -504,6 +528,11 @@ function resetTimingStates() {
 function createMetricsDisplay() {
   let metricsDiv = document.createElement("div");
   metricsDiv.id = "metrics";
+  metricsDiv.style.position = "fixed";
+  metricsDiv.style.top = "80px";
+  metricsDiv.style.left = "20px";
+  metricsDiv.style.zIndex = "1"; // Set to a lower z-index than the canvas
+  metricsDiv.style.pointerEvents = "none";
   METRIC_IDS.forEach((id) => {
     let metricElement = document.createElement("div");
     metricElement.className = "metric";
@@ -634,6 +663,7 @@ function saveMetricsAndRedirect() {
       .getElementById("averageClickTime")
       .textContent.split(": ")[1]
       .replace("s", ""),
+    originalTargetSize: CONFIG.originalCellSize,
   };
 
   // Log the metrics to the console
@@ -698,4 +728,176 @@ function disableDefaultBehaviors() {
   document.addEventListener("touchmove", (event) => event.preventDefault(), {
     passive: false,
   });
+}
+
+function checkZoomLevel() {
+  if (gameStarted) return; // Don't check zoom level if game has started
+
+  const zoomLevel = Math.round((window.innerWidth / window.outerWidth) * 100);
+  const warningDiv = document.getElementById("zoom-warning");
+
+  if (Math.abs(zoomLevel - 100) > 5) {
+    // Allow a small margin of error
+    if (!warningDiv) {
+      displayZoomWarning();
+    }
+  } else {
+    removeZoomWarning();
+  }
+}
+
+function displayZoomWarning() {
+  const warningDiv = document.createElement("div");
+  warningDiv.id = "zoom-warning";
+  warningDiv.style.position = "fixed";
+  warningDiv.style.bottom = "10px";
+  warningDiv.style.left = "50%";
+  warningDiv.style.transform = "translateX(-50%)";
+  warningDiv.style.backgroundColor = "black";
+  warningDiv.style.color = "white";
+  warningDiv.style.padding = "10px";
+  warningDiv.style.borderRadius = "5px";
+  warningDiv.style.zIndex = "1000";
+  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
+  warningDiv.style.fontSize = "12px";
+  warningDiv.style.textAlign = "center";
+  warningDiv.innerHTML = `Please adjust your browser zoom to 100%<br>for optimal performance`;
+
+  document.body.appendChild(warningDiv);
+}
+
+function removeZoomWarning() {
+  const warningDiv = document.getElementById("zoom-warning");
+  if (warningDiv) {
+    warningDiv.remove();
+  }
+}
+
+// Add this function to periodically check zoom level
+function setupZoomCheck() {
+  const zoomCheckInterval = setInterval(() => {
+    if (gameStarted) {
+      clearInterval(zoomCheckInterval);
+      return;
+    }
+    checkZoomLevel();
+  }, 1000); // Check every second
+}
+
+function handleResize() {
+  if (!gameStarted) {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      checkAndAdjustGridSize();
+      resizeCanvas(
+        CONFIG.gridSize * CONFIG.cellSize,
+        CONFIG.gridSize * CONFIG.cellSize
+      );
+      updateInitialMetricDisplay();
+    }, 250);
+  }
+}
+
+// Call this function at the end of setup and in the handleResize function
+function handleResize() {
+  if (!gameStarted) {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      checkAndAdjustGridSize();
+      resizeCanvas(
+        CONFIG.gridSize * CONFIG.cellSize,
+        CONFIG.gridSize * CONFIG.cellSize
+      );
+      updateInitialMetricDisplay();
+    }, 250);
+  }
+}
+
+// Call this function at the end of your setup
+setupZoomCheck();
+
+function checkAndAdjustGridSize() {
+  const minWidth = 1250;
+  const minHeight = 540;
+  const availableWidth = window.innerWidth;
+  const availableHeight = window.innerHeight;
+
+  if (availableWidth < minWidth || availableHeight < minHeight) {
+    const scaleFactor = Math.min(
+      availableWidth / minWidth,
+      availableHeight / minHeight
+    );
+    CONFIG.cellSize = Math.floor(CONFIG.originalCellSize * scaleFactor);
+    displaySizeWarning();
+  } else {
+    CONFIG.cellSize = CONFIG.originalCellSize;
+    removeSizeWarning();
+  }
+}
+
+function displaySizeWarning() {
+  const warningDiv = document.createElement("div");
+  warningDiv.id = "size-warning";
+  warningDiv.style.position = "fixed";
+  warningDiv.style.top = "30px";
+  warningDiv.style.left = "50%";
+  warningDiv.style.transform = "translateX(-50%)";
+  warningDiv.style.backgroundColor = "black";
+  warningDiv.style.color = "white";
+  warningDiv.style.padding = "10px";
+  warningDiv.style.borderRadius = "5px";
+  warningDiv.style.zIndex = "1000";
+  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
+  warningDiv.style.fontSize = "12px";
+  warningDiv.style.textAlign = "center";
+  warningDiv.innerHTML = `Target size reduced to ${CONFIG.cellSize}px due to small screen size. Enlarge width and height and reload.`;
+
+  document.body.appendChild(warningDiv);
+}
+
+function removeSizeWarning() {
+  const warningDiv = document.getElementById("size-warning");
+  if (warningDiv) {
+    warningDiv.remove();
+  }
+}
+
+function removeAllWarnings() {
+  removeSizeWarning();
+  removeZoomWarning();
+}
+
+function handleResize() {
+  if (!gameStarted) {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      checkAndAdjustGridSize();
+      resizeCanvas(
+        CONFIG.gridSize * CONFIG.cellSize,
+        CONFIG.gridSize * CONFIG.cellSize
+      );
+      updateInitialMetricDisplay();
+    }, 250); // Wait for 250ms after resize ends before adjusting
+  }
+}
+
+function removeSizeWarning() {
+  const warningDiv = document.getElementById("size-warning");
+  if (warningDiv) {
+    warningDiv.remove();
+  }
+}
+
+function handleResize() {
+  if (!gameStarted) {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      checkAndAdjustGridSize();
+      resizeCanvas(
+        CONFIG.gridSize * CONFIG.cellSize,
+        CONFIG.gridSize * CONFIG.cellSize
+      );
+      updateInitialMetricDisplay();
+    }, 250); // Wait for 250ms after resize ends before adjusting
+  }
 }

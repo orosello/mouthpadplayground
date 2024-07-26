@@ -794,6 +794,13 @@ function handleResize() {
         CONFIG.gridSize * CONFIG.cellSize
       );
       updateInitialMetricDisplay();
+
+      // Re-center the canvas after resizing
+      const canvasElement = document.querySelector("canvas");
+      canvasElement.style.position = "absolute";
+      canvasElement.style.top = "50%";
+      canvasElement.style.left = "50%";
+      canvasElement.style.transform = "translate(-50%, -50%)";
     }, 250);
   }
 }
@@ -839,100 +846,6 @@ function checkAndAdjustGridSize() {
   }
 
   console.log(`Final cell size: ${CONFIG.cellSize}`);
-
-  // Adjust canvas position
-  const canvas = document.querySelector("canvas");
-  canvas.style.left = "50%";
-  canvas.style.transform = "translate(-50%, -50%)";
-}
-
-function displaySizeWarning() {
-  console.log("Attempting to display size warning");
-  let warningDiv = document.getElementById("size-warning");
-
-  if (!warningDiv) {
-    console.log("Creating size warning element");
-    warningDiv = document.createElement("div");
-    warningDiv.id = "size-warning";
-    document.body.appendChild(warningDiv);
-  }
-
-  // Always update the styling to ensure visibility
-  warningDiv.style.position = "fixed";
-  warningDiv.style.bottom = "20px";
-  warningDiv.style.left = "50%";
-  warningDiv.style.transform = "translateX(-50%)";
-  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)"; // Semi-transparent red
-  warningDiv.style.color = "white";
-  warningDiv.style.padding = "15px";
-  warningDiv.style.borderRadius = "5px";
-  warningDiv.style.zIndex = "10000"; // Ensure it's on top
-  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
-  warningDiv.style.fontSize = "14px";
-  warningDiv.style.textAlign = "center";
-  warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-  warningDiv.style.display = "block"; // Ensure it's not hidden
-  warningDiv.innerHTML = `Warning: Window size is too small.<br>Please adjust your browser window for optimal performance.`;
-
-  console.log("Size warning element styled and content set");
-}
-
-function removeSizeWarning() {
-  const warningDiv = document.getElementById("size-warning");
-  if (warningDiv) {
-    warningDiv.remove();
-    console.log("Size warning removed");
-  } else {
-    console.log("No size warning to remove");
-  }
-}
-
-function checkAndAdjustGridSize() {
-  const minWidth = 720;
-  const minHeight = 540;
-  const availableWidth = window.innerWidth;
-  const availableHeight = window.innerHeight;
-
-  console.log(`Available dimensions: ${availableWidth}x${availableHeight}`);
-
-  const maxGridWidth = availableWidth;
-  const maxGridHeight = availableHeight;
-  const maxCellSize = Math.min(
-    maxGridWidth / CONFIG.gridSize,
-    maxGridHeight / CONFIG.gridSize
-  );
-
-  console.log(
-    `Max cell size: ${maxCellSize}, Original cell size: ${CONFIG.originalCellSize}`
-  );
-
-  if (maxCellSize >= CONFIG.originalCellSize) {
-    CONFIG.cellSize = CONFIG.originalCellSize;
-    console.log("Using original cell size");
-    removeSizeWarning();
-  } else if (maxCellSize >= 12) {
-    CONFIG.cellSize = Math.floor(maxCellSize);
-    console.log(`Using adjusted cell size: ${CONFIG.cellSize}`);
-    removeSizeWarning();
-  } else {
-    const scaleFactor = Math.min(
-      availableWidth / minWidth,
-      availableHeight / minHeight
-    );
-    CONFIG.cellSize = Math.max(
-      12,
-      Math.floor(CONFIG.originalCellSize * scaleFactor)
-    );
-    console.log(`Scaling down, new cell size: ${CONFIG.cellSize}`);
-    displaySizeWarning();
-  }
-
-  console.log(`Final cell size: ${CONFIG.cellSize}`);
-
-  // Adjust canvas position
-  const canvas = document.querySelector("canvas");
-  canvas.style.left = "50%";
-  canvas.style.transform = "translate(-50%, -50%)";
 }
 
 function displaySizeWarning() {

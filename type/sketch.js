@@ -9,7 +9,7 @@ let totalKeysPerRow = 10;
 let extraKeys = [" ", "<"];
 let sendButton;
 const googleScriptURL =
-  "https://script.google.com/macros/s/AKfycbyWFIZZUqqM7DT6iVKn77f-1Zm0qoUUKRcBHR4hSRNIQ7TF42a4zTX39jfzWt3GRJFl/exec";
+  "https://script.google.com/macros/s/AKfycbzGY-z_nl0BS-zKrv700RMDZURv8rhBopmMYUXkxYIlKooLad6Gy0BZrlOXStf8FEot/exec";
 
 let inputDevices = [
   "MouthPad^ (Head Tracking and Tongue Clicks)",

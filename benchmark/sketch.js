@@ -81,8 +81,8 @@ function setup() {
   const canvasElement = document.querySelector("canvas");
   canvasElement.style.position = "absolute";
   canvasElement.style.top = "50%";
-  canvasElement.style.left = "0";
-  canvasElement.style.transform = "translateY(-50%)";
+  canvasElement.style.left = "50%";
+  canvasElement.style.transform = "translate(-50%, -50%)";
   canvasElement.style.zIndex = "2";
 
   pickNewTarget();
@@ -799,12 +799,13 @@ function handleResize() {
 }
 
 function checkAndAdjustGridSize() {
-  const minWidth = 720; // Reduced from 1250 to allow overlap with metrics
+  const minWidth = 720;
   const minHeight = 540;
   const availableWidth = window.innerWidth;
   const availableHeight = window.innerHeight;
 
-  // Calculate the maximum possible grid size
+  console.log(`Available dimensions: ${availableWidth}x${availableHeight}`);
+
   const maxGridWidth = availableWidth;
   const maxGridHeight = availableHeight;
   const maxCellSize = Math.min(
@@ -812,17 +813,19 @@ function checkAndAdjustGridSize() {
     maxGridHeight / CONFIG.gridSize
   );
 
+  console.log(
+    `Max cell size: ${maxCellSize}, Original cell size: ${CONFIG.originalCellSize}`
+  );
+
   if (maxCellSize >= CONFIG.originalCellSize) {
-    // If we can fit the original cell size, use it
     CONFIG.cellSize = CONFIG.originalCellSize;
+    console.log("Using original cell size");
     removeSizeWarning();
   } else if (maxCellSize >= 12) {
-    // Set a minimum cell size (e.g., 12px)
-    // Use the maximum possible cell size
     CONFIG.cellSize = Math.floor(maxCellSize);
+    console.log(`Using adjusted cell size: ${CONFIG.cellSize}`);
     removeSizeWarning();
   } else {
-    // If we can't maintain a minimum cell size, scale down
     const scaleFactor = Math.min(
       availableWidth / minWidth,
       availableHeight / minHeight
@@ -831,136 +834,67 @@ function checkAndAdjustGridSize() {
       12,
       Math.floor(CONFIG.originalCellSize * scaleFactor)
     );
+    console.log(`Scaling down, new cell size: ${CONFIG.cellSize}`);
     displaySizeWarning();
   }
 
-  // Adjust canvas position
-  const canvas = document.querySelector("canvas");
-  canvas.style.left = "0";
-  canvas.style.transform = "translateY(-50%)";
-}
-
-// Update the createMetricsDisplay function to position metrics on the right
-function createMetricsDisplay() {
-  let metricsDiv = document.createElement("div");
-  metricsDiv.id = "metrics";
-  metricsDiv.style.position = "fixed";
-  metricsDiv.style.top = "80px";
-  metricsDiv.style.right = "20px"; // Changed from left to right
-  metricsDiv.style.zIndex = "1";
-  metricsDiv.style.pointerEvents = "none";
-  METRIC_IDS.forEach((id) => {
-    let metricElement = document.createElement("div");
-    metricElement.className = "metric";
-    metricElement.id = id;
-    metricElement.textContent = `${
-      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
-    }: 0`;
-    metricsDiv.appendChild(metricElement);
-    metricElements[id] = metricElement;
-  });
-  document.body.appendChild(metricsDiv);
-}
-
-function checkAndAdjustGridSize() {
-  const minWidth = 720; // Reduced from 1250 to allow overlap with metrics
-  const minHeight = 540;
-  const availableWidth = window.innerWidth;
-  const availableHeight = window.innerHeight;
-
-  // Calculate the maximum possible grid size
-  const maxGridWidth = availableWidth;
-  const maxGridHeight = availableHeight;
-  const maxCellSize = Math.min(
-    maxGridWidth / CONFIG.gridSize,
-    maxGridHeight / CONFIG.gridSize
-  );
-
-  if (maxCellSize >= CONFIG.originalCellSize) {
-    // If we can fit the original cell size, use it
-    CONFIG.cellSize = CONFIG.originalCellSize;
-    removeSizeWarning();
-  } else if (maxCellSize >= 12) {
-    // Set a minimum cell size (e.g., 12px)
-    // Use the maximum possible cell size
-    CONFIG.cellSize = Math.floor(maxCellSize);
-    removeSizeWarning();
-  } else {
-    // If we can't maintain a minimum cell size, scale down
-    const scaleFactor = Math.min(
-      availableWidth / minWidth,
-      availableHeight / minHeight
-    );
-    CONFIG.cellSize = Math.max(
-      12,
-      Math.floor(CONFIG.originalCellSize * scaleFactor)
-    );
-    displaySizeWarning();
-  }
+  console.log(`Final cell size: ${CONFIG.cellSize}`);
 
   // Adjust canvas position
   const canvas = document.querySelector("canvas");
-  canvas.style.left = "0";
-  canvas.style.transform = "translateY(-50%)";
+  canvas.style.left = "50%";
+  canvas.style.transform = "translate(-50%, -50%)";
 }
 
 function displaySizeWarning() {
-  const warningDiv = document.createElement("div");
-  warningDiv.id = "size-warning";
+  console.log("Attempting to display size warning");
+  let warningDiv = document.getElementById("size-warning");
+
+  if (!warningDiv) {
+    console.log("Creating size warning element");
+    warningDiv = document.createElement("div");
+    warningDiv.id = "size-warning";
+    document.body.appendChild(warningDiv);
+  }
+
+  // Always update the styling to ensure visibility
   warningDiv.style.position = "fixed";
-  warningDiv.style.bottom = "10px";
+  warningDiv.style.bottom = "20px";
   warningDiv.style.left = "50%";
   warningDiv.style.transform = "translateX(-50%)";
-  warningDiv.style.backgroundColor = "black";
+  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)"; // Semi-transparent red
   warningDiv.style.color = "white";
-  warningDiv.style.padding = "10px";
+  warningDiv.style.padding = "15px";
   warningDiv.style.borderRadius = "5px";
-  warningDiv.style.zIndex = "1000";
+  warningDiv.style.zIndex = "10000"; // Ensure it's on top
   warningDiv.style.fontFamily = "'Press Start 2P', cursive";
-  warningDiv.style.fontSize = "12px";
+  warningDiv.style.fontSize = "14px";
   warningDiv.style.textAlign = "center";
-  warningDiv.innerHTML = `Please adjust your browser window size for optimal performance`;
+  warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
+  warningDiv.style.display = "block"; // Ensure it's not hidden
+  warningDiv.innerHTML = `Warning: Window size is too small.<br>Please adjust your browser window for optimal performance.`;
 
-  document.body.appendChild(warningDiv);
+  console.log("Size warning element styled and content set");
 }
 
 function removeSizeWarning() {
   const warningDiv = document.getElementById("size-warning");
   if (warningDiv) {
     warningDiv.remove();
+    console.log("Size warning removed");
+  } else {
+    console.log("No size warning to remove");
   }
 }
-
-function removeAllWarnings() {
-  removeZoomWarning();
-  removeSizeWarning();
-}
-
-// Call this function at the end of setup and in the handleResize function
-function handleResize() {
-  if (!gameStarted) {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      checkAndAdjustGridSize();
-      resizeCanvas(
-        CONFIG.gridSize * CONFIG.cellSize,
-        CONFIG.gridSize * CONFIG.cellSize
-      );
-      updateInitialMetricDisplay();
-    }, 250);
-  }
-}
-
-// Call this function at the end of your setup
-setupZoomCheck();
 
 function checkAndAdjustGridSize() {
-  const minWidth = 720; // Reduced from 1250 to allow overlap with metrics
+  const minWidth = 720;
   const minHeight = 540;
   const availableWidth = window.innerWidth;
   const availableHeight = window.innerHeight;
 
-  // Calculate the maximum possible grid size
+  console.log(`Available dimensions: ${availableWidth}x${availableHeight}`);
+
   const maxGridWidth = availableWidth;
   const maxGridHeight = availableHeight;
   const maxCellSize = Math.min(
@@ -968,17 +902,19 @@ function checkAndAdjustGridSize() {
     maxGridHeight / CONFIG.gridSize
   );
 
+  console.log(
+    `Max cell size: ${maxCellSize}, Original cell size: ${CONFIG.originalCellSize}`
+  );
+
   if (maxCellSize >= CONFIG.originalCellSize) {
-    // If we can fit the original cell size, use it
     CONFIG.cellSize = CONFIG.originalCellSize;
+    console.log("Using original cell size");
     removeSizeWarning();
   } else if (maxCellSize >= 12) {
-    // Set a minimum cell size (e.g., 12px)
-    // Use the maximum possible cell size
     CONFIG.cellSize = Math.floor(maxCellSize);
+    console.log(`Using adjusted cell size: ${CONFIG.cellSize}`);
     removeSizeWarning();
   } else {
-    // If we can't maintain a minimum cell size, scale down
     const scaleFactor = Math.min(
       availableWidth / minWidth,
       availableHeight / minHeight
@@ -987,78 +923,55 @@ function checkAndAdjustGridSize() {
       12,
       Math.floor(CONFIG.originalCellSize * scaleFactor)
     );
+    console.log(`Scaling down, new cell size: ${CONFIG.cellSize}`);
     displaySizeWarning();
   }
 
+  console.log(`Final cell size: ${CONFIG.cellSize}`);
+
   // Adjust canvas position
   const canvas = document.querySelector("canvas");
-  canvas.style.left = "0";
-  canvas.style.transform = "translateY(-50%)";
+  canvas.style.left = "50%";
+  canvas.style.transform = "translate(-50%, -50%)";
 }
 
 function displaySizeWarning() {
-  const warningDiv = document.createElement("div");
-  warningDiv.id = "size-warning";
+  console.log("Attempting to display size warning");
+  let warningDiv = document.getElementById("size-warning");
+
+  if (!warningDiv) {
+    console.log("Creating size warning element");
+    warningDiv = document.createElement("div");
+    warningDiv.id = "size-warning";
+    document.body.appendChild(warningDiv);
+  }
+
+  // Always update the styling to ensure visibility
   warningDiv.style.position = "fixed";
-  warningDiv.style.bottom = "10px";
+  warningDiv.style.bottom = "20px";
   warningDiv.style.left = "50%";
   warningDiv.style.transform = "translateX(-50%)";
-  warningDiv.style.backgroundColor = "black";
+  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)"; // Semi-transparent red
   warningDiv.style.color = "white";
-  warningDiv.style.padding = "10px";
+  warningDiv.style.padding = "15px";
   warningDiv.style.borderRadius = "5px";
-  warningDiv.style.zIndex = "1000";
+  warningDiv.style.zIndex = "10000"; // Ensure it's on top
   warningDiv.style.fontFamily = "'Press Start 2P', cursive";
-  warningDiv.style.fontSize = "12px";
+  warningDiv.style.fontSize = "14px";
   warningDiv.style.textAlign = "center";
-  warningDiv.innerHTML = `Please adjust your browser window size for optimal performance`;
+  warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
+  warningDiv.style.display = "block"; // Ensure it's not hidden
+  warningDiv.innerHTML = `Warning: Window size is too small.<br>Please adjust your browser window for optimal performance.`;
 
-  document.body.appendChild(warningDiv);
+  console.log("Size warning element styled and content set");
 }
 
 function removeSizeWarning() {
   const warningDiv = document.getElementById("size-warning");
   if (warningDiv) {
     warningDiv.remove();
-  }
-}
-
-function removeAllWarnings() {
-  removeZoomWarning();
-  removeSizeWarning();
-}
-
-function handleResize() {
-  if (!gameStarted) {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      checkAndAdjustGridSize();
-      resizeCanvas(
-        CONFIG.gridSize * CONFIG.cellSize,
-        CONFIG.gridSize * CONFIG.cellSize
-      );
-      updateInitialMetricDisplay();
-    }, 250); // Wait for 250ms after resize ends before adjusting
-  }
-}
-
-function removeSizeWarning() {
-  const warningDiv = document.getElementById("size-warning");
-  if (warningDiv) {
-    warningDiv.remove();
-  }
-}
-
-function handleResize() {
-  if (!gameStarted) {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      checkAndAdjustGridSize();
-      resizeCanvas(
-        CONFIG.gridSize * CONFIG.cellSize,
-        CONFIG.gridSize * CONFIG.cellSize
-      );
-      updateInitialMetricDisplay();
-    }, 250); // Wait for 250ms after resize ends before adjusting
+    console.log("Size warning removed");
+  } else {
+    console.log("No size warning to remove");
   }
 }

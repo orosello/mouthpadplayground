@@ -628,6 +628,13 @@ function updateMetricDisplay(id, value) {
   element.style.fontWeight = ""; // Reset font weight for other metrics
   element.style.marginTop = ""; // Reset margin for other metrics
   element.style.display = ""; // Reset display for other metrics
+
+  // Add this condition to change the color of "Target Size" text
+  if (id === "targetSize" && CONFIG.cellSize !== 24) {
+    element.style.color = "magenta";
+  } else {
+    element.style.color = ""; // Reset color for other metrics
+  }
 }
 
 function saveMetricsAndRedirect() {
@@ -846,6 +853,9 @@ function checkAndAdjustGridSize() {
   }
 
   console.log(`Final cell size: ${CONFIG.cellSize}`);
+
+  // Update the target size display
+  updateMetricDisplay("targetSize", CONFIG.cellSize + "px");
 }
 
 function displaySizeWarning() {

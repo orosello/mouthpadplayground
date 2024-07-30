@@ -451,10 +451,12 @@ function createScoreDisplay() {
   bpsScore.textContent = `${metrics.bps.toFixed(2)}`;
   bpsScore.style.fontSize = "75px";
   bpsScore.style.margin = "0";
+  bpsScore.style.textShadow = "none";
+  bpsScore.style.webkitTextStroke = "0";
 
   const scoreText = document.createElement("h2");
-  scoreText.textContent = "Your Score";
-  scoreText.style.fontSize = "28px";
+  scoreText.textContent = "Your BPS Score";
+  scoreText.style.fontSize = "20px";
   scoreText.style.margin = "10px 0 0 0";
 
   scoreContainer.appendChild(bpsScore);

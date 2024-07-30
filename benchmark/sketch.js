@@ -432,14 +432,33 @@ function endGame() {
   // Hide canvas
   document.querySelector("canvas").style.display = "none";
 
-  // Create and show large buttons
+  // Create and show score display and large buttons
+  createScoreDisplay();
   createLargeButtons();
+}
+
+function createScoreDisplay() {
+  const scoreContainer = document.createElement("div");
+  scoreContainer.style.position = "absolute";
+  scoreContainer.style.top = "30%";
+  scoreContainer.style.left = "50%";
+  scoreContainer.style.transform = "translate(-50%, -50%)";
+  scoreContainer.style.textAlign = "center";
+  scoreContainer.style.fontFamily = "'Press Start 2P', cursive";
+  scoreContainer.style.color = "white";
+
+  const scoreText = document.createElement("h2");
+  scoreText.textContent = `Your score: ${metrics.bps.toFixed(2)} BPS`;
+  scoreText.style.fontSize = "28px";
+
+  scoreContainer.appendChild(scoreText);
+  document.body.appendChild(scoreContainer);
 }
 
 function createLargeButtons() {
   const buttonContainer = document.createElement("div");
   buttonContainer.style.position = "absolute";
-  buttonContainer.style.top = "50%";
+  buttonContainer.style.top = "60%";
   buttonContainer.style.left = "50%";
   buttonContainer.style.transform = "translate(-50%, -50%)";
   buttonContainer.style.display = "flex";

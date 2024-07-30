@@ -447,10 +447,17 @@ function createScoreDisplay() {
   scoreContainer.style.fontFamily = "'Press Start 2P', cursive";
   scoreContainer.style.color = "white";
 
-  const scoreText = document.createElement("h2");
-  scoreText.textContent = `Your score: ${metrics.bps.toFixed(2)} BPS`;
-  scoreText.style.fontSize = "28px";
+  const bpsScore = document.createElement("h1");
+  bpsScore.textContent = `${metrics.bps.toFixed(2)}`;
+  bpsScore.style.fontSize = "75px";
+  bpsScore.style.margin = "0";
 
+  const scoreText = document.createElement("h2");
+  scoreText.textContent = "Your Score";
+  scoreText.style.fontSize = "28px";
+  scoreText.style.margin = "10px 0 0 0";
+
+  scoreContainer.appendChild(bpsScore);
   scoreContainer.appendChild(scoreText);
   document.body.appendChild(scoreContainer);
 }

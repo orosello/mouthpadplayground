@@ -72,17 +72,25 @@ let gameStarted = false;
 
 function setup() {
   checkAndAdjustGridSize();
+  const navBar = document.querySelector("nav");
+  const navBarHeight = navBar ? navBar.offsetHeight : 50; // Default to 50 if navBar is not found
+  const topMargin = 10; // Reduced margin below the nav bar
+  const bottomMargin = 10; // Reduced bottom margin
+
+  const availableHeight =
+    window.innerHeight - navBarHeight - topMargin - bottomMargin;
+
   createCanvas(
     CONFIG.gridSize * CONFIG.cellSize,
-    CONFIG.gridSize * CONFIG.cellSize
+    min(CONFIG.gridSize * CONFIG.cellSize, availableHeight)
   );
 
   // Center the canvas
   const canvasElement = document.querySelector("canvas");
   canvasElement.style.position = "absolute";
-  canvasElement.style.top = "50%";
+  canvasElement.style.top = `${navBarHeight + topMargin}px`; // Adjusted margin below the nav bar
   canvasElement.style.left = "50%";
-  canvasElement.style.transform = "translate(-50%, -50%)";
+  canvasElement.style.transform = "translateX(-50%)";
   canvasElement.style.zIndex = "2";
 
   pickNewTarget();
@@ -103,6 +111,35 @@ function setup() {
 
   // Add event listener for window resize
   window.addEventListener("resize", handleResize);
+}
+
+function handleResize() {
+  if (!gameStarted) {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      checkAndAdjustGridSize();
+      const navBar = document.querySelector("nav");
+      const navBarHeight = navBar ? navBar.offsetHeight : 50; // Default to 50 if navBar is not found
+      const topMargin = 10; // Reduced margin below the nav bar
+      const bottomMargin = 10; // Reduced bottom margin
+
+      const availableHeight =
+        window.innerHeight - navBarHeight - topMargin - bottomMargin;
+
+      resizeCanvas(
+        CONFIG.gridSize * CONFIG.cellSize,
+        min(CONFIG.gridSize * CONFIG.cellSize, availableHeight)
+      );
+      updateInitialMetricDisplay();
+
+      // Re-center the canvas after resizing
+      const canvasElement = document.querySelector("canvas");
+      canvasElement.style.position = "absolute";
+      canvasElement.style.top = `${navBarHeight + topMargin}px`; // Adjusted margin below the nav bar
+      canvasElement.style.left = "50%";
+      canvasElement.style.transform = "translateX(-50%)";
+    }, 250);
+  }
 }
 
 let lastTime = 0;
@@ -761,6 +798,130 @@ function drawHoverHighlight() {
   }
 }
 
+function displayWarning(id, message) {
+  let warningDiv = document.getElementById(id);
+
+  if (!warningDiv) {
+    warningDiv = document.createElement("div");
+    warningDiv.id = id;
+    document.body.appendChild(warningDiv);
+  }
+
+  warningDiv.style.position = "fixed";
+  warningDiv.style.bottom = "20px";
+  warningDiv.style.left = "50%";
+  warningDiv.style.transform = "translateX(-50%)";
+  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+  warningDiv.style.color = "white";
+  warningDiv.style.padding = "15px";
+  warningDiv.style.borderRadius = "5px";
+  warningDiv.style.zIndex = "10000";
+  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
+  warningDiv.style.fontSize = "14px";
+  warningDiv.style.textAlign = "center";
+  warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
+  warningDiv.style.display = "block";
+  warningDiv.innerHTML = `${message}<br>Click to dismiss.`;
+
+  warningDiv.addEventListener("click", () => {
+    warningDiv.style.display = "none";
+  });
+}
+
+function displaySizeWarning() {
+  displayWarning(
+    "size-warning",
+    "Warning: Grid size is being scaled to fit your system and browser's resolution."
+  );
+}
+
+function displayZoomWarning() {
+  displayWarning(
+    "zoom-warning",
+    "Please adjust your browser zoom to 100% for optimal performance"
+  );
+}
+
+function removeWarning(id) {
+  const warningDiv = document.getElementById(id);
+  if (warningDiv) {
+    warningDiv.remove();
+    console.log(`${id} removed`);
+  } else {
+    console.log(`No ${id} to remove`);
+  }
+}
+
+function removeSizeWarning() {
+  removeWarning("size-warning");
+}
+
+function removeZoomWarning() {
+  removeWarning("zoom-warning");
+}
+
+function displayWarning(id, message) {
+  let warningDiv = document.getElementById(id);
+
+  if (!warningDiv) {
+    warningDiv = document.createElement("div");
+    warningDiv.id = id;
+    document.body.appendChild(warningDiv);
+  }
+
+  warningDiv.style.position = "fixed";
+  warningDiv.style.bottom = "20px";
+  warningDiv.style.left = "50%";
+  warningDiv.style.transform = "translateX(-50%)";
+  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+  warningDiv.style.color = "white";
+  warningDiv.style.padding = "15px";
+  warningDiv.style.borderRadius = "5px";
+  warningDiv.style.zIndex = "10000";
+  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
+  warningDiv.style.fontSize = "14px";
+  warningDiv.style.textAlign = "center";
+  warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
+  warningDiv.style.display = "block";
+  warningDiv.innerHTML = `${message}<br>Click to dismiss.`;
+
+  warningDiv.addEventListener("click", () => {
+    warningDiv.style.display = "none";
+  });
+}
+
+function displaySizeWarning() {
+  displayWarning(
+    "size-warning",
+    "Warning: Grid size is being scaled to fit your system and browser's resolution."
+  );
+}
+
+function displayZoomWarning() {
+  displayWarning(
+    "zoom-warning",
+    "Please adjust your browser zoom to 100% for optimal performance"
+  );
+}
+
+function removeWarning(id) {
+  const warningDiv = document.getElementById(id);
+  if (warningDiv) {
+    warningDiv.remove();
+    console.log(`${id} removed`);
+  } else {
+    console.log(`No ${id} to remove`);
+  }
+}
+
+function removeSizeWarning() {
+  removeWarning("size-warning");
+}
+
+function removeZoomWarning() {
+  removeWarning("zoom-warning");
+}
+
 function disableDefaultBehaviors() {
   document.addEventListener("contextmenu", (event) => event.preventDefault());
   document.addEventListener("wheel", (event) => event.preventDefault(), {
@@ -788,30 +949,14 @@ function checkZoomLevel() {
 }
 
 function displayZoomWarning() {
-  const warningDiv = document.createElement("div");
-  warningDiv.id = "zoom-warning";
-  warningDiv.style.position = "fixed";
-  warningDiv.style.bottom = "10px";
-  warningDiv.style.left = "50%";
-  warningDiv.style.transform = "translateX(-50%)";
-  warningDiv.style.backgroundColor = "black";
-  warningDiv.style.color = "white";
-  warningDiv.style.padding = "10px";
-  warningDiv.style.borderRadius = "5px";
-  warningDiv.style.zIndex = "1000";
-  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
-  warningDiv.style.fontSize = "12px";
-  warningDiv.style.textAlign = "center";
-  warningDiv.innerHTML = `Please adjust your browser zoom to 100%<br>for optimal performance`;
-
-  document.body.appendChild(warningDiv);
+  displayWarning(
+    "zoom-warning",
+    "Please adjust your browser zoom to 100% for optimal performance"
+  );
 }
 
 function removeZoomWarning() {
-  const warningDiv = document.getElementById("zoom-warning");
-  if (warningDiv) {
-    warningDiv.remove();
-  }
+  removeWarning("zoom-warning");
 }
 
 // Add this function to periodically check zoom level
@@ -830,18 +975,26 @@ function handleResize() {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
       checkAndAdjustGridSize();
+      const navBar = document.querySelector("nav");
+      const navBarHeight = navBar ? navBar.offsetHeight : 50; // Default to 50 if navBar is not found
+      const topMargin = 10; // Reduced margin below the nav bar
+      const bottomMargin = 10; // Reduced bottom margin
+
+      const availableHeight =
+        window.innerHeight - navBarHeight - topMargin - bottomMargin;
+
       resizeCanvas(
         CONFIG.gridSize * CONFIG.cellSize,
-        CONFIG.gridSize * CONFIG.cellSize
+        min(CONFIG.gridSize * CONFIG.cellSize, availableHeight)
       );
       updateInitialMetricDisplay();
 
       // Re-center the canvas after resizing
       const canvasElement = document.querySelector("canvas");
       canvasElement.style.position = "absolute";
-      canvasElement.style.top = "50%";
+      canvasElement.style.top = `${navBarHeight + topMargin}px`; // Adjusted margin below the nav bar
       canvasElement.style.left = "50%";
-      canvasElement.style.transform = "translate(-50%, -50%)";
+      canvasElement.style.transform = "translateX(-50%)";
     }, 250);
   }
 }
@@ -850,7 +1003,12 @@ function checkAndAdjustGridSize() {
   const minWidth = 720;
   const minHeight = 540;
   const availableWidth = window.innerWidth;
-  const availableHeight = window.innerHeight;
+  const navBar = document.querySelector("nav");
+  const navBarHeight = navBar ? navBar.offsetHeight : 50; // Default to 50 if navBar is not found
+  const topMargin = 10; // Reduced margin below the nav bar
+  const bottomMargin = 10; // Reduced bottom margin
+  const availableHeight =
+    window.innerHeight - navBarHeight - topMargin - bottomMargin;
 
   console.log(`Available dimensions: ${availableWidth}x${availableHeight}`);
 
@@ -873,6 +1031,7 @@ function checkAndAdjustGridSize() {
     CONFIG.cellSize = Math.floor(maxCellSize);
     console.log(`Using adjusted cell size: ${CONFIG.cellSize}`);
     removeSizeWarning();
+    displaySizeWarning(); // Display warning when cell size is adjusted
   } else {
     const scaleFactor = Math.min(
       availableWidth / minWidth,
@@ -883,7 +1042,7 @@ function checkAndAdjustGridSize() {
       Math.floor(CONFIG.originalCellSize * scaleFactor)
     );
     console.log(`Scaling down, new cell size: ${CONFIG.cellSize}`);
-    displaySizeWarning();
+    displaySizeWarning(); // Display warning when cell size is scaled down
   }
 
   console.log(`Final cell size: ${CONFIG.cellSize}`);
@@ -893,42 +1052,12 @@ function checkAndAdjustGridSize() {
 }
 
 function displaySizeWarning() {
-  console.log("Attempting to display size warning");
-  let warningDiv = document.getElementById("size-warning");
-
-  if (!warningDiv) {
-    console.log("Creating size warning element");
-    warningDiv = document.createElement("div");
-    warningDiv.id = "size-warning";
-    document.body.appendChild(warningDiv);
-  }
-
-  // Always update the styling to ensure visibility
-  warningDiv.style.position = "fixed";
-  warningDiv.style.bottom = "20px";
-  warningDiv.style.left = "50%";
-  warningDiv.style.transform = "translateX(-50%)";
-  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)"; // Semi-transparent red
-  warningDiv.style.color = "white";
-  warningDiv.style.padding = "15px";
-  warningDiv.style.borderRadius = "5px";
-  warningDiv.style.zIndex = "10000"; // Ensure it's on top
-  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
-  warningDiv.style.fontSize = "14px";
-  warningDiv.style.textAlign = "center";
-  warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-  warningDiv.style.display = "block"; // Ensure it's not hidden
-  warningDiv.innerHTML = `Warning: Window size is too small.<br>Please adjust your browser window for optimal performance.`;
-
-  console.log("Size warning element styled and content set");
+  displayWarning(
+    "size-warning",
+    "Warning: Grid size is being scaled to fit your system and browser's resolution."
+  );
 }
 
 function removeSizeWarning() {
-  const warningDiv = document.getElementById("size-warning");
-  if (warningDiv) {
-    warningDiv.remove();
-    console.log("Size warning removed");
-  } else {
-    console.log("No size warning to remove");
-  }
+  removeWarning("size-warning");
 }

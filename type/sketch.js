@@ -40,6 +40,33 @@ function setup() {
 
   createCheckboxes();
   createSendButton();
+
+  // Ensure the body is scrollable and the vertical scrollbar is always visible and accessible
+  document.body.style.overflowY = "scroll";
+  document.body.style.overflowX = "hidden"; // Hide horizontal scrollbar if not needed
+  document.body.style.scrollbarWidth = "auto"; // For Firefox
+  document.body.style.scrollbarColor = "gray black"; // For Firefox
+
+  applyScrollbarStyles(); // Apply additional styles for Webkit browsers
+}
+
+// Add this function to apply additional styles for Webkit browsers (Chrome, Safari)
+function applyScrollbarStyles() {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    ::-webkit-scrollbar {
+      width: 16px; /* Increase the width for accessibility */
+    }
+    ::-webkit-scrollbar-track {
+      background: black;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: gray;
+      border-radius: 10px;
+      border: 3px solid black;
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 function createCheckboxes() {

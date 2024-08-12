@@ -143,6 +143,9 @@ function handleResize() {
 }
 
 let lastTime = 0;
+let lastHoverUpdate = 0;
+const HOVER_UPDATE_INTERVAL = 50; // Update hover every 50ms
+
 function gameLoop(currentTime) {
   if (!lastTime) lastTime = currentTime;
   const deltaTime = currentTime - lastTime;
@@ -155,7 +158,11 @@ function gameLoop(currentTime) {
 }
 
 function updateGame(deltaTime) {
-  updateHover();
+  const currentTime = millis();
+  if (currentTime - lastHoverUpdate > HOVER_UPDATE_INTERVAL) {
+    updateHover();
+    lastHoverUpdate = currentTime;
+  }
   updateTimingMetrics();
   if (gameState.gameStarted && !gameState.timerEnded) {
     updateMetrics();
@@ -170,7 +177,12 @@ function drawGame() {
   drawHoverHighlight();
 }
 
+let lastMousePress = 0;
+
 function handleMousePressed(event) {
+  if (event.timeStamp - lastMousePress < 50) return;
+  lastMousePress = event.timeStamp;
+
   const rect = canvas.getBoundingClientRect();
   const mouseX = event.clientX - rect.left;
   const mouseY = event.clientY - rect.top;
@@ -796,68 +808,6 @@ function drawHoverHighlight() {
       CONFIG.cellSize
     );
   }
-}
-
-function displayWarning(id, message) {
-  let warningDiv = document.getElementById(id);
-
-  if (!warningDiv) {
-    warningDiv = document.createElement("div");
-    warningDiv.id = id;
-    document.body.appendChild(warningDiv);
-  }
-
-  warningDiv.style.position = "fixed";
-  warningDiv.style.bottom = "20px";
-  warningDiv.style.left = "50%";
-  warningDiv.style.transform = "translateX(-50%)";
-  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
-  warningDiv.style.color = "white";
-  warningDiv.style.padding = "15px";
-  warningDiv.style.borderRadius = "5px";
-  warningDiv.style.zIndex = "10000";
-  warningDiv.style.fontFamily = "'Press Start 2P', cursive";
-  warningDiv.style.fontSize = "14px";
-  warningDiv.style.textAlign = "center";
-  warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-  warningDiv.style.display = "block";
-  warningDiv.innerHTML = `${message}<br>Click to dismiss.`;
-
-  warningDiv.addEventListener("click", () => {
-    warningDiv.style.display = "none";
-  });
-}
-
-function displaySizeWarning() {
-  displayWarning(
-    "size-warning",
-    "Warning: Grid size is being scaled to fit your system and browser's resolution."
-  );
-}
-
-function displayZoomWarning() {
-  displayWarning(
-    "zoom-warning",
-    "Please adjust your browser zoom to 100% for optimal performance"
-  );
-}
-
-function removeWarning(id) {
-  const warningDiv = document.getElementById(id);
-  if (warningDiv) {
-    warningDiv.remove();
-    console.log(`${id} removed`);
-  } else {
-    console.log(`No ${id} to remove`);
-  }
-}
-
-function removeSizeWarning() {
-  removeWarning("size-warning");
-}
-
-function removeZoomWarning() {
-  removeWarning("zoom-warning");
 }
 
 function displayWarning(id, message) {

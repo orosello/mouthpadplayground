@@ -106,6 +106,10 @@ class Bubble {
   }
 
   setPosition(x, y) {
+    // Ensure the new position keeps the circle within the canvas bounds
+    x = constrain(x, this.r, windowWidth - this.r);
+    y = constrain(y, this.r, windowHeight - this.r);
+
     while (dist(x, y, this.x, this.y) < this.r * 5) {
       x = random(this.r, windowWidth - this.r);
       y = random(this.r, windowHeight - this.r);

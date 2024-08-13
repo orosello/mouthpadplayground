@@ -127,6 +127,10 @@ class Bubble {
       y = random(this.r, windowHeight - this.r);
     }
 
+    // Ensure the new position is within the canvas boundaries
+    x = constrain(x, this.r, windowWidth - this.r);
+    y = constrain(y, this.r, windowHeight - this.r);
+
     // Set the target position
     this.targetX = x;
     this.targetY = y;

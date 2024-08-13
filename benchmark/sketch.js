@@ -833,12 +833,24 @@ function displayWarning(id, message) {
   warningDiv.style.textAlign = "center";
   warningDiv.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
   warningDiv.style.display = "block";
-  warningDiv.innerHTML = `${message}<br>Click to dismiss.`;
+  warningDiv.innerHTML = `${message}<br>Click anywhere to dismiss.`;
 
-  warningDiv.addEventListener("click", () => {
+  // Remove individual click event listener
+  warningDiv.removeEventListener("click", () => {
     warningDiv.style.display = "none";
   });
 }
+
+// Add this function to hide all warnings
+function hideAllWarnings() {
+  const warnings = document.querySelectorAll("[id$='-warning']");
+  warnings.forEach((warning) => {
+    warning.style.display = "none";
+  });
+}
+
+// Add event listener to the document body to hide all warnings on click
+document.body.addEventListener("click", hideAllWarnings);
 
 function displaySizeWarning() {
   displayWarning(

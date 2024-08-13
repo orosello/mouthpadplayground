@@ -823,7 +823,7 @@ function displayWarning(id, message) {
   warningDiv.style.bottom = "20px";
   warningDiv.style.left = "50%";
   warningDiv.style.transform = "translateX(-50%)";
-  warningDiv.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+  warningDiv.style.backgroundColor = "rgba(255, 0, 255, 0.6)";
   warningDiv.style.color = "white";
   warningDiv.style.padding = "15px";
   warningDiv.style.borderRadius = "5px";

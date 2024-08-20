@@ -58,7 +58,7 @@ function initializeCircles() {
   for (let i = 0; i < circleCount; i++) {
     let angle = map(i, 0, circleCount, 0, TWO_PI); // map the index to an angle between 0 and 2*PI
     let x = windowWidth / 2 + radius * cos(angle); // calculate x coordinate
-    let y = windowHeight / 2 + radius * sin(angle); // calculate y coordinate
+    let y = windowHeight / 2 + radius * sin(angle) - 20; // calculate y coordinate
     circles.push({
       x: x,
       y: y,

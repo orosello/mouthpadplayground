@@ -80,6 +80,10 @@ class Bubble {
     this.targetY = y;
     this.r = r;
     this.mouseIsPressed = false;
+    this.lerpSpeed = 0.05;
+    this.minLerpDistance = 1; // Minimum distance to consider lerping complete
+    this.lastMoveTime = 0;
+    this.moveCooldown = 200; // 200 milliseconds cooldown
   }
 
   show() {
@@ -89,33 +93,49 @@ class Bubble {
     } else {
       noStroke();
     }
-    fill(this.mouseIsPressed ? 0 : 255);
-    this.x = lerp(this.x, this.targetX, 0.05);
-    this.y = lerp(this.y, this.targetY, 0.05);
+    fill(255); // Always fill with white
+
+    // Update position with lerping
+    let dx = this.targetX - this.x;
+    let dy = this.targetY - this.y;
+    if (abs(dx) > this.minLerpDistance || abs(dy) > this.minLerpDistance) {
+      this.x += dx * this.lerpSpeed;
+      this.y += dy * this.lerpSpeed;
+    } else {
+      // If we're close enough, snap to the target position
+      this.x = this.targetX;
+      this.y = this.targetY;
+    }
+
     circle(this.x, this.y, this.r * 2);
   }
 
   checkMouseDoubleClick() {
     if (dist(mouseX, mouseY, this.x, this.y) < this.r) {
-      this.setPosition(
-        random(this.r, windowWidth - this.r),
-        random(this.r, windowHeight - this.r)
-      );
-      moveCount++; // Added this line
+      let currentTime = millis();
+      if (currentTime - this.lastMoveTime > this.moveCooldown) {
+        this.setPosition(
+          random(this.r, windowWidth - this.r),
+          random(this.r, windowHeight - this.r)
+        );
+        moveCount++;
+        this.lerpSpeed = 0.05;
+        this.lastMoveTime = currentTime;
+      }
     }
   }
 
   setPosition(x, y) {
-    // Ensure the new position keeps the circle within the canvas bounds
-    x = constrain(x, this.r, windowWidth - this.r);
-    y = constrain(y, this.r, windowHeight - this.r);
+    // Ensure the new position keeps the circle fully within the canvas bounds
+    const margin = this.r;
+    this.targetX = constrain(x, margin, windowWidth - margin);
+    this.targetY = constrain(y, margin, windowHeight - margin);
 
-    while (dist(x, y, this.x, this.y) < this.r * 5) {
-      x = random(this.r, windowWidth - this.r);
-      y = random(this.r, windowHeight - this.r);
+    // Ensure the new position is at least 5 radii away from the current position
+    while (dist(this.targetX, this.targetY, this.x, this.y) < this.r * 5) {
+      this.targetX = random(margin, windowWidth - margin);
+      this.targetY = random(margin, windowHeight - margin);
     }
-    this.targetX = x;
-    this.targetY = y;
   }
 
   isMouseInside() {

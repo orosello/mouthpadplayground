@@ -616,16 +616,53 @@ function createMetricsDisplay() {
   metricsDiv.style.right = "20px";
   metricsDiv.style.zIndex = "1";
   metricsDiv.style.pointerEvents = "none";
+
+  // Create the "MouthPad^ League" button
+  let leagueButton = document.createElement("button");
+  leagueButton.id = "leagueButton";
+  leagueButton.textContent = "MouthPad^ League";
+  leagueButton.style.fontFamily = "'Press Start 2P', cursive";
+  leagueButton.style.fontSize = "10px"; // Adjusted to match metrics font size
+  leagueButton.style.padding = "10px 20px";
+  leagueButton.style.backgroundColor = "black";
+  leagueButton.style.color = "white";
+  leagueButton.style.border = "2px solid white";
+  leagueButton.style.borderRadius = "5px";
+  leagueButton.style.cursor = "pointer";
+  leagueButton.style.marginBottom = "20px";
+  leagueButton.style.display = "block";
+  leagueButton.style.pointerEvents = "auto";
+
+  leagueButton.addEventListener("mouseover", () => {
+    leagueButton.style.backgroundColor = "white";
+    leagueButton.style.color = "black";
+  });
+
+  leagueButton.addEventListener("mouseout", () => {
+    leagueButton.style.backgroundColor = "black";
+    leagueButton.style.color = "white";
+  });
+
+  leagueButton.addEventListener("click", () => {
+    window.open(
+      "https://lookerstudio.google.com/u/0/reporting/7649fde7-68f8-46bd-a3b1-ff2c894cf4c3/page/XWj8D?refresh=30",
+      "_blank"
+    );
+  });
+
+  // Add the button to the metrics div first
+  metricsDiv.appendChild(leagueButton);
+
+  // Then add the rest of the metrics
   METRIC_IDS.forEach((id) => {
     let metricElement = document.createElement("div");
     metricElement.className = "metric";
     metricElement.id = id;
-    metricElement.textContent = `${
-      id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")
-    }: 0`;
+    metricElement.textContent = `${id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, " $1")}: 0`;
     metricsDiv.appendChild(metricElement);
     metricElements[id] = metricElement;
   });
+
   document.body.appendChild(metricsDiv);
 }
 

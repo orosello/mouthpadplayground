@@ -30,7 +30,7 @@ function draw() {
 
   // Display the text
   text(
-    "To scroll, gently slide your tongue \nfrom front to back",
+    "To scroll, touch the top or bottom edge of the trackpad \n with your tongue and maintain contact.",
     -windowWidth / 2 + 50, // Adjusted for WEBGL mode
     windowHeight / 2 - 80,
     windowWidth - 100 // subtracting 100 to leave some margin on both sides

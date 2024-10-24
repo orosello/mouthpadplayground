@@ -15,6 +15,7 @@ function preload() {
 }
 
 function setup() {
+  // Adjust canvas size to fit the window dimensions
   createCanvas(windowWidth, windowHeight);
   bird = new Bird();
   pipes.push(new Pipe());
@@ -27,6 +28,10 @@ function draw() {
   background(0);
   updatePipes();
   updateBird();
+
+  // Draw the floor
+  fill(100); // Set a color for the floor
+  rect(0, height - 10, width, 10); // Draw a rectangle at the bottom
 
   // Clear the score graphics buffer
   scoreGraphics.clear();
@@ -108,6 +113,12 @@ function mousePressed() {
   }
 }
 
+function touchStarted() {
+  // Allow tapping anywhere on the screen to move the bird
+  bird.up();
+  return false; // Prevent default behavior
+}
+
 function Bird() {
   this.y = height / 2;
   this.x = windowWidth / 3;
@@ -127,8 +138,9 @@ function Bird() {
   };
 
   this.adjustPositionForHeight = function () {
-    if (this.y > height - this.radius) {
-      this.y = height - this.radius;
+    if (this.y > height - this.diameter) {
+      // Adjust for full bird visibility
+      this.y = height - this.diameter; // Position the bird so the bottom edge is at the floor
       this.velocity = 0;
     }
 

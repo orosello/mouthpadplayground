@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -9,11 +9,32 @@
     <link rel="stylesheet" type="text/css" href="../common.css" />
 
     <script src="../libraries/p5.min.js"></script>
+
+    <style>
+      canvas {
+        position: absolute;
+        z-index: 1; /* Ensure canvas is behind the menu */
+      }
+      #menu {
+        position: relative;
+        z-index: 2; /* Ensure menu is on top of the canvas */
+      }
+    </style>
   </head>
 
   <body>
     <!-- Navigation Bar -->
-    <script src="../navigation.js"></script>
+    <div id="menu">
+      <script src="../navigation.js"></script>
+    </div>
+    <script>
+      // Prevent touch events on the menu from propagating to the canvas
+      document
+        .getElementById("menu")
+        .addEventListener("touchstart", function (e) {
+          e.stopPropagation();
+        });
+    </script>
     <script src="sketch.js"></script>
   </body>
 </html>

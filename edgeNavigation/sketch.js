@@ -68,11 +68,11 @@ function getStage0Positions() {
     },
     {
       x: windowWidth - 60,
-      y: windowHeight - 60,
+      y: windowHeight - 120, // Adjusted to ensure visibility
       targetX: windowWidth / 2,
-      targetY: windowHeight - 60,
+      targetY: windowHeight - 120, // Adjusted to ensure visibility
     },
-    { x: 60, y: windowHeight - 60, targetX: 60, targetY: windowHeight / 2 },
+    { x: 60, y: windowHeight - 120, targetX: 60, targetY: windowHeight / 2 }, // Adjusted to ensure visibility
   ];
 }
 
@@ -87,11 +87,11 @@ function getStage1Positions() {
     },
     {
       x: windowWidth / 2,
-      y: windowHeight - 60,
+      y: windowHeight - 120, // Adjusted to ensure visibility
       targetX: windowWidth - 60,
-      targetY: windowHeight - 60,
+      targetY: windowHeight - 120, // Adjusted to ensure visibility
     },
-    { x: 60, y: windowHeight / 2, targetX: 60, targetY: windowHeight - 60 },
+    { x: 60, y: windowHeight / 2, targetX: 60, targetY: windowHeight - 120 }, // Adjusted to ensure visibility
   ];
 }
 

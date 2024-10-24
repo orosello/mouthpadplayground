@@ -50,19 +50,19 @@ function mousePressed() {
 
 // Function to initialize circles
 function initializeCircles() {
-  const radius = 200; // radius of the circle on which the circles will be placed
+  const maxRadius = min(windowWidth, windowHeight) / 3; // Calculate max radius based on window size
   const circleCount = 5;
-  const circleSize = 90;
+  const maxCircleSize = maxRadius / 3; // Calculate max circle size based on max radius
 
   // Create circles
   for (let i = 0; i < circleCount; i++) {
     let angle = map(i, 0, circleCount, 0, TWO_PI); // map the index to an angle between 0 and 2*PI
-    let x = windowWidth / 2 + radius * cos(angle); // calculate x coordinate
-    let y = windowHeight / 2 + radius * sin(angle) - 20; // calculate y coordinate
+    let x = windowWidth / 2 + maxRadius * cos(angle); // calculate x coordinate
+    let y = windowHeight / 2 + maxRadius * sin(angle) - 20; // calculate y coordinate
     circles.push({
       x: x,
       y: y,
-      r: circleSize,
+      r: maxCircleSize,
       color: baseCircleColor,
     });
   }

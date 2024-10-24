@@ -172,7 +172,7 @@ function setup() {
 
 function draw() {
   background(0);
-  text(macbethText, 50, yOffset, windowWidth - 20, windowHeight * 10);
+  text(macbethText, 50, yOffset, windowWidth - 50, windowHeight * 10); // Adjusted width
 }
 
 function mouseWheel(event) {

@@ -10,6 +10,9 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // Adjust the circle radius to fit within the screen with a maximum size
+  const maxRadius = 250; // Set a maximum radius for the circle
+  circleRadius = min(min(windowWidth, windowHeight) / 2 - 10, maxRadius); // Subtract 10 for padding
   let x = windowWidth / 2;
   let y = windowHeight / 2;
   let r = circleRadius;
@@ -85,8 +88,12 @@ function mouseReleased() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  // Recalculate the circle radius on window resize with a maximum size
+  const maxRadius = 200; // Set a maximum radius for the circle
+  circleRadius = min(min(windowWidth, windowHeight) / 2 - 10, maxRadius); // Subtract 10 for padding
   bubble1.x = windowWidth / 2;
   bubble1.y = windowHeight / 2;
+  bubble1.r = circleRadius;
 }
 
 class Bubble {

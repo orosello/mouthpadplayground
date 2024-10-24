@@ -73,9 +73,7 @@ function mouseReleased() {
 
 // Handle window resize event
 function windowResized() {
-  // Resize the canvas and reposition the bubble in the center
   resizeCanvas(windowWidth, windowHeight);
-  bubble.setPosition(windowWidth / 2, windowHeight / 2);
 }
 
 // Bubble class
@@ -127,9 +125,12 @@ class Bubble {
       y = random(this.r, windowHeight - this.r);
     }
 
-    // Ensure the new position is within the canvas boundaries
+    // Ensure the new position is within the canvas boundaries, accounting for the radius
     x = constrain(x, this.r, windowWidth - this.r);
-    y = constrain(y, this.r, windowHeight - this.r);
+
+    // Ensure the new position is above the bottom text area, accounting for the circle's radius
+    const maxY = windowHeight - BOTTOM_TEXT_Y_OFFSET - this.r;
+    y = constrain(y, this.r, maxY);
 
     // Set the target position
     this.targetX = x;

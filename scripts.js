@@ -32,6 +32,7 @@ const ipadGameOrder = [
   "../scrollText/scrollText.html", // I9
   "../pong/pong.html", // I10
   "../flappyBirds/flappyBirds.html", // I11
+  "../benchmark/benchmark.html", // I12
 ];
 
 // Store the current game order

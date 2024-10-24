@@ -12,7 +12,8 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  const canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent("game-container");
 
   // Check if device is mobile
   isMobile =
@@ -28,8 +29,8 @@ function setup() {
   bubble1 = new Bubble(windowWidth / 2, windowHeight / 2, circleRadius);
 
   // Prevent default touch behaviors
-  const canvas = document.querySelector("canvas");
-  canvas.addEventListener(
+  const canvasElement = document.querySelector("canvas");
+  canvasElement.addEventListener(
     "touchstart",
     function (e) {
       e.preventDefault();
@@ -37,7 +38,7 @@ function setup() {
     { passive: false }
   );
 
-  canvas.addEventListener(
+  canvasElement.addEventListener(
     "touchmove",
     function (e) {
       e.preventDefault();
@@ -49,28 +50,41 @@ function setup() {
   textFont(myFont);
   textSize(isMobile ? 14 : 16); // Smaller text on mobile
   textAlign(CENTER);
+
+  // Set up event listeners for the navbar
+  setupNavbarListeners();
+}
+
+function setupNavbarListeners() {
+  const navbar = document.getElementById("navbar-container");
+  navbar.addEventListener("mousedown", (e) => e.stopPropagation());
+  navbar.addEventListener("mouseup", (e) => e.stopPropagation());
+  navbar.addEventListener("touchstart", (e) => e.stopPropagation());
+  navbar.addEventListener("touchend", (e) => e.stopPropagation());
 }
 
 function touchStarted() {
-  const currentTime = millis();
+  if (!checkNavbarClick(touches[0].x, touches[0].y)) {
+    const currentTime = millis();
 
-  // Handle double-tap (simulates right-click on mobile)
-  if (currentTime - lastTouchTime < DOUBLE_TAP_DELAY) {
-    mouseButton = RIGHT;
-  } else {
-    mouseButton = LEFT;
+    // Handle double-tap (simulates right-click on mobile)
+    if (currentTime - lastTouchTime < DOUBLE_TAP_DELAY) {
+      mouseButton = RIGHT;
+    } else {
+      mouseButton = LEFT;
+    }
+
+    lastTouchTime = currentTime;
+
+    // Update touch position
+    if (touches.length > 0) {
+      mouseX = touches[0].x;
+      mouseY = touches[0].y;
+    }
+
+    bubble1.mouseIsPressed = true;
+    return false; // Prevent default
   }
-
-  lastTouchTime = currentTime;
-
-  // Update touch position
-  if (touches.length > 0) {
-    mouseX = touches[0].x;
-    mouseY = touches[0].y;
-  }
-
-  bubble1.mouseIsPressed = true;
-  return false; // Prevent default
 }
 
 function touchEnded() {
@@ -119,7 +133,7 @@ function draw() {
 }
 
 function mousePressed() {
-  if (!isMobile) {
+  if (!isMobile && !checkNavbarClick(mouseX, mouseY)) {
     bubble1.mouseIsPressed = true;
   }
 }
@@ -178,4 +192,10 @@ class Bubble {
     }
     return d < this.r;
   }
+}
+
+function checkNavbarClick(x, y) {
+  const navbar = document.getElementById("navbar-container");
+  const rect = navbar.getBoundingClientRect();
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }

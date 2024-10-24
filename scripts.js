@@ -22,8 +22,8 @@ const regularGameOrder = [
 
 const ipadGameOrder = [
   "../edgeNavigation/edgeNavigation.html", // I1
+  "../chaseBall/chaseBall.html",
   "../OnOff/onOff.html", // I2
-  "../chaseBall/chaseBall.html", // I3
   "../fitts/fitts.html", // I4
   "../orbit/orbit.html", // I5
   "../dragHole/dragHole.html", // I6

@@ -4,6 +4,8 @@ let myFont;
 let showInstruction = true;
 let showAwesomeText = false;
 let isMobile = false;
+let lastTouchTime = 0;
+const DOUBLE_TAP_DELAY = 300; // milliseconds between taps to count as double-tap
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -18,56 +20,69 @@ function setup() {
       navigator.userAgent
     );
 
-  // Adjust the circle radius to fit within the screen with a maximum size
-  const maxRadius = 250;
-  circleRadius = min(min(windowWidth, windowHeight) / 2 - 10, maxRadius);
+  // Adjust circle size based on screen size
+  const smallerDimension = min(windowWidth, windowHeight);
+  circleRadius = smallerDimension * 0.3; // Make circle 30% of smaller screen dimension
 
-  let x = windowWidth / 2;
-  let y = windowHeight / 2;
-  let r = circleRadius;
-  bubble1 = new Bubble(x, y, r);
+  // Initialize bubble at screen center
+  bubble1 = new Bubble(windowWidth / 2, windowHeight / 2, circleRadius);
 
-  // Prevent the context menu from opening on right click
-  canvas.oncontextmenu = function (e) {
-    e.preventDefault();
-  };
+  // Prevent default touch behaviors
+  const canvas = document.querySelector("canvas");
+  canvas.addEventListener(
+    "touchstart",
+    function (e) {
+      e.preventDefault();
+    },
+    { passive: false }
+  );
 
-  // Add touch event listeners for mobile
-  if (isMobile) {
-    canvas.addEventListener("touchstart", handleTouch, false);
-    canvas.addEventListener("touchend", handleTouchEnd, false);
+  canvas.addEventListener(
+    "touchmove",
+    function (e) {
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+
+  // Set up text properties
+  textFont(myFont);
+  textSize(isMobile ? 14 : 16); // Smaller text on mobile
+  textAlign(CENTER);
+}
+
+function touchStarted() {
+  const currentTime = millis();
+
+  // Handle double-tap (simulates right-click on mobile)
+  if (currentTime - lastTouchTime < DOUBLE_TAP_DELAY) {
+    mouseButton = RIGHT;
+  } else {
+    mouseButton = LEFT;
   }
 
-  textFont(myFont);
-  textSize(16);
-  textAlign(CENTER);
-  showInstruction = true;
-}
+  lastTouchTime = currentTime;
 
-function handleTouch(event) {
-  // Prevent default touch behavior
-  event.preventDefault();
+  // Update touch position
+  if (touches.length > 0) {
+    mouseX = touches[0].x;
+    mouseY = touches[0].y;
+  }
 
-  // Get touch coordinates
-  const touch = event.touches[0];
-  // Update p5.js mouseX and mouseY
-  mouseX = touch.clientX;
-  mouseY = touch.clientY;
-
-  // Simulate left mouse button press
-  mouseButton = LEFT;
   bubble1.mouseIsPressed = true;
+  return false; // Prevent default
 }
 
-function handleTouchEnd(event) {
-  event.preventDefault();
-  bubble1.mouseIsPressed = false;
+function touchEnded() {
+  if (mouseButton === LEFT) {
+    showAwesomeText = true;
+    setTimeout(() => {
+      showAwesomeText = false;
+    }, 1000);
+  }
 
-  // Show "Awesome!" text on touch release
-  showAwesomeText = true;
-  setTimeout(() => {
-    showAwesomeText = false;
-  }, 1000);
+  bubble1.mouseIsPressed = false;
+  return false; // Prevent default
 }
 
 function draw() {
@@ -84,7 +99,7 @@ function draw() {
   if (bubble1.mouseIsPressed && mouseButton === RIGHT) {
     noStroke();
     fill(255);
-    text("Woops! That's a right click", windowWidth / 2, windowHeight - 50);
+    text("Double-tap detected!", windowWidth / 2, windowHeight - 50);
     showInstruction = false;
   }
 
@@ -92,38 +107,26 @@ function draw() {
     noStroke();
     fill(255);
     const instructionText = isMobile
-      ? "Tap the circle"
+      ? "Tap the circle\nDouble-tap for alternative action"
       : "To click, press your tongue flat\nagainst the roof of your mouth";
 
-    if (isMobile) {
-      text(instructionText, windowWidth / 2, windowHeight - 50);
-    } else {
-      text(
-        "To click, press your tongue flat",
-        windowWidth / 2,
-        windowHeight - 70
-      );
-      text(
-        "against the roof of your mouth",
-        windowWidth / 2,
-        windowHeight - 50
-      );
-    }
+    const yOffset = isMobile ? 70 : 50;
+    const lines = instructionText.split("\n");
+    lines.forEach((line, i) => {
+      text(line, windowWidth / 2, windowHeight - yOffset + i * 20);
+    });
   }
 }
 
 function mousePressed() {
-  if (!isMobile && (mouseButton === LEFT || mouseButton === RIGHT)) {
+  if (!isMobile) {
     bubble1.mouseIsPressed = true;
   }
 }
 
 function mouseReleased() {
   if (!isMobile) {
-    if (mouseButton === LEFT || mouseButton === RIGHT) {
-      bubble1.mouseIsPressed = false;
-    }
-
+    bubble1.mouseIsPressed = false;
     if (mouseButton === LEFT) {
       showAwesomeText = true;
       setTimeout(() => {
@@ -135,11 +138,12 @@ function mouseReleased() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  const maxRadius = 200;
-  circleRadius = min(min(windowWidth, windowHeight) / 2 - 10, maxRadius);
+  const smallerDimension = min(windowWidth, windowHeight);
+  circleRadius = smallerDimension * 0.3;
   bubble1.x = windowWidth / 2;
   bubble1.y = windowHeight / 2;
   bubble1.r = circleRadius;
+  textSize(isMobile ? 14 : 16); // Adjust text size on resize
 }
 
 class Bubble {
@@ -166,7 +170,12 @@ class Bubble {
   }
 
   isMouseOver() {
-    let d = dist(mouseX, mouseY, this.x, this.y);
+    let d;
+    if (isMobile && touches.length > 0) {
+      d = dist(touches[0].x, touches[0].y, this.x, this.y);
+    } else {
+      d = dist(mouseX, mouseY, this.x, this.y);
+    }
     return d < this.r;
   }
 }

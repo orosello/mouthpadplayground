@@ -57,10 +57,18 @@ function setup() {
 
 function setupNavbarListeners() {
   const navbar = document.getElementById("navbar-container");
-  navbar.addEventListener("mousedown", (e) => e.stopPropagation());
-  navbar.addEventListener("mouseup", (e) => e.stopPropagation());
-  navbar.addEventListener("touchstart", (e) => e.stopPropagation());
-  navbar.addEventListener("touchend", (e) => e.stopPropagation());
+  navbar.addEventListener("mousedown", (e) => e.stopPropagation(), {
+    passive: true,
+  });
+  navbar.addEventListener("mouseup", (e) => e.stopPropagation(), {
+    passive: true,
+  });
+  navbar.addEventListener("touchstart", (e) => e.stopPropagation(), {
+    passive: true,
+  });
+  navbar.addEventListener("touchend", (e) => e.stopPropagation(), {
+    passive: true,
+  });
 }
 
 function touchStarted() {

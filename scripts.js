@@ -31,7 +31,7 @@ const ipadGameOrder = [
   "../scroll/scroll.html", // I8
   "../scrollText/scrollText.html", // I9
   "../pong/pong.html", // I10
-  "../flappyBirds/flappyBirds.html", // I11
+  // "../flappyBirds/flappyBirds.html", // I11
   "../benchmark/benchmark.html", // I12
 ];
 

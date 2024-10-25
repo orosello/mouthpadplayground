@@ -9,7 +9,6 @@ const regularGameOrder = [
   "../orbit/orbit.html",
   "../dragHole/dragHole.html",
   "../paint/paint.html",
-  "../scroll/scroll.html",
   "../scrollText/scrollText.html",
   "../benchmark/benchmark.html",
   "../pong/pong.html",

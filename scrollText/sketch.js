@@ -1,5 +1,35 @@
 let myFont;
-let macbethText = `
+const macbethText = ` 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 SCENE I. Three witches plan to meet Macbeth.
 
@@ -149,37 +179,225 @@ I'll see it done.
 DUNCAN
 What he hath lost noble Macbeth hath won.
 
-[EXEUNT]`; // Add more text as needed
+[EXEUNT]`;
 
-let yOffset;
+// Global variables for animation and scroll control
+let yOffset = 0;
+let targetYOffset = 0;
+let angle = 0;
+let targetAngle = 0;
+const SCROLL_SPEED = 0.1;
+const ROTATION_SPEED = 0.3; // Reduced for smoother rotation
+const SMOOTHING = 0.05; // Reduced for smoother animation
+let cubeSize; // Dynamic cube size based on screen size
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  textFont(myFont);
-  textSize(16); // Adjust text size as needed
-  fill(255); // White color
-  yOffset = windowHeight / 2 - textAscent(); // Initialize yOffset to half the window height minus the text ascent
+  // Create canvas in WEBGL mode for 3D rendering
+  createCanvas(windowWidth, windowHeight, WEBGL);
 
-  // Disable right-click context menu
-  document.addEventListener("contextmenu", function (event) {
-    event.preventDefault();
+  // Calculate cube size based on screen dimensions
+  updateCubeSize();
+
+  // Initialize text settings
+  textFont(myFont);
+  textSize(min(16, windowWidth / 40)); // Responsive text size
+  textAlign(LEFT, TOP);
+
+  // Set initial camera and rendering settings
+  angleMode(DEGREES);
+  perspective(60, width / height, 0.1, 10000);
+
+  // Disable context menu and handle touch events
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+  document.addEventListener("touchmove", (e) => e.preventDefault(), {
+    passive: false,
   });
 }
 
+function updateCubeSize() {
+  // Make cube size responsive to screen size
+  cubeSize = min(windowWidth, windowHeight) * 0.8;
+}
+
 function draw() {
+  // Clear background
   background(0);
-  text(macbethText, 50, yOffset, windowWidth - 50, windowHeight * 10); // Adjusted width
+
+  // Smooth scrolling animation
+  yOffset = lerp(yOffset, targetYOffset, SMOOTHING);
+  angle = lerp(angle, targetAngle, SMOOTHING);
+
+  // Draw background cube
+  drawCube();
+
+  // Draw scrolling text
+  drawText();
+
+  // Draw scroll indicator
+  drawScrollIndicator();
+}
+
+function drawCube() {
+  push();
+  // Position cube behind text
+  translate(0, 0, -1200); // Moved further back for larger appearance
+
+  // Rotate cube based on scroll position
+  rotateX(angle);
+  rotateY(angle * 0.7);
+
+  // Set cube appearance
+  stroke(255, 100); // Reduced opacity for better text readability
+  strokeWeight(5);
+  noFill();
+
+  // Draw nested cubes with increasing size
+  for (let i = 1; i <= 5; i++) {
+    push();
+    // Scale rotation slightly for each cube
+    rotateX(angle * (1 + i * 0.01));
+    rotateY(angle * (1 + i * 0.01));
+    // Reduce opacity for outer cubes
+    stroke(255, 40 / i);
+    box(cubeSize * (i * 0.5));
+    pop();
+  }
+
+  pop();
+}
+
+function drawText() {
+  push();
+  // Reset transformation for 2D text rendering
+  translate(-width / 2, -height / 2);
+
+  // Set text appearance
+  fill(255);
+  noStroke();
+
+  // Calculate text margins based on screen size
+  const margin = width * 0.1;
+
+  // Draw text with scroll offset
+  text(
+    macbethText,
+    margin,
+    yOffset + height / 2,
+    width - margin * 2,
+    height * 10
+  );
+
+  pop();
+}
+
+function drawScrollIndicator() {
+  if (yOffset > -10) {
+    push();
+    translate(0, height / 3);
+    fill(255, 255);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(min(14, windowWidth / 45));
+    text(
+      "To scroll, touch the top or bottom edge \n of the trackpad with your tongue and maintain contact.",
+      0,
+      0
+    );
+
+    // Animated arrow
+    const arrowBob = sin(frameCount * 2) * 10;
+    translate(0, 50 + arrowBob);
+    triangle(-10, 0, 10, 0, 0, 10);
+    pop();
+  }
 }
 
 function mouseWheel(event) {
-  yOffset -= event.delta;
-  yOffset = constrain(
-    yOffset,
-    -windowHeight * 9,
-    windowHeight / 2 - textAscent()
-  ); // Adjust constraints
+  // Update target scroll position
+  targetYOffset -= event.delta;
+
+  // Constrain scroll range
+  targetYOffset = constrain(
+    targetYOffset,
+    -height * 9,
+    height / 2 - textAscent()
+  );
+
+  // Update cube rotation target
+  targetAngle += event.delta * ROTATION_SPEED;
+
+  // Prevent default scroll behavior
+  return false;
+}
+
+function windowResized() {
+  // Handle window resizing
+  resizeCanvas(windowWidth, windowHeight);
+
+  // Update responsive elements
+  updateCubeSize();
+  textSize(min(16, windowWidth / 40));
+
+  // Recalculate scroll constraints
+  targetYOffset = constrain(
+    targetYOffset,
+    -height * 9,
+    height / 2 - textAscent()
+  );
+}
+
+// Enhanced mobile touch support
+let touchStartY = 0;
+let lastTouchY = 0;
+let touchVelocity = 0;
+
+function touchStarted() {
+  if (touches.length > 0) {
+    touchStartY = touches[0].y;
+    lastTouchY = touches[0].y;
+    touchVelocity = 0;
+  }
+  return false;
+}
+
+function touchMoved() {
+  if (touches.length > 0) {
+    // Calculate touch velocity for smoother scrolling
+    const currentY = touches[0].y;
+    touchVelocity = lastTouchY - currentY;
+    lastTouchY = currentY;
+
+    // Update targets based on touch movement
+    targetYOffset -= touchVelocity;
+    targetAngle += touchVelocity * ROTATION_SPEED;
+
+    // Constrain scroll range
+    targetYOffset = constrain(
+      targetYOffset,
+      -height * 9,
+      height / 2 - textAscent()
+    );
+  }
+  return false;
+}
+
+function touchEnded() {
+  // Add momentum scrolling
+  const momentum = touchVelocity * 0.5;
+  targetYOffset -= momentum;
+  targetAngle += momentum * ROTATION_SPEED;
+
+  // Constrain scroll range
+  targetYOffset = constrain(
+    targetYOffset,
+    -height * 9,
+    height / 2 - textAscent()
+  );
+
+  touchVelocity = 0;
+  return false;
 }

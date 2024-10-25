@@ -28,7 +28,7 @@ const ipadGameOrder = [
   "../orbit/orbit.html", // I5
   "../dragHole/dragHole.html", // I6
   "../paint/paint.html", // I7
-  "../scroll/scroll.html", // I8
+  // "../scroll/scroll.html", // I8
   "../scrollText/scrollText.html", // I9
   "../pong/pong.html", // I10
   // "../flappyBirds/flappyBirds.html", // I11

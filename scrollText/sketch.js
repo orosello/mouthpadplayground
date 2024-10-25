@@ -301,9 +301,9 @@ function drawScrollIndicator() {
     fill(255, 255);
     noStroke();
     textAlign(CENTER, CENTER);
-    textSize(min(14, windowWidth / 45));
+    textSize(min(16, windowWidth / 45));
     text(
-      "To scroll, touch the top or bottom edge \n of the trackpad with your tongue and maintain contact.",
+      "To scroll, touch the top or bottom edge \n of the trackpad with your tongue \n and maintain contact.",
       0,
       0
     );

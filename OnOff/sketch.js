@@ -5,7 +5,7 @@ let showInstruction = true;
 let showAwesomeText = false;
 let isMobile = false;
 let lastTouchTime = 0;
-const DOUBLE_TAP_DELAY = 300; // milliseconds between taps to count as double-tap
+const DOUBLE_TAP_DELAY = 300;
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -23,79 +23,82 @@ function setup() {
 
   // Adjust circle size based on screen size
   const smallerDimension = min(windowWidth, windowHeight);
-  circleRadius = smallerDimension * 0.3; // Make circle 30% of smaller screen dimension
+  circleRadius = smallerDimension * 0.3;
 
   // Initialize bubble at screen center
   bubble1 = new Bubble(windowWidth / 2, windowHeight / 2, circleRadius);
 
-  // Prevent default touch behaviors
-  const canvasElement = document.querySelector("canvas");
-  canvasElement.addEventListener(
-    "touchstart",
-    function (e) {
-      e.preventDefault();
-    },
-    { passive: false }
-  );
-
-  canvasElement.addEventListener(
-    "touchmove",
-    function (e) {
-      e.preventDefault();
-    },
-    { passive: false }
-  );
-
   // Set up text properties
   textFont(myFont);
-  textSize(isMobile ? 14 : 16); // Smaller text on mobile
+  textSize(isMobile ? 14 : 16);
   textAlign(CENTER);
 
-  // Set up event listeners for the navbar
-  setupNavbarListeners();
+  // Set up navbar and canvas event handlers
+  setupEventHandlers();
 }
 
-function setupNavbarListeners() {
+function setupEventHandlers() {
+  // Set up navbar event handlers
   const navbar = document.getElementById("navbar-container");
-  navbar.addEventListener("mousedown", (e) => e.stopPropagation(), {
-    passive: true,
+
+  const navbarEvents = [
+    "mousedown",
+    "mouseup",
+    "touchstart",
+    "touchend",
+    "click",
+  ];
+  navbarEvents.forEach((eventType) => {
+    navbar.addEventListener(
+      eventType,
+      (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      },
+      { passive: false }
+    );
   });
-  navbar.addEventListener("mouseup", (e) => e.stopPropagation(), {
-    passive: true,
+
+  // Set up canvas event handlers with proper touch handling
+  const canvasElement = document.querySelector("canvas");
+  canvasElement.addEventListener("touchstart", handleCanvasTouch, {
+    passive: false,
   });
-  navbar.addEventListener("touchstart", (e) => e.stopPropagation(), {
-    passive: true,
-  });
-  navbar.addEventListener("touchend", (e) => e.stopPropagation(), {
-    passive: true,
+  canvasElement.addEventListener("touchend", handleCanvasTouchEnd, {
+    passive: false,
   });
 }
 
-function touchStarted() {
-  if (!checkNavbarClick(touches[0].x, touches[0].y)) {
-    const currentTime = millis();
+function handleCanvasTouch(e) {
+  e.preventDefault();
 
-    // Handle double-tap (simulates right-click on mobile)
-    if (currentTime - lastTouchTime < DOUBLE_TAP_DELAY) {
-      mouseButton = RIGHT;
-    } else {
-      mouseButton = LEFT;
-    }
+  // Return early if touch is on navbar
+  if (
+    e.touches.length > 0 &&
+    checkNavbarClick(e.touches[0].clientX, e.touches[0].clientY)
+  ) {
+    return;
+  }
 
-    lastTouchTime = currentTime;
+  const currentTime = millis();
+  if (currentTime - lastTouchTime < DOUBLE_TAP_DELAY) {
+    mouseButton = RIGHT;
+  } else {
+    mouseButton = LEFT;
+  }
+  lastTouchTime = currentTime;
 
-    // Update touch position
-    if (touches.length > 0) {
-      mouseX = touches[0].x;
-      mouseY = touches[0].y;
-    }
-
+  if (e.touches.length > 0) {
+    const rect = e.target.getBoundingClientRect();
+    mouseX = e.touches[0].clientX - rect.left;
+    mouseY = e.touches[0].clientY - rect.top;
     bubble1.mouseIsPressed = true;
-    return false; // Prevent default
   }
 }
 
-function touchEnded() {
+function handleCanvasTouchEnd(e) {
+  e.preventDefault();
+
   if (mouseButton === LEFT) {
     showAwesomeText = true;
     setTimeout(() => {
@@ -104,7 +107,6 @@ function touchEnded() {
   }
 
   bubble1.mouseIsPressed = false;
-  return false; // Prevent default
 }
 
 function draw() {
@@ -165,7 +167,7 @@ function windowResized() {
   bubble1.x = windowWidth / 2;
   bubble1.y = windowHeight / 2;
   bubble1.r = circleRadius;
-  textSize(isMobile ? 14 : 16); // Adjust text size on resize
+  textSize(isMobile ? 14 : 16);
 }
 
 class Bubble {
@@ -204,6 +206,14 @@ class Bubble {
 
 function checkNavbarClick(x, y) {
   const navbar = document.getElementById("navbar-container");
+  if (!navbar) return false;
+
   const rect = navbar.getBoundingClientRect();
-  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+  const buffer = 10; // Adding a small buffer for easier clicking
+  return (
+    x >= rect.left - buffer &&
+    x <= rect.right + buffer &&
+    y >= rect.top - buffer &&
+    y <= rect.bottom + buffer
+  );
 }

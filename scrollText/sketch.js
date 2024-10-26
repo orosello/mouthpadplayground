@@ -283,7 +283,7 @@ function drawText() {
   const margin = width * 0.1;
 
   // Adjust the x position to ensure text is not cropped
-  const xOffset = margin + 10; // Add a small offset to prevent cropping
+  const xOffset = margin + 30; // Add a small offset to prevent cropping
 
   // Draw text with scroll offset
   text(

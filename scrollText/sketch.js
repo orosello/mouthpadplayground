@@ -348,6 +348,9 @@ function windowResized() {
     -height * 9,
     height / 2 - textAscent()
   );
+
+  // Force redraw after resize
+  redraw();
 }
 
 // Enhanced mobile touch support

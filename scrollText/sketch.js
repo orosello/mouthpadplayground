@@ -282,10 +282,13 @@ function drawText() {
   // Calculate text margins based on screen size
   const margin = width * 0.1;
 
+  // Adjust the x position to ensure text is not cropped
+  const xOffset = margin + 10; // Add a small offset to prevent cropping
+
   // Draw text with scroll offset
   text(
     macbethText,
-    margin,
+    xOffset, // Use adjusted x position
     yOffset + height / 2,
     width - margin * 2,
     height * 10
@@ -352,6 +355,7 @@ function windowResized() {
   // Force redraw after resize
   redraw();
 }
+("");
 
 // Enhanced mobile touch support
 let touchStartY = 0;

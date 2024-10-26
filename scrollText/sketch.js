@@ -251,7 +251,7 @@ function drawCube() {
   rotateY(angle * 0.7);
 
   // Set cube appearance
-  stroke(255, 100); // Reduced opacity for better text readability
+  stroke(255, 255); // Increased opacity by 20%
   strokeWeight(5);
   noFill();
 
@@ -261,8 +261,8 @@ function drawCube() {
     // Scale rotation slightly for each cube
     rotateX(angle * (1 + i * 0.01));
     rotateY(angle * (1 + i * 0.01));
-    // Reduce opacity for outer cubes
-    stroke(255, 40 / i);
+    // Increase opacity for outer cubes
+    stroke(255, 48 / i); // Increased opacity by 20%
     box(cubeSize * (i * 0.5));
     pop();
   }

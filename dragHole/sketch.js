@@ -1,5 +1,5 @@
 let circleDiameter = 70;
-let gameWon = false; // New variable to track game state
+let gameWon = false;
 
 // Define the main circle object
 let circle = {
@@ -10,8 +10,8 @@ let circle = {
   offsetX: 0,
   offsetY: 0,
   disappearing: false,
-  jitter: false, // Add this property to control the jitter effect
-  hovering: false, // Add this property to track when the circle is hovering over the target
+  jitter: false,
+  hovering: false,
 };
 
 // Define the target circle object
@@ -41,6 +41,16 @@ function setup() {
 
   // Disable right-click context menu
   canvas.elt.oncontextmenu = (e) => e.preventDefault();
+
+  // Prevent background selection/highlighting
+  canvas.elt.style.touchAction = "none"; // Prevent default touch actions
+  canvas.elt.style.webkitTapHighlightColor = "rgba(0,0,0,0)"; // For Safari on iOS
+
+  // Disable text selection on the canvas
+  canvas.elt.style.userSelect = "none";
+  canvas.elt.style.webkitUserSelect = "none"; // For Safari on iOS
+  canvas.elt.style.msUserSelect = "none"; // For IE/Edge
+  canvas.elt.style.mozUserSelect = "none"; // For Firefox
 }
 
 // This function is called repeatedly to draw the scene
@@ -206,7 +216,7 @@ function startDraggingCircle() {
 function mouseReleased() {
   // Stop dragging the circle
   circle.dragging = false;
-  circle.jitter = false; // Stop the jitter effect
+  circle.jitter = false;
 
   // If the circle is hovering over the target when the mouse button is released, the game is won
   if (circle.hovering) {

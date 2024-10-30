@@ -16,10 +16,13 @@ function setup() {
   initializeCircles();
   selectTargetCircle();
 
-  // Prevent the context menu from appearing on right click
-  canvas.elt.addEventListener("contextmenu", function (e) {
+  // Prevent the context menu from appearing on right click for the entire document
+  document.addEventListener("contextmenu", function (e) {
     e.preventDefault();
   });
+
+  // Disable text selection on the canvas
+  canvas.elt.style.userSelect = "none";
 
   // ... rest of the setup code ...
 }
@@ -46,6 +49,21 @@ function draw() {
 
 function mousePressed() {
   handleMousePress();
+}
+
+function mouseDragged() {
+  // Allow dragging only if the mouse is over the target circle
+  let distanceToTarget = dist(
+    mouseX,
+    mouseY,
+    circles[targetCircleIndex].x,
+    circles[targetCircleIndex].y
+  );
+
+  if (distanceToTarget < circles[targetCircleIndex].r) {
+    circles[targetCircleIndex].x = mouseX;
+    circles[targetCircleIndex].y = mouseY;
+  }
 }
 
 // Function to initialize circles

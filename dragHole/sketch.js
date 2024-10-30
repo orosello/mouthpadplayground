@@ -30,6 +30,11 @@ function setup() {
   // Create a canvas that fills the window
   canvas = createCanvas(windowWidth, windowHeight);
 
+  // Prevent the context menu from appearing on right click for the canvas
+  canvas.elt.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
+
   // Position the target circle in the center of the canvas with a margin
   let margin = targetCircle.diameter;
   targetCircle.x = constrain(width / 2, margin, width - margin);

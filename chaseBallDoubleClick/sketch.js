@@ -103,8 +103,12 @@ function mousePressed() {
 }
 
 function mouseReleased() {
-  if ((mouseButton === LEFT || mouseButton === RIGHT) && bubble.isMouseInside())
+  if (
+    (mouseButton === LEFT || mouseButton === RIGHT) &&
+    bubble.isMouseInside()
+  ) {
     bubble.mouseIsPressed = false;
+  }
 }
 
 // Handle mouse double click event
@@ -230,6 +234,12 @@ class Bubble {
     ) {
       this.targetX = random(margin, windowWidth - margin);
       this.targetY = random(margin, windowHeight - margin);
+    }
+
+    // If the bubble is not moving, update x and y immediately (Fix applied here)
+    if (!this.isMoving) {
+      this.x = this.targetX;
+      this.y = this.targetY;
     }
   }
 

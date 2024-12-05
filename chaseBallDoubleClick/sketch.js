@@ -115,10 +115,10 @@ function mouseReleased() {
 function doubleClicked() {
   if (bubble.isMouseInside()) {
     bubble.startAnimation();
-    if (isEasyMode) {
-      bubble.moveRandomly();
-    } else {
+    if (!isEasyMode) {
       bubble.checkMouseDoubleClick();
+    } else {
+      moveCount++;
     }
   }
 }
@@ -236,7 +236,7 @@ class Bubble {
       this.targetY = random(margin, windowHeight - margin);
     }
 
-    // If the bubble is not moving, update x and y immediately (Fix applied here)
+    // If the bubble is not moving, update x and y immediately
     if (!this.isMoving) {
       this.x = this.targetX;
       this.y = this.targetY;

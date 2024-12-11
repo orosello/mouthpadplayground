@@ -121,4 +121,29 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("contextmenu", function (e) {
     e.preventDefault();
   });
+
+  // Add touch event handlers for navigation buttons
+  const navButtons = document.querySelectorAll(".button");
+  navButtons.forEach((button) => {
+    // Remove existing onclick and ontouchend attributes
+    button.removeAttribute("onclick");
+    button.removeAttribute("ontouchend");
+
+    // Add touch event listeners
+    button.addEventListener("touchstart", (e) => {
+      e.preventDefault(); // Prevent double-firing on iOS
+      const action = button.getAttribute("data-action");
+      if (action && typeof window[action] === "function") {
+        window[action]();
+      }
+    });
+
+    // Keep click events for non-touch devices
+    button.addEventListener("click", (e) => {
+      const action = button.getAttribute("data-action");
+      if (action && typeof window[action] === "function") {
+        window[action]();
+      }
+    });
+  });
 });

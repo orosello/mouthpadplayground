@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -9,11 +9,23 @@
     <link rel="stylesheet" type="text/css" href="../common.css" />
 
     <script src="../libraries/p5.min.js"></script>
+    <style>
+      canvas {
+        position: absolute;
+        z-index: 1;
+      }
+      #navbar-container {
+        position: relative;
+        z-index: 2;
+      }
+    </style>
   </head>
 
   <body>
     <!-- Navigation Bar -->
-    <script src="../navigation.js"></script>
+    <div id="navbar-container">
+      <script src="../navigation.js"></script>
+    </div>
 
     <!-- JS Game -->
     <script src="sketch.js"></script>

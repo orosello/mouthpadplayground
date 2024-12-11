@@ -1,4 +1,4 @@
-let circleRadius = 250;
+let circleRadius = 120;
 let bubble1;
 let myFont;
 let showInstruction = true;

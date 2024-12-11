@@ -3,6 +3,7 @@ const FONT_SIZE = 16;
 const SAFE_AREA_WIDTH = 160;
 const SAFE_AREA_HEIGHT = 50;
 const BRUSH_WIDTH = 40; // Set a constant brush width
+const BUTTON_TOP_MARGIN = 60; // Space for navbar
 
 let myFont;
 let showInstructions = true; // This should ensure instructions are shown initially
@@ -78,14 +79,15 @@ function setup() {
 }
 
 function positionButtons() {
-  const buttonMargin = 30; // Margin between the buttons
-  const buttonWidth = 150; // Width of the buttons
+  const buttonMargin = 30; // Space between buttons
+  const buttonWidth = 150;
 
-  // Position the buttons near the top right edge
-  toggleButton.position(windowWidth - buttonWidth - buttonMargin, 10);
+  // Position buttons at top left, below navbar, side by side
+  toggleButton.position(buttonMargin, BUTTON_TOP_MARGIN);
+
   clearButton.position(
-    windowWidth - buttonWidth - buttonMargin,
-    10 + buttonMargin + toggleButton.height
+    buttonMargin * 2 + buttonWidth, // Position after first button plus margin
+    BUTTON_TOP_MARGIN
   );
 }
 

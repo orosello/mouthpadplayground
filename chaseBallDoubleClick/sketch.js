@@ -1,12 +1,12 @@
 // Constants
 const CIRCLE_RADIUS = 50;
 const FONT_SIZE = 16;
-const BOTTOM_TEXT_Y_OFFSET = 50;
+const BOTTOM_TEXT_Y_OFFSET = 100;
 const ANIMATION_DURATION = 1000; // 1 second animation
 const MAX_SCALE = 3; // Maximum scale factor for the animation
-const BUTTON_PADDING = 3;
-const BUTTON_FONT_SIZE = 11; // Increased from 10
-const BUTTON_MIN_WIDTH = 150; // New constant for minimum button width
+const BUTTON_PADDING = 5;
+const BUTTON_FONT_SIZE = 14;
+const BUTTON_MIN_WIDTH = 150; // Revert back to 150
 
 // Variables
 let bubble;
@@ -26,7 +26,7 @@ function setup() {
   bubble = new Bubble(windowWidth / 2, windowHeight / 2, CIRCLE_RADIUS);
 
   // Create Easy Mode button
-  easyModeButton = createButton("Easy Mode: OFF");
+  easyModeButton = createButton("Easy: OFF");
   styleButton(easyModeButton);
   positionButton();
   easyModeButton.mousePressed(toggleEasyMode);
@@ -45,12 +45,12 @@ function styleButton(button) {
   button.style("font-family", '"Press Start 2P", cursive');
   button.style("font-size", `${BUTTON_FONT_SIZE}px`);
   button.style("color", "#FFFFFF");
-  button.style("background-color", "#000000");
-  button.style("border", "0px solid #FFFFFF");
-  button.style("padding", `${BUTTON_PADDING}px ${BUTTON_PADDING * 2}px`); // Increased horizontal padding
+  button.style("background-color", "black");
+  button.style("border", "1px solid #FFFFFF");
+  button.style("padding", `${BUTTON_PADDING}px ${BUTTON_PADDING * 2}px`);
   button.style("cursor", "pointer");
-  button.style("min-width", `${BUTTON_MIN_WIDTH}px`); // Set minimum width
-  button.style("white-space", "nowrap"); // Prevent text wrapping
+  button.style("min-width", `${BUTTON_MIN_WIDTH}px`);
+  button.style("white-space", "nowrap");
 }
 
 function positionButton() {
@@ -135,7 +135,7 @@ function windowResized() {
 // Toggle Easy Mode
 function toggleEasyMode() {
   isEasyMode = !isEasyMode;
-  easyModeButton.html(isEasyMode ? "Easy Mode: ON" : "Easy Mode: OFF");
+  easyModeButton.html(isEasyMode ? "Easy: ON" : "Easy: OFF");
 
   if (isEasyMode) {
     bubble.setPosition(windowWidth / 2, windowHeight / 2);

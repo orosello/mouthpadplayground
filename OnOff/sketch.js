@@ -116,14 +116,14 @@ function draw() {
   if (showAwesomeText) {
     noStroke();
     fill(255);
-    text("Awesome!", windowWidth / 2, windowHeight - 50);
+    text("Awesome!", windowWidth / 2, windowHeight - 100);
     showInstruction = false;
   }
 
   if (bubble1.mouseIsPressed && mouseButton === RIGHT) {
     noStroke();
     fill(255);
-    text("Double-tap detected!", windowWidth / 2, windowHeight - 50);
+    text("Whoops! that's a right click", windowWidth / 2, windowHeight - 100);
     showInstruction = false;
   }
 
@@ -137,7 +137,7 @@ function draw() {
     const yOffset = isMobile ? 70 : 50;
     const lines = instructionText.split("\n");
     lines.forEach((line, i) => {
-      text(line, windowWidth / 2, windowHeight - yOffset + i * 20);
+      text(line, windowWidth / 2, windowHeight - yOffset - 100 + i * 20);
     });
   }
 }
@@ -156,6 +156,12 @@ function mouseReleased() {
       setTimeout(() => {
         showAwesomeText = false;
       }, 1000);
+    } else if (mouseButton === RIGHT) {
+      showAwesomeText = true;
+      setTimeout(() => {
+        showAwesomeText = false;
+      }, 1000);
+      text("Whoops! that's a right click", windowWidth / 2, windowHeight - 50);
     }
   }
 }

@@ -1,7 +1,7 @@
 // Constants
 const CIRCLE_RADIUS = 20;
 const FONT_SIZE = 16;
-const BOTTOM_TEXT_Y_OFFSET = 50;
+const BOTTOM_TEXT_Y_OFFSET = 100;
 
 // Variables
 let bubble;

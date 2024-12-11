@@ -116,4 +116,9 @@ document.addEventListener("DOMContentLoaded", () => {
   } else if (storedMode === "regular") {
     currentGameOrder = [...regularGameOrder];
   }
+
+  // Disable context menu on the whole document
+  document.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
 });

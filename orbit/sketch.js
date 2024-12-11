@@ -65,7 +65,7 @@ let s = function (p) {
     p.text(
       "To click and drag, hold your tongue \nagainst the roof of your mouth. \nNext, move the cursor. Then, tap to release.",
       windowWidth / 2 - (windowWidth - 100) / 2,
-      windowHeight - 80,
+      windowHeight - 100,
       windowWidth - 100 // subtracting 100 to leave some margin on both sides
     );
   };

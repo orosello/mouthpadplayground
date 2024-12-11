@@ -15,6 +15,16 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-tap-highlight-color: rgba(
+    0,
+    0,
+    0,
+    0
+  ); /* Remove tap highlight on iOS */
 }
 
 .index-body {
@@ -99,8 +109,9 @@ body {
   color: rgb(255, 255, 255);
   background-color: black;
   border: none;
-  padding: 10px 20px;
+  padding: 20px 20px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .button:hover {
@@ -111,4 +122,8 @@ body {
 .navbar {
   position: relative;
   z-index: 10; /* Ensure it's above the p5.js canvas */
+}
+
+canvas {
+  touch-action: none; /* Prevent default touch actions */
 }

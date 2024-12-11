@@ -41,7 +41,7 @@ function draw() {
     text(
       "Click on the white circle",
       windowWidth / 2 - (windowWidth - 100) / 2,
-      windowHeight - 50,
+      windowHeight - 100,
       windowWidth - 100 // subtracting 100 to leave some margin on both sides
     );
   }

@@ -46,11 +46,11 @@ function setup() {
   document.head.appendChild(style);
 
   // Toggle button for eraser and paintbrush
-  toggleButton = createButton("Pick up eraser");
+  toggleButton = createButton("Eraser");
   toggleButton.mousePressed(toggleTool);
 
-  // Clear canvas button
-  clearButton = createButton("Clear canvas");
+  // Clear button
+  clearButton = createButton("Clear");
   clearButton.mousePressed(() => window.location.reload());
 
   // Styling the buttons
@@ -63,7 +63,7 @@ function setup() {
     button.style("font-size", "12px");
     button.style("padding", "10px 15px");
     button.style("white-space", "nowrap");
-    button.style("width", "240px"); // Increased width by 20px
+    button.style("width", "150px"); // Increased width by 20px
     button.style("text-align", "center");
   });
 
@@ -78,8 +78,15 @@ function setup() {
 }
 
 function positionButtons() {
-  toggleButton.position(windowWidth - 260, 30); // Adjusted position
-  clearButton.position(windowWidth - 260, 80); // Adjusted position
+  const buttonMargin = 30; // Margin between the buttons
+  const buttonWidth = 150; // Width of the buttons
+
+  // Position the buttons near the top right edge
+  toggleButton.position(windowWidth - buttonWidth - buttonMargin, 10);
+  clearButton.position(
+    windowWidth - buttonWidth - buttonMargin,
+    10 + buttonMargin + toggleButton.height
+  );
 }
 
 function draw() {
@@ -140,7 +147,7 @@ function draw() {
 
 function toggleTool() {
   isEraser = !isEraser;
-  toggleButton.html(isEraser ? "Pick up paintbrush" : "Pick up eraser");
+  toggleButton.html(isEraser ? "Paintbrush" : "Eraser");
 }
 
 function windowResized() {

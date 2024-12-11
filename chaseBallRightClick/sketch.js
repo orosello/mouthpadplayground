@@ -8,6 +8,8 @@ const BUTTON_PADDING = 5;
 const BUTTON_FONT_SIZE = 14; // Revert back to 11
 const BUTTON_MIN_WIDTH = 150; // Revert back to 150
 const WRONG_CLICK_DURATION = 1000; // Duration to show wrong click message
+const BUTTON_MARGIN_BOTTOM = 40; // New constant for bottom margin
+const BUTTON_TOP_MARGIN = 70; // Space for navbar
 
 // Variables
 let bubble;
@@ -49,20 +51,20 @@ function styleButton(button) {
   button.style("font-size", `${BUTTON_FONT_SIZE}px`);
   button.style("color", "#FFFFFF");
   button.style("background-color", "black");
-  button.style("border", "1px solid #FFFFFF"); // Revert back to 0px border
-  button.style("padding", `${BUTTON_PADDING}px ${BUTTON_PADDING * 2}px`); // Revert padding
+  button.style("border", "1px solid #FFFFFF");
+  button.style("padding", `${BUTTON_PADDING}px ${BUTTON_PADDING * 2}px`);
   button.style("cursor", "pointer");
-  button.style("min-width", `${BUTTON_MIN_WIDTH}px`); // Set minimum width
-  button.style("white-space", "nowrap"); // Prevent text wrapping
+  button.style("min-width", `${BUTTON_MIN_WIDTH}px`);
+  button.style("white-space", "nowrap");
 }
 
 function positionButton() {
-  easyModeButton.size(BUTTON_MIN_WIDTH, AUTO); // Set the button size
-  let buttonWidth = easyModeButton.width;
-  let buttonHeight = easyModeButton.height;
+  easyModeButton.size(BUTTON_MIN_WIDTH, AUTO);
+
+  // Position at top left with padding, below navbar
   easyModeButton.position(
-    windowWidth - buttonWidth - BUTTON_PADDING - 20,
-    BUTTON_PADDING
+    BUTTON_PADDING + 20, // Small padding from left edge
+    BUTTON_TOP_MARGIN // Space below navbar
   );
 }
 

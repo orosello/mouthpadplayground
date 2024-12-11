@@ -4,9 +4,11 @@ const FONT_SIZE = 16;
 const BOTTOM_TEXT_Y_OFFSET = 100;
 const ANIMATION_DURATION = 1000; // 1 second animation
 const MAX_SCALE = 3; // Maximum scale factor for the animation
-const BUTTON_PADDING = 5;
+const BUTTON_PADDING = 5; // Revert to original padding
 const BUTTON_FONT_SIZE = 14;
 const BUTTON_MIN_WIDTH = 150; // Revert back to 150
+const BUTTON_MARGIN_BOTTOM = 40; // New constant for bottom margin
+const BUTTON_TOP_MARGIN = 70; // Space for navbar
 
 // Variables
 let bubble;
@@ -54,12 +56,12 @@ function styleButton(button) {
 }
 
 function positionButton() {
-  easyModeButton.size(BUTTON_MIN_WIDTH, AUTO); // Set the button size
-  let buttonWidth = easyModeButton.width;
-  let buttonHeight = easyModeButton.height;
+  easyModeButton.size(BUTTON_MIN_WIDTH, AUTO);
+
+  // Position at top left with padding, below navbar
   easyModeButton.position(
-    windowWidth - buttonWidth - BUTTON_PADDING - 20,
-    BUTTON_PADDING
+    BUTTON_PADDING + 20, // Small padding from left edge
+    BUTTON_TOP_MARGIN // Space below navbar
   );
 }
 

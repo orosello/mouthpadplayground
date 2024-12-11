@@ -51,21 +51,6 @@ function mousePressed() {
   handleMousePress();
 }
 
-function mouseDragged() {
-  // Allow dragging only if the mouse is over the target circle
-  let distanceToTarget = dist(
-    mouseX,
-    mouseY,
-    circles[targetCircleIndex].x,
-    circles[targetCircleIndex].y
-  );
-
-  if (distanceToTarget < circles[targetCircleIndex].r) {
-    circles[targetCircleIndex].x = mouseX;
-    circles[targetCircleIndex].y = mouseY;
-  }
-}
-
 // Function to initialize circles
 function initializeCircles() {
   const maxRadius = min(windowWidth, windowHeight) / 3; // Calculate max radius based on window size

@@ -21,17 +21,16 @@ const regularGameOrder = [
 
 const ipadGameOrder = [
   "../edgeNavigation/edgeNavigation.html", // I1
-  "../chaseBall/chaseBall.html",
-  "../OnOff/onOff.html", // I2
+  "../chaseBall/chaseBall.html", // I2
+  "../OnOff/onOff.html", // I3
   "../fitts/fitts.html", // I4
   "../orbit/orbit.html", // I5
   "../dragHole/dragHole.html", // I6
   "../paint/paint.html", // I7
-  // "../scroll/scroll.html", // I8
-  "../scrollText/scrollText.html", // I9
+  "../scrollText/scrollText.html", // I8
+  "../chaseBallRightClick/chaseBallRightClick.html", // I9
   "../pong/pong.html", // I10
-  // "../flappyBirds/flappyBirds.html", // I11
-  "../benchmark/benchmark.html", // I12
+  "../benchmark/benchmark.html", // I11
 ];
 
 // Store the current game order

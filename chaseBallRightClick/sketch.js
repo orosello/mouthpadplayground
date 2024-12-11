@@ -86,25 +86,31 @@ function draw() {
 }
 
 // Handle mouse press and release events
-function mousePressed() {
-  if (mouseButton === RIGHT && bubble.isMouseInside()) {
+function mousePressed(event) {
+  // Check if it's a right click or secondary click (for iPad)
+  if (
+    (mouseButton === RIGHT || (event && event.button === 2)) &&
+    bubble.isMouseInside()
+  ) {
     bubble.startAnimation();
     if (!isEasyMode) {
       let newX, newY;
       do {
         newX = random(CIRCLE_RADIUS, windowWidth - CIRCLE_RADIUS);
         newY = random(CIRCLE_RADIUS, windowHeight - CIRCLE_RADIUS);
-      } while (dist(newX, newY, bubble.x, bubble.y) < CIRCLE_RADIUS * 2); // Ensure new position is sufficiently different
+      } while (dist(newX, newY, bubble.x, bubble.y) < CIRCLE_RADIUS * 2);
 
       bubble.setPosition(newX, newY);
-      moveCount++; // Increment the move count each time the bubble moves
+      moveCount++;
     }
   }
 }
 
 function mouseReleased() {
-  if ((mouseButton === LEFT || mouseButton === RIGHT) && bubble.isMouseInside())
+  // Only reset mouseIsPressed if it was a right click
+  if (mouseButton === RIGHT && bubble.isMouseInside()) {
     bubble.mouseIsPressed = false;
+  }
 }
 
 // Handle window resize event

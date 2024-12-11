@@ -74,9 +74,9 @@ function draw() {
   noStroke();
   fill(255);
   if (gameWon) {
-    text("Nice!", windowWidth / 2, windowHeight - 50);
+    text("Nice!", windowWidth / 2, windowHeight - 100);
   } else if (circle.hovering) {
-    text("...now drop the ball", windowWidth / 2, windowHeight - 50);
+    text("...now drop the ball", windowWidth / 2, windowHeight - 100);
   } else {
     text(
       "Drag and drop the white circle \n into the hole",

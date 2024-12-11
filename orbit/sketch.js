@@ -63,7 +63,7 @@ let s = function (p) {
 
     // Display the text
     p.text(
-      "To click and drag, hold your \ntongue against the roof of your\n mouth. Next, move the cursor. Then, tap to release.",
+      "To click and drag, hold your\n tongue against the roof of \n your mouth. Next, move the \n cursor. Then, tap to release.",
       windowWidth / 2 - (windowWidth - 100) / 2,
       windowHeight - 100,
       windowWidth - 100 // subtracting 100 to leave some margin on both sides

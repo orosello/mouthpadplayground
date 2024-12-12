@@ -24,12 +24,12 @@ const ipadGameOrder = [
   "../chaseBall/chaseBall.html", // I2
   "../OnOff/onOff.html", // I3
   "../fitts/fitts.html", // I4
-  "../orbit/orbit.html", // I5
-  "../dragHole/dragHole.html", // I6
-  "../paint/paint.html", // I7
-  "../scrollText/scrollText.html", // I8
-  "../chaseBallRightClick/chaseBallRightClick.html", // I9
-  "../pong/pong.html", // I10
+  "../chaseBallDoubleClick/chaseBallDoubleClick.html", // I5
+  "../orbit/orbit.html", // I6
+  "../dragHole/dragHole.html", // I7
+  "../paint/paint.html", // I8
+  "../scrollText/scrollText.html", // I9
+  "../chaseBallRightClick/chaseBallRightClick.html", // I10
   "../benchmark/benchmark.html", // I11
 ];
 

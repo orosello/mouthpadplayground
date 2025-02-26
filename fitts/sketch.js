@@ -6,7 +6,9 @@ let baseCircleColor = 30;
 let canvas; // Define a variable to hold the canvas object
 let showText = true; // Variable to control the visibility of the text
 let myFont; // Variable to hold the font
-// let sizes = [10, 20, 40, 80];  // Array of possible target sizes
+let smallSizeButton; // Button to set small target size
+let isHardMode = false; // Track if hard mode is active
+let previousRadius; // Store the previous radius when entering hard mode
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -16,6 +18,12 @@ function setup() {
   canvas = createCanvas(windowWidth, windowHeight); // Store the canvas object
   initializeCircles();
   selectTargetCircle();
+
+  // Create Small Size button with "Hard Mode" title
+  smallSizeButton = createButton("Hard Mode: OFF");
+  styleButton(smallSizeButton);
+  positionButton();
+  smallSizeButton.mousePressed(setSmallSize);
 
   // Prevent the context menu from appearing on right click for the entire document
   document.addEventListener("contextmenu", function (e) {
@@ -148,10 +156,16 @@ function updateCircleSizes() {
   let newRadius;
   switch (circles[0].r) {
     case 70:
+      newRadius = 50;
+      break;
+    case 50:
       newRadius = 20;
       break;
     case 20:
-      newRadius = 7;
+      newRadius = 40;
+      break;
+    case 40:
+      newRadius = 7; //aprox close window size icon, Corbin's suggestion
       break;
     case 7:
     default:
@@ -183,4 +197,59 @@ function drawProgressBar() {
   stroke(100); // Set line color to white
   line(50, windowHeight - 20, 50 + progressBarWidth, windowHeight - 20); // Draw line
   noStroke(); // Reset stroke settings
+}
+
+// Style the button
+function styleButton(button) {
+  button.style("font-family", '"Press Start 2P", cursive');
+  button.style("font-size", "14px");
+  button.style("color", "#FFFFFF");
+  button.style("background-color", "black");
+  button.style("border", "1px solid #FFFFFF");
+  button.style("padding", "5px 10px");
+  button.style("cursor", "pointer");
+  button.style("min-width", "150px");
+  button.style("white-space", "nowrap");
+}
+
+function positionButton() {
+  // Remove fixed size to allow button to expand based on content
+  smallSizeButton.size(AUTO, AUTO);
+  
+  // Position at top left with padding, below navbar
+  smallSizeButton.position(
+    25, // Small padding from left edge
+    70  // Space below navbar
+  );
+}
+
+// Function to toggle hard mode
+function setSmallSize() {
+  isHardMode = !isHardMode;
+  
+  if (isHardMode) {
+    // Store current radius before switching to hard mode
+    previousRadius = circles[0].r;
+    
+    // Set all circles to the smallest size (7)
+    for (let circle of circles) {
+      circle.r = 7;
+    }
+    
+    // Update button text
+    smallSizeButton.html("Hard Mode: ON");
+  } else {
+    // Restore previous radius
+    for (let circle of circles) {
+      circle.r = previousRadius;
+    }
+    
+    // Update button text
+    smallSizeButton.html("Hard Mode: OFF");
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  positionButton();
 }

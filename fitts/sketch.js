@@ -6,6 +6,7 @@ let baseCircleColor = 30;
 let canvas; // Define a variable to hold the canvas object
 let showText = true; // Variable to control the visibility of the text
 let myFont; // Variable to hold the font
+// let sizes = [10, 20, 40, 80];  // Array of possible target sizes
 
 function preload() {
   myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
@@ -147,16 +148,10 @@ function updateCircleSizes() {
   let newRadius;
   switch (circles[0].r) {
     case 70:
-      newRadius = 50;
-      break;
-    case 50:
       newRadius = 20;
       break;
     case 20:
-      newRadius = 40;
-      break;
-    case 40:
-      newRadius = 7; //aprox close window size icon, Corbin's suggestion
+      newRadius = 7;
       break;
     case 7:
     default:

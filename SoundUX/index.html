@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Sample Tester</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MouthPad^ Sound Tester</h1>
+        </header>
+        
+        <main>
+            <section class="upload-section">
+                <!-- <h2> </h2> -->
+                <div class="upload-container">
+                    <label for="file-upload" class="custom-file-upload">
+                        <span class="upload-icon">+</span>
+                        Choose Files
+                    </label>
+                    <input id="file-upload" type="file" accept="audio/*" multiple>
+                </div>
+            </section>
+            
+            <section class="samples-section">
+                <h2>Uploaded Samples</h2>
+                <div id="samples-list" class="samples-list">
+                    <p class="empty-message">No sound samples uploaded yet.</p>
+                </div>
+            </section>
+            
+            <section class="interaction-section">
+                <h2>Test Interactions</h2>
+                <div class="interaction-area">
+                    <div id="interaction-box" class="interaction-box">
+                        <p>Interact here to test your sounds</p>
+                    </div>
+                    
+                    <div class="controls">
+                        <div class="control-group">
+                            <label for="interaction-type">Trigger on:</label>
+                            <select id="interaction-type">
+                                <option value="click">Click</option>
+                                <option value="hover">Hover</option>
+                                <option value="mousedown">Mouse Down</option>
+                                <option value="mouseup">Mouse Up</option>
+                                <option value="drag">Drag</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="volume-control">Volume:</label>
+                            <input type="range" id="volume-control" min="0" max="1" step="0.1" value="0.7">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="playback-speed">Speed:</label>
+                            <input type="range" id="playback-speed" min="0.5" max="2" step="0.1" value="1">
+                            <span id="speed-value">1.0x</span>
+                        </div>
+                        
+                        <div class="control-group checkbox">
+                            <input type="checkbox" id="loop-control">
+                            <label for="loop-control">Loop Sound</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p></p>
+        </footer>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html> 

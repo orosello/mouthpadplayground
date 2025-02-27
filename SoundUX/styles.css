@@ -29,6 +29,7 @@ header {
 h1, h2 {
     margin-bottom: 15px;
     color: #ffffff;
+    font-size: 16px;
 }
 
 section {
@@ -63,6 +64,7 @@ input[type="file"] {
     display: flex;
     align-items: left;
     opacity: 1;
+    font-size: 16px;
 }
 
 /* .custom-file-upload:hover {
@@ -70,7 +72,7 @@ input[type="file"] {
 } */
 
 .upload-icon {
-    font-size: 20px;
+    font-size: 16px;
     margin-right: 8px;
 }
 

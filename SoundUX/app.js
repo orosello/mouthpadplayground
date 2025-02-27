@@ -35,7 +35,6 @@ class SoundSampleApp {
         this.volumeControl = document.getElementById('volume-control');
         this.playbackSpeed = document.getElementById('playback-speed');
         this.speedValue = document.getElementById('speed-value');
-        this.loopControl = document.getElementById('loop-control');
         
         // Add assign button
         this.assignButton = document.createElement('button');
@@ -208,7 +207,7 @@ class SoundSampleApp {
         const source = this.audioContext.createBufferSource();
         source.buffer = sample.buffer;
         source.playbackRate.value = parseFloat(this.playbackSpeed.value);
-        source.loop = this.loopControl.checked;
+        source.loop = false; // Always set to false since we removed the loop option
         source.connect(this.gainNode);
         source.start(0);
         

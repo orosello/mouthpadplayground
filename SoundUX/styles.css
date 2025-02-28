@@ -29,7 +29,7 @@ header {
 h1, h2 {
     margin-bottom: 15px;
     color: #ffffff;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 section {
@@ -40,94 +40,12 @@ section {
     border: none;
 }
 
-/* Upload Section */
-.upload-container {
-    display: flex;
-    justify-content: left;
-    margin: 20px 0;
-    background-color: #000000 !important;
-    opacity: 1;
-}
-
-input[type="file"] {
+/* File Upload */
+.file-upload {
     display: none;
 }
 
-.custom-file-upload {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #ffffff;
-    color: #000000;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    display: flex;
-    align-items: left;
-    opacity: 1;
-    font-size: 16px;
-}
-
-/* .custom-file-upload:hover {
-    background-color: #cccccc;
-} */
-
-.upload-icon {
-    font-size: 16px;
-    margin-right: 8px;
-}
-
-/* Samples Section */
-.samples-list {
-    min-height: 100px;
-}
-
-.empty-message {
-    text-align: left;
-    color: #ffffff;
-    font-style: italic;
-}
-
-.sample-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    border: 1px solid #333;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    background-color: #111111;
-}
-
-.sample-item.active {
-    border-color: #ffffff;
-    background-color: #222222;
-}
-
-.sample-name {
-    flex-grow: 1;
-    margin-right: 10px;
-    font-size: 0.7em;
-}
-
-.sample-controls {
-    display: flex;
-    gap: 8px;
-}
-
-.sample-controls button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    color: #ffffff;
-    font-size: 16px;
-    transition: color 0.3s;
-}
-
-/* .sample-controls button:hover {
-    color: #cccccc;
-} */
-
-/* Interaction Section */
+/* Interaction Area */
 .interaction-area {
     display: flex;
     flex-direction: column;
@@ -135,25 +53,24 @@ input[type="file"] {
 }
 
 .interaction-box {
+    width: 100%;
     height: 200px;
-    border: 2px dashed #ffffff;
+    border: 2px solid #333;
     border-radius: 8px;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background-color: #111111;
     cursor: pointer;
-    transition: background-color 0.3s;
-    background-color: #000000;
 }
 
-/* .interaction-box:hover {
-    background-color: #111111;
-} */
-
 .controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 20px;
+    margin-bottom: 20px;
 }
 
 .control-group {
@@ -170,62 +87,58 @@ input[type="file"] {
 select, input[type="range"] {
     padding: 8px;
     border-radius: 4px;
-    border: 1px solid #444;
-    background-color: #000000;
+    border: 1px solid #333;
+    background-color: #111111;
     color: #ffffff;
     font-family: 'Press Start 2P', cursive;
-    font-size: 0.7em;
+    font-size: 14px;
 }
 
-/* Slider styling */
 input[type="range"] {
     -webkit-appearance: none;
-    appearance: none;
-    background: #000000;
-    height: 4px;
-    border: 1px solid #ffffff;
+    width: 200px;
+    height: 8px;
+    background: #333333;
     outline: none;
-    border-radius: 2px;
+    border-radius: 4px;
+    padding: 0;
 }
 
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 15px;
-    height: 15px;
-    background: #000000;
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
     cursor: pointer;
     border-radius: 50%;
-    border: 2px solid #ffffff;
 }
 
 input[type="range"]::-moz-range-thumb {
-    width: 15px;
-    height: 15px;
-    background: #000000;
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
     cursor: pointer;
     border-radius: 50%;
-    border: 2px solid #ffffff;
 }
 
 input[type="range"]::-moz-range-track {
-    background: #000000;
-    height: 4px;
-    border: 1px solid #ffffff;
-    border-radius: 2px;
+    width: 100%;
+    height: 8px;
+    background: #333333;
+    border-radius: 4px;
 }
 
-/* Footer */
 footer {
     text-align: center;
     margin-top: 30px;
-    color: #aaaaaa;
+    color: #666666;
+    font-size: 14px;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .controls {
-        grid-template-columns: 1fr;
+        flex-direction: column;
     }
     
     .interaction-box {
@@ -233,42 +146,13 @@ footer {
     }
 }
 
-/* Assign Button */
-.assign-button {
-    margin-top: 10px;
-    padding: 8px 16px;
-    background-color: #000000 !important;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.7em;
-    opacity: 1;
-}
-
-/* .assign-button:hover:not(:disabled) {
-    background-color: #cccccc;
-} */
-
-.assign-button:disabled {
-    background-color: #444;
-    cursor: not-allowed;
-}
-
-.assign-button.success {
-    background-color: #ffffff;
-    color: #000000;
-    border: 2px solid #ffffff;
-}
-
-/* Interactive Circle */
 .interactive-circle {
-    cursor: pointer;
-    transition: r 0.2s ease;
-    fill: #ffffff;
-    stroke: #ffffff;
+    width: 50px;
+    height: 50px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    cursor: grab;
 }
 
 .interactive-circle.dragging {
@@ -276,16 +160,152 @@ footer {
 }
 
 .interaction-box p {
-    position: relative;
-    z-index: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #666666;
+    font-size: 14px;
+    text-align: center;
     pointer-events: none;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 5px 10px;
-    border-radius: 4px;
-    color: #ffffff;
+    z-index: 0;
 }
 
-.sample-controls .delete-btn {
-    font-size: 20px;
-    font-weight: normal;
+/* Trigger Events Table Styles */
+.trigger-events-table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+#trigger-events {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+    background-color: #000000;
+}
+
+#trigger-events th,
+#trigger-events td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ffffff;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+#trigger-events th {
+    background-color: #000000;
+    font-size: 14px;
+}
+
+#trigger-events tr:hover {
+    background-color: #111111;
+}
+
+#trigger-events tr:last-child td {
+    border-bottom: none;
+}
+
+.sound-cell {
+    width: 70%;
+}
+
+.sound-assignment {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.no-sound-message {
+    color: #666666;
+    font-style: italic;
+    font-size: 14px;
+}
+
+.sound-name {
+    color: #ffffff;
+    
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.sound-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.sound-controls button {
+    background-color: #000000;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.sound-controls button:disabled {
+    background-color: #000000;
+    border-color: #444444;
+    color: #444444;
+    cursor: not-allowed;
+}
+
+.sound-controls .assign-btn,
+.sound-controls .play-btn,
+.sound-controls .stop-btn,
+.sound-controls .delete-btn {
+    background-color: #000000;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #ffffff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Load Sample Sounds Button */
+.load-samples-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.load-samples-btn {
+    background-color: #000000;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.load-samples-btn:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.load-samples-btn:active {
+    transform: scale(0.98);
 } 

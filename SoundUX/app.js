@@ -1,8 +1,7 @@
 // Main application class
 class SoundSampleApp {
     constructor() {
-        this.samples = [];
-        this.currentSample = null;
+        this.samples = {};
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.gainNode = this.audioContext.createGain();
         this.gainNode.connect(this.audioContext.destination);
@@ -17,250 +16,373 @@ class SoundSampleApp {
             dblclick: null
         };
         
+        // Debug flag - set to true to enable console logging
+        this.debug = true;
+        
+        // Initialize timing variables for event handling
+        this.lastClickTime = 0;
+        this.lastDoubleClickTime = 0;
+        this.isDoubleClickInProgress = false;
+        this.pendingClickSoundTimer = null;
+        
         // Initialize the app
         this.initializeElements();
         this.setupEventListeners();
     }
     
+    // Debug helper method
+    logDebug(message) {
+        if (this.debug) {
+            console.log(`[SoundSampleApp] ${message}`);
+        }
+    }
+    
     initializeElements() {
-        // File upload elements
-        this.fileUploadInput = document.getElementById('file-upload');
-        this.samplesList = document.getElementById('samples-list');
-        
         // Interaction elements
         this.interactionBox = document.getElementById('interaction-box');
-        this.interactionType = document.getElementById('interaction-type');
+        this.triggerEventsTable = document.getElementById('trigger-events');
         
         // Playback control elements
         this.volumeControl = document.getElementById('volume-control');
         this.playbackSpeed = document.getElementById('playback-speed');
         this.speedValue = document.getElementById('speed-value');
         
-        // Add assign button
-        this.assignButton = document.createElement('button');
-        this.assignButton.id = 'assign-button';
-        this.assignButton.className = 'assign-button';
-        this.assignButton.textContent = 'Assign to Interaction';
-        this.assignButton.disabled = true;
-        
-        // Insert assign button after interaction type dropdown
-        const controlGroup = this.interactionType.parentNode;
-        controlGroup.appendChild(this.assignButton);
+        // Load sample sounds button
+        this.loadSampleSoundsBtn = document.getElementById('load-sample-sounds');
         
         // Create the interactive circle
         this.createInteractiveCircle();
     }
     
     setupEventListeners() {
-        // File upload event
-        this.fileUploadInput.addEventListener('change', this.handleFileUpload.bind(this));
-        
         // Playback control events
         this.volumeControl.addEventListener('input', this.updateVolume.bind(this));
         this.playbackSpeed.addEventListener('input', this.updatePlaybackSpeed.bind(this));
         
         // Set up interaction events
         this.setupInteractionEvents();
-        this.interactionType.addEventListener('change', () => {
-            this.updateAssignButtonState();
-            this.setupInteractionEvents();
-        });
         
-        // Add assign button event listener
-        this.assignButton.addEventListener('click', this.assignSoundToInteraction.bind(this));
+        // Set up event handlers for the trigger events table
+        this.setupTriggerEventsTable();
+        
+        // Set up load sample sounds button
+        this.loadSampleSoundsBtn.addEventListener('click', this.loadSampleSounds.bind(this));
     }
     
-    handleFileUpload(event) {
+    setupTriggerEventsTable() {
+        // Get all rows in the trigger events table
+        const rows = this.triggerEventsTable.querySelectorAll('tbody tr');
+        
+        // Add event listeners to each row
+        rows.forEach(row => {
+            const eventType = row.dataset.event;
+            const fileInput = row.querySelector('.file-upload');
+            const assignBtn = row.querySelector('.assign-btn');
+            const playBtn = row.querySelector('.play-btn');
+            const stopBtn = row.querySelector('.stop-btn');
+            const deleteBtn = row.querySelector('.delete-btn');
+            
+            // File input change event
+            fileInput.addEventListener('change', (e) => {
+                this.handleFileUpload(e, eventType);
+            });
+            
+            // Assign button event (trigger file input click)
+            assignBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // Play button event
+            playBtn.addEventListener('click', () => {
+                this.playSample(eventType);
+            });
+            
+            // Stop button event
+            stopBtn.addEventListener('click', () => {
+                this.stopSample(eventType);
+            });
+            
+            // Delete button event
+            deleteBtn.addEventListener('click', () => {
+                this.deleteSample(eventType);
+            });
+        });
+    }
+    
+    handleFileUpload(event, eventType) {
         const files = event.target.files;
         if (files.length === 0) return;
         
-        // Clear empty message if it exists
-        const emptyMessage = this.samplesList.querySelector('.empty-message');
-        if (emptyMessage) {
-            this.samplesList.removeChild(emptyMessage);
-        }
+        // Process the first file
+        const file = files[0];
         
-        // Process each file
-        Array.from(files).forEach(file => {
-            // Only process audio files
-            if (!file.type.startsWith('audio/')) return;
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.audioContext.decodeAudioData(e.target.result, (buffer) => {
-                    const sample = {
-                        id: Date.now() + Math.random().toString(36).substr(2, 5),
-                        name: file.name,
-                        buffer: buffer,
-                        source: null
-                    };
-                    
-                    this.samples.push(sample);
-                    this.addSampleToUI(sample);
-                    
-                    // Set as current sample if it's the first one
-                    if (this.samples.length === 1) {
-                        this.setCurrentSample(sample.id);
-                    }
-                });
-            };
-            
-            reader.readAsArrayBuffer(file);
-        });
+        // Only process audio files
+        if (!file.type.startsWith('audio/')) return;
+        
+        // Show loading indicator
+        this.showLoadingIndicator(eventType);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.audioContext.decodeAudioData(e.target.result, (buffer) => {
+                // Create a sample object
+                const sample = {
+                    name: file.name,
+                    buffer: buffer,
+                    source: null
+                };
+                
+                // Store the sample
+                this.samples[eventType] = sample;
+                
+                // Assign the sample to the event type
+                this.assignedSounds[eventType] = eventType;
+                
+                // Update the UI
+                this.updateTriggerEventRow(eventType);
+                
+                // Hide loading indicator
+                this.hideLoadingIndicator(eventType);
+            });
+        };
+        
+        reader.readAsArrayBuffer(file);
         
         // Reset the file input
         event.target.value = '';
     }
     
-    addSampleToUI(sample) {
-        const sampleItem = document.createElement('div');
-        sampleItem.className = 'sample-item';
-        sampleItem.dataset.id = sample.id;
+    showLoadingIndicator(eventType) {
+        const row = this.triggerEventsTable.querySelector(`tr[data-event="${eventType}"]`);
+        if (!row) return;
         
-        sampleItem.innerHTML = `
-            <div class="sample-name">${sample.name}</div>
-            <div class="sample-controls">
-                <button class="play-btn" title="Play">▶</button>
-                <button class="stop-btn" title="Stop">■</button>
-                <button class="delete-btn" title="Delete">✕</button>
-            </div>
-        `;
+        const soundCell = row.querySelector('.sound-cell');
+        const soundAssignment = soundCell.querySelector('.sound-assignment');
         
-        // Add event listeners to the sample item
-        sampleItem.addEventListener('click', () => this.setCurrentSample(sample.id));
-        sampleItem.querySelector('.play-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.playSample(sample.id);
-        });
-        sampleItem.querySelector('.stop-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.stopSample(sample.id);
-        });
-        sampleItem.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.deleteSample(sample.id);
-        });
+        // Create loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
         
-        this.samplesList.appendChild(sampleItem);
+        // Replace the no-sound message or sound name with loading indicator
+        if (soundAssignment.querySelector('.no-sound-message')) {
+            soundAssignment.querySelector('.no-sound-message').replaceWith(loadingIndicator);
+        } else if (soundAssignment.querySelector('.sound-name')) {
+            soundAssignment.querySelector('.sound-name').replaceWith(loadingIndicator);
+        } else {
+            soundAssignment.insertBefore(loadingIndicator, soundAssignment.firstChild);
+        }
+        
+        // Add loading text
+        const loadingText = document.createElement('span');
+        loadingText.className = 'loading-text';
+        loadingText.textContent = 'Loading sound...';
+        soundAssignment.insertBefore(loadingText, soundAssignment.querySelector('.sound-controls'));
     }
     
-    setCurrentSample(id) {
-        // Remove active class from all samples
-        const sampleItems = this.samplesList.querySelectorAll('.sample-item');
-        sampleItems.forEach(item => item.classList.remove('active'));
+    hideLoadingIndicator(eventType) {
+        const row = this.triggerEventsTable.querySelector(`tr[data-event="${eventType}"]`);
+        if (!row) return;
         
-        // Add active class to the selected sample
-        const selectedItem = this.samplesList.querySelector(`.sample-item[data-id="${id}"]`);
-        if (selectedItem) {
-            selectedItem.classList.add('active');
-            this.currentSample = this.samples.find(sample => sample.id === id);
-            this.updateAssignButtonState();
+        const soundCell = row.querySelector('.sound-cell');
+        const soundAssignment = soundCell.querySelector('.sound-assignment');
+        
+        // Remove loading indicator and text
+        const loadingIndicator = soundAssignment.querySelector('.loading-indicator');
+        const loadingText = soundAssignment.querySelector('.loading-text');
+        
+        if (loadingIndicator) loadingIndicator.remove();
+        if (loadingText) loadingText.remove();
+    }
+    
+    updateTriggerEventRow(eventType) {
+        // Get the row for this event type
+        const row = this.triggerEventsTable.querySelector(`tr[data-event="${eventType}"]`);
+        if (!row) return;
+        
+        // Get the sound cell
+        const soundCell = row.querySelector('.sound-cell');
+        
+        // Get the assigned sample
+        const sample = this.samples[eventType];
+        
+        // Update the sound name or show "No sound assigned"
+        const soundAssignment = soundCell.querySelector('.sound-assignment');
+        
+        if (sample) {
+            // If a sound is assigned, update the UI
+            const existingNoSoundMessage = soundAssignment.querySelector('.no-sound-message');
+            const existingSoundName = soundAssignment.querySelector('.sound-name');
+            
+            if (existingNoSoundMessage) {
+                // Replace the no-sound message with the sound name
+                const soundName = document.createElement('div');
+                soundName.className = 'sound-name';
+                soundName.textContent = sample.name;
+                existingNoSoundMessage.replaceWith(soundName);
+            } else if (existingSoundName) {
+                // Update the existing sound name
+                existingSoundName.textContent = sample.name;
+            } else {
+                // Create and insert the sound name
+                const soundName = document.createElement('div');
+                soundName.className = 'sound-name';
+                soundName.textContent = sample.name;
+                soundAssignment.insertBefore(soundName, soundAssignment.querySelector('.sound-controls'));
+            }
+            
+            // Enable the play, stop, and delete buttons
+            soundCell.querySelector('.play-btn').disabled = false;
+            soundCell.querySelector('.stop-btn').disabled = false;
+            soundCell.querySelector('.delete-btn').disabled = false;
+        } else {
+            // If no sound is assigned, show the "No sound assigned" message
+            const existingSoundName = soundAssignment.querySelector('.sound-name');
+            const existingNoSoundMessage = soundAssignment.querySelector('.no-sound-message');
+            
+            if (existingSoundName) {
+                // Replace the sound name with the no-sound message
+                const noSoundMessage = document.createElement('span');
+                noSoundMessage.className = 'no-sound-message';
+                noSoundMessage.textContent = 'No sound assigned';
+                existingSoundName.replaceWith(noSoundMessage);
+            } else if (!existingNoSoundMessage) {
+                // Create and insert the no-sound message
+                const noSoundMessage = document.createElement('span');
+                noSoundMessage.className = 'no-sound-message';
+                noSoundMessage.textContent = 'No sound assigned';
+                soundAssignment.insertBefore(noSoundMessage, soundAssignment.querySelector('.sound-controls'));
+            }
+            
+            // Disable the play, stop, and delete buttons
+            soundCell.querySelector('.play-btn').disabled = true;
+            soundCell.querySelector('.stop-btn').disabled = true;
+            soundCell.querySelector('.delete-btn').disabled = true;
         }
     }
     
-    updateAssignButtonState() {
-        this.assignButton.disabled = !this.currentSample;
-        
-        // Update button text to show if a sound is already assigned
-        const interactionType = this.interactionType.value;
-        const assignedSample = this.assignedSounds[interactionType];
-        
-        if (assignedSample) {
-            const sample = this.samples.find(s => s.id === assignedSample);
-            if (sample) {
-                this.assignButton.textContent = `Reassign (Current: ${sample.name})`;
+    playSample(eventType) {
+        // Don't play click sounds during double-clicks or if a double-click might be in progress
+        if (eventType === 'click') {
+            // If double-click is in progress, don't play click sound
+            if (this.isDoubleClickInProgress) {
+                this.logDebug('Skipping click sound because double-click is in progress');
+                return;
+            }
+            
+            // If this click is within the double-click threshold of the last click,
+            // delay playing the sound in case this is the first click of a double-click
+            const now = Date.now();
+            const timeSinceLastClick = now - this.lastClickTime;
+            const doubleClickThreshold = 300; // ms
+            
+            if (timeSinceLastClick < doubleClickThreshold) {
+                this.logDebug('Delaying click sound in case this is part of a double-click');
+                
+                // Clear any existing click sound timer
+                if (this.pendingClickSoundTimer) {
+                    clearTimeout(this.pendingClickSoundTimer);
+                }
+                
+                // Set a timer to play the click sound after the double-click threshold
+                this.pendingClickSoundTimer = setTimeout(() => {
+                    // Only play if a double-click hasn't occurred
+                    if (!this.isDoubleClickInProgress) {
+                        this._playActualSample(eventType);
+                    }
+                }, doubleClickThreshold);
+                
                 return;
             }
         }
         
-        this.assignButton.textContent = 'Assign to Interaction';
+        // For non-click sounds or clicks that aren't part of a double-click
+        this._playActualSample(eventType);
     }
     
-    assignSoundToInteraction() {
-        if (!this.currentSample) return;
+    // Private method to actually play the sample
+    _playActualSample(eventType) {
+        const sample = this.samples[eventType];
+        if (!sample) {
+            this.logDebug(`No sample found for ${eventType}`);
+            return;
+        }
         
-        const interactionType = this.interactionType.value;
-        this.assignedSounds[interactionType] = this.currentSample.id;
-        
-        // Update the UI to show the assignment
-        this.updateAssignButtonState();
-        
-        // Show a temporary confirmation message
-        const originalText = this.assignButton.textContent;
-        this.assignButton.textContent = 'Sound Assigned!';
-        this.assignButton.classList.add('success');
-        
-        setTimeout(() => {
-            this.assignButton.textContent = originalText;
-            this.assignButton.classList.remove('success');
-        }, 1500);
-    }
-    
-    playSample(id) {
-        const sample = this.samples.find(sample => sample.id === id);
-        if (!sample) return;
+        this.logDebug(`Playing sample for ${eventType}: ${sample.name}`);
         
         // Stop the sample if it's already playing
-        this.stopSample(id);
+        this.stopSample(eventType);
         
         // Create a new audio source
         const source = this.audioContext.createBufferSource();
         source.buffer = sample.buffer;
         source.playbackRate.value = parseFloat(this.playbackSpeed.value);
-        source.loop = false; // Always set to false since we removed the loop option
+        
+        // Connect the source to the gain node
         source.connect(this.gainNode);
+        
+        // Start playing
         source.start(0);
         
         // Store the source for later stopping
         sample.source = source;
     }
     
-    stopSample(id) {
-        const sample = this.samples.find(sample => sample.id === id);
+    // Add a method to play a looping sample
+    playLoopingSample(eventType) {
+        const sample = this.samples[eventType];
+        if (!sample) {
+            this.logDebug(`No sample found for ${eventType}`);
+            return;
+        }
+        
+        // Don't start a new loop if one is already playing
+        if (sample.isLooping) {
+            return;
+        }
+        
+        this.logDebug(`Playing looping sample for ${eventType}: ${sample.name}`);
+        
+        // Stop any existing playback
+        this.stopSample(eventType);
+        
+        // Create a new audio source
+        const source = this.audioContext.createBufferSource();
+        source.buffer = sample.buffer;
+        source.playbackRate.value = parseFloat(this.playbackSpeed.value);
+        source.loop = true; // Enable looping
+        
+        // Connect the source to the gain node
+        source.connect(this.gainNode);
+        
+        // Start playing
+        source.start(0);
+        
+        // Store the source for later stopping
+        sample.source = source;
+        sample.isLooping = true;
+    }
+    
+    stopSample(eventType) {
+        const sample = this.samples[eventType];
         if (sample && sample.source) {
             sample.source.stop();
             sample.source = null;
+            sample.isLooping = false; // Reset the looping state
         }
     }
     
-    deleteSample(id) {
+    deleteSample(eventType) {
         // Stop the sample if it's playing
-        this.stopSample(id);
+        this.stopSample(eventType);
         
-        // Remove from the samples array
-        this.samples = this.samples.filter(sample => sample.id !== id);
+        // Remove the sample
+        delete this.samples[eventType];
         
-        // Remove from the UI
-        const sampleItem = this.samplesList.querySelector(`.sample-item[data-id="${id}"]`);
-        if (sampleItem) {
-            this.samplesList.removeChild(sampleItem);
-        }
+        // Remove the assignment
+        this.assignedSounds[eventType] = null;
         
-        // Remove from assigned sounds if it's assigned
-        for (const interactionType in this.assignedSounds) {
-            if (this.assignedSounds[interactionType] === id) {
-                this.assignedSounds[interactionType] = null;
-            }
-        }
-        
-        // Reset current sample if it was deleted
-        if (this.currentSample && this.currentSample.id === id) {
-            this.currentSample = this.samples.length > 0 ? this.samples[0] : null;
-            if (this.currentSample) {
-                this.setCurrentSample(this.currentSample.id);
-            }
-        }
-        
-        // Update assign button state
-        this.updateAssignButtonState();
-        
-        // Show empty message if no samples left
-        if (this.samples.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.className = 'empty-message';
-            emptyMessage.textContent = 'No sound samples uploaded yet.';
-            this.samplesList.appendChild(emptyMessage);
-        }
+        // Update the UI
+        this.updateTriggerEventRow(eventType);
     }
     
     updateVolume() {
@@ -270,13 +392,6 @@ class SoundSampleApp {
     updatePlaybackSpeed() {
         const speed = parseFloat(this.playbackSpeed.value);
         this.speedValue.textContent = speed.toFixed(1) + 'x';
-        
-        // Update playback speed of currently playing sample
-        this.samples.forEach(sample => {
-            if (sample.source) {
-                sample.source.playbackRate.value = speed;
-            }
-        });
     }
     
     setupInteractionEvents() {
@@ -288,34 +403,67 @@ class SoundSampleApp {
         // Create the interactive circle
         this.createInteractiveCircle();
         
-        // Add event listeners based on selected interaction type
+        // Add event listeners for all interaction types
         this.setupClickEvent();
         this.setupHoverEvent();
         this.setupDragEvent();
         this.setupContextMenuEvent();
         this.setupScrollEvent();
         this.setupDoubleClickEvent();
+    }
+    
+    // Helper method to handle double-click detection
+    handleDoubleClick(e, isCircle = false) {
+        // Record the time of this double-click
+        this.lastDoubleClickTime = Date.now();
         
-        // Update the assign button state
-        this.updateAssignButtonState();
+        // Set the double-click in progress flag
+        this.isDoubleClickInProgress = true;
+        
+        // Clear any pending click timer
+        if (this.interactionBoxClickTimer) {
+            clearTimeout(this.interactionBoxClickTimer);
+            this.interactionBoxClickTimer = null;
+        }
+        
+        // Clear any pending click sound timer
+        if (this.pendingClickSoundTimer) {
+            clearTimeout(this.pendingClickSoundTimer);
+            this.pendingClickSoundTimer = null;
+        }
+        
+        // Reset click pending state
+        this.isClickPending = false;
+        
+        // Prevent the click event from firing
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Play the double-click sound
+        if (this.assignedSounds.dblclick) {
+            this.logDebug(`Playing double-click sound from ${isCircle ? 'circle' : 'interaction box'}`);
+            this.playSample('dblclick');
+        }
+        
+        // Reset the double-click flag after a short delay
+        setTimeout(() => {
+            this.isDoubleClickInProgress = false;
+        }, 500); // Longer delay to ensure we catch all click events
     }
     
     setupDoubleClickEvent() {
+        // Track the last double-click time to prevent click sounds from firing
+        this.lastDoubleClickTime = 0;
+        
+        // Flag to indicate a double-click is in progress
+        this.isDoubleClickInProgress = false;
+        
         this.interactionBox.addEventListener('dblclick', (e) => {
             // If the event originated from the circle, don't handle it here
             if (e.target === this.circle) return;
             
-            // Clear any pending click timer to prevent single click from firing
-            if (this.interactionBoxClickTimer) {
-                clearTimeout(this.interactionBoxClickTimer);
-                this.interactionBoxClickTimer = null;
-            }
-            
-            const assignedId = this.assignedSounds.dblclick;
-            if (assignedId) {
-                this.playSample(assignedId);
-            }
-        });
+            this.handleDoubleClick(e, false);
+        }, true); // Use capture phase to ensure this runs before other handlers
     }
     
     setupScrollEvent() {
@@ -323,407 +471,553 @@ class SoundSampleApp {
         let isScrolling = false;
         const scrollThrottle = 800; // ms - longer cooldown between scroll sounds
         
+        // Track accumulated scroll distance
+        let accumulatedScrollY = 0;
+        let accumulatedScrollX = 0;
+        let scrollResetTimer = null;
+        
+        // Minimum scroll distance required to trigger the sound (in pixels)
+        const minScrollDistance = 25; // Reduced from 50 to make it more sensitive
+        
         this.interactionBox.addEventListener('wheel', (e) => {
             const now = Date.now();
             
-            // If we're not currently in a scrolling state, start a new scroll action
-            if (!isScrolling) {
+            // Log raw scroll values for debugging
+            if (this.debug) {
+                console.log(`[SoundSampleApp] Scroll event - deltaX: ${e.deltaX}, deltaY: ${e.deltaY}`);
+            }
+            
+            // Accumulate scroll distance (use smaller values for deltaX since horizontal scrolling is often less pronounced)
+            accumulatedScrollY += Math.abs(e.deltaY);
+            accumulatedScrollX += Math.abs(e.deltaX) * 2; // Multiply horizontal scroll by 2 to give it more weight
+            
+            // Clear any existing reset timer
+            if (scrollResetTimer) {
+                clearTimeout(scrollResetTimer);
+            }
+            
+            // Set a timer to reset accumulated scroll if user stops scrolling
+            scrollResetTimer = setTimeout(() => {
+                if (this.debug) {
+                    console.log(`[SoundSampleApp] Scroll reset - accumulated X: ${accumulatedScrollX}, Y: ${accumulatedScrollY}`);
+                }
+                accumulatedScrollY = 0;
+                accumulatedScrollX = 0;
+                isScrolling = false;
+            }, 300); // Reset after 300ms of inactivity
+            
+            // Calculate total scroll distance
+            const totalScrollDistance = accumulatedScrollY + accumulatedScrollX;
+            
+            if (this.debug) {
+                console.log(`[SoundSampleApp] Total scroll distance: ${totalScrollDistance}, threshold: ${minScrollDistance}`);
+            }
+            
+            // If we're not currently in a scrolling state and have scrolled enough, start a new scroll action
+            if (!isScrolling && totalScrollDistance > minScrollDistance) {
                 isScrolling = true;
                 
                 // Only play the sound if enough time has passed since the last scroll action
                 if (now - lastScrollTime > scrollThrottle) {
                     lastScrollTime = now;
-                    const assignedId = this.assignedSounds.scroll;
-                    if (assignedId) {
-                        this.playSample(assignedId);
+                    if (this.assignedSounds.scroll) {
+                        this.logDebug(`Playing scroll sound after ${totalScrollDistance}px of scrolling (X: ${accumulatedScrollX}, Y: ${accumulatedScrollY})`);
+                        this.playSample('scroll');
                     }
+                    
+                    // Reset accumulated scroll after playing the sound
+                    accumulatedScrollY = 0;
+                    accumulatedScrollX = 0;
                 }
-                
-                // Set a timeout to reset the scrolling state after a short delay
-                setTimeout(() => {
-                    isScrolling = false;
-                }, 300); // Consider scrolling stopped after 300ms of inactivity
             }
         });
     }
     
     setupContextMenuEvent() {
         this.interactionBox.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            const assignedId = this.assignedSounds.contextmenu;
-            if (assignedId) {
-                this.playSample(assignedId);
+            e.preventDefault(); // Prevent the default context menu
+            
+            // Cancel any pending click
+            if (this.interactionBoxClickTimer) {
+                clearTimeout(this.interactionBoxClickTimer);
+                this.interactionBoxClickTimer = null;
             }
-            return false;
-        });
+            
+            // Ensure click is not pending
+            this.isClickPending = false;
+            
+            if (this.assignedSounds.contextmenu) {
+                this.playSample('contextmenu');
+            }
+        }, true); // Use capture phase to ensure this runs before other handlers
     }
     
     setupDragEvent() {
-        let isDragging = false;
-        let hasDragged = false; // Track if dragging actually occurred
-        
-        this.interactionBox.addEventListener('mousedown', (e) => {
-            // Only start dragging on left mouse button (button code 0)
-            if (e.button !== 0) return;
-            
-            // Don't start dragging if the event originated from the circle
-            if (e.target === this.circle) return;
-            
-            isDragging = true;
-            hasDragged = false; // Reset drag tracking
-        });
-        
-        this.interactionBox.addEventListener('mousemove', () => {
-            if (!isDragging) return;
-            
-            // If this is the first movement, mark as dragged and play the sound
-            if (!hasDragged) {
-                hasDragged = true;
-                
-                // Play drag sound if assigned (only on first movement)
-                const assignedId = this.assignedSounds.drag;
-                if (assignedId) {
-                    this.playSample(assignedId);
-                }
-            }
-            
-            // Continue playing drag sound if it stopped and we're still dragging
-            const assignedId = this.assignedSounds.drag;
-            if (assignedId && hasDragged) {
-                const sample = this.samples.find(s => s.id === assignedId);
-                if (sample && !sample.source) {
-                    this.playSample(assignedId);
-                }
-            }
-        });
-        
-        this.interactionBox.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            
-            // Store the drag state for the click handler
-            this.interactionBoxHasDragged = hasDragged;
-            
-            const assignedId = this.assignedSounds.drag;
-            if (assignedId) {
-                this.stopSample(assignedId);
-            }
-        });
-        
-        this.interactionBox.addEventListener('mouseleave', () => {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            
-            // Store the drag state for the click handler
-            this.interactionBoxHasDragged = hasDragged;
-            
-            const assignedId = this.assignedSounds.drag;
-            if (assignedId) {
-                this.stopSample(assignedId);
-            }
-        });
+        // Setup drag events for the circle
+        this.setupCircleInteractions();
     }
     
     setupClickEvent() {
-        // Use a shared timer variable for the interaction box
-        if (!this.interactionBoxClickTimer) {
-            this.interactionBoxClickTimer = null;
+        let clickMouseDownTime = 0;
+        let isClickPending = false;
+        let mouseDownX = 0;
+        let mouseDownY = 0;
+        const movementThreshold = 5; // pixels of movement to consider it a drag
+        let lastClickTime = 0;
+        const doubleClickThreshold = 300; // ms between clicks to be considered a double-click
+        
+        // Store isClickPending in a property so other methods can access it
+        this.isClickPending = false;
+        
+        // Initialize lastDoubleClickTime if not already set
+        if (!this.lastDoubleClickTime) {
+            this.lastDoubleClickTime = 0;
         }
         
-        // Initialize drag tracking
-        this.interactionBoxHasDragged = false;
+        // Initialize lastClickTime if not already set
+        if (!this.lastClickTime) {
+            this.lastClickTime = 0;
+        }
         
+        this.interactionBox.addEventListener('mousedown', (e) => {
+            // If the event originated from the circle, don't handle it here
+            if (e.target === this.circle) return;
+            
+            // Only handle left clicks (button 0)
+            if (e.button !== 0) return;
+            
+            // Check if this could be part of a double-click
+            const now = Date.now();
+            if (now - lastClickTime < doubleClickThreshold) {
+                // This might be the second click of a double-click, so don't process it as a single click
+                return;
+            }
+            
+            clickMouseDownTime = now;
+            isClickPending = true;
+            this.isClickPending = true;
+            mouseDownX = e.clientX;
+            mouseDownY = e.clientY;
+        });
+        
+        this.interactionBox.addEventListener('mousemove', (e) => {
+            // If significant mouse movement occurs, cancel the pending click
+            if (isClickPending) {
+                const dx = Math.abs(e.clientX - mouseDownX);
+                const dy = Math.abs(e.clientY - mouseDownY);
+                
+                // If the mouse has moved more than the threshold, cancel the click
+                if (dx > movementThreshold || dy > movementThreshold) {
+                    isClickPending = false;
+                    this.isClickPending = false;
+                    
+                    // Clear any pending click timer
+                    if (this.interactionBoxClickTimer) {
+                        clearTimeout(this.interactionBoxClickTimer);
+                        this.interactionBoxClickTimer = null;
+                    }
+                }
+            }
+        });
+        
+        this.interactionBox.addEventListener('mouseup', (e) => {
+            // If the event originated from the circle, don't handle it here
+            if (e.target === this.circle) return;
+            
+            // Only handle left clicks (button 0)
+            if (e.button !== 0) return;
+            
+            const now = Date.now();
+            
+            // If this was a quick press and release without movement, it's a click
+            if (isClickPending && (now - clickMouseDownTime < 200)) {
+                // Check if this is too close to a recent double-click or if a double-click is in progress
+                if (now - this.lastDoubleClickTime > 300 && !this.isDoubleClickInProgress) {
+                    // Record this click time for double-click detection
+                    lastClickTime = now;
+                    this.lastClickTime = now; // Store in class property for use in playSample
+                    
+                    // Play the click sound immediately for better responsiveness
+                    if (this.assignedSounds.click) {
+                        this.logDebug('Playing click sound from interaction box');
+                        this.playSample('click');
+                    }
+                }
+            }
+            
+            isClickPending = false;
+            this.isClickPending = false;
+        });
+        
+        // Add a direct click handler for immediate response
         this.interactionBox.addEventListener('click', (e) => {
             // If the event originated from the circle, don't handle it here
             if (e.target === this.circle) return;
             
-            // If dragging just occurred, don't trigger click
-            if (this.interactionBoxHasDragged) {
-                this.interactionBoxHasDragged = false;
-                return;
-            }
-            
-            // If there's a pending click timer, clear it
-            if (this.interactionBoxClickTimer) {
-                clearTimeout(this.interactionBoxClickTimer);
-                this.interactionBoxClickTimer = null;
-                return; // Don't process the click as it's part of a double-click
-            }
-            
-            // Set a timer to delay the single click action
-            this.interactionBoxClickTimer = setTimeout(() => {
-                const assignedId = this.assignedSounds.click;
-                if (assignedId) {
-                    this.playSample(assignedId);
-                }
-                
-                // Reset the timer
-                this.interactionBoxClickTimer = null;
-            }, 300); // Same delay as in setupCircleInteractions
+            // We already handle the click in mouseup, this is just a fallback
+            // to ensure clicks are captured if the mouseup logic fails
         });
     }
     
     setupHoverEvent() {
-        this.interactionBox.addEventListener('mouseenter', () => {
-            const assignedId = this.assignedSounds.hover;
-            if (assignedId) {
-                this.playSample(assignedId);
+        // Hover state for the interaction box
+        let isBoxHovering = false;
+        let boxHoverTimer = null;
+        
+        // Hover state for the circle
+        let isCircleHovering = false;
+        let circleHoverTimer = null;
+        
+        // Interaction box hover events
+        this.interactionBox.addEventListener('mouseenter', (e) => {
+            // If the event originated from the circle, don't handle it here
+            if (e.target === this.circle) return;
+            
+            // Clear any existing hover timer
+            if (boxHoverTimer) {
+                clearTimeout(boxHoverTimer);
             }
+            
+            // Set a small delay to avoid conflict with click events
+            boxHoverTimer = setTimeout(() => {
+                if (!isBoxHovering) {
+                    isBoxHovering = true;
+                    if (this.assignedSounds.hover) {
+                        this.playSample('hover');
+                    }
+                }
+            }, 50); // Small delay to avoid conflict with click
         });
         
-        this.interactionBox.addEventListener('mouseleave', () => {
-            const assignedId = this.assignedSounds.hover;
-            if (assignedId) {
-                this.stopSample(assignedId);
+        this.interactionBox.addEventListener('mouseleave', (e) => {
+            // If the event originated from the circle, don't handle it here
+            if (e.target === this.circle) return;
+            
+            // Clear any pending hover timer
+            if (boxHoverTimer) {
+                clearTimeout(boxHoverTimer);
+                boxHoverTimer = null;
             }
+            isBoxHovering = false;
+        });
+        
+        // Circle hover events
+        this.circle.addEventListener('mouseenter', (e) => {
+            // Prevent the event from bubbling to the interaction box
+            e.stopPropagation();
+            
+            // Clear any existing hover timer
+            if (circleHoverTimer) {
+                clearTimeout(circleHoverTimer);
+            }
+            
+            // Set a small delay to avoid conflict with click events
+            circleHoverTimer = setTimeout(() => {
+                if (!isCircleHovering) {
+                    isCircleHovering = true;
+                    if (this.assignedSounds.hover) {
+                        this.logDebug('Playing hover sound for circle');
+                        this.playSample('hover');
+                    }
+                }
+            }, 50); // Small delay to avoid conflict with click
+        });
+        
+        this.circle.addEventListener('mouseleave', (e) => {
+            // Prevent the event from bubbling to the interaction box
+            e.stopPropagation();
+            
+            // Clear any pending hover timer
+            if (circleHoverTimer) {
+                clearTimeout(circleHoverTimer);
+                circleHoverTimer = null;
+            }
+            isCircleHovering = false;
         });
     }
     
     createInteractiveCircle() {
-        // Create an SVG element for the circle
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("height", "100%");
-        svg.style.position = "absolute";
-        svg.style.top = "0";
-        svg.style.left = "0";
+        // Create a draggable circle
+        this.circle = document.createElement('div');
+        this.circle.className = 'interactive-circle';
         
-        // Create the circle element
-        this.circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        this.circle.setAttribute("cx", "50%");
-        this.circle.setAttribute("cy", "50%");
-        this.circle.setAttribute("r", "30");
-        this.circle.setAttribute("fill", "#3498db");
-        this.circle.setAttribute("stroke", "#2980b9");
-        this.circle.setAttribute("stroke-width", "2");
-        this.circle.classList.add("interactive-circle");
+        // Position the circle in the center of the interaction box
+        this.circle.style.left = '50%';
+        this.circle.style.top = '50%';
+        this.circle.style.transform = 'translate(-50%, -50%)';
         
-        // Add the circle to the SVG
-        svg.appendChild(this.circle);
+        // Add the circle to the interaction box
+        this.interactionBox.appendChild(this.circle);
         
-        // Add the SVG to the interaction box
-        this.interactionBox.style.position = "relative";
-        this.interactionBox.innerHTML = '';
-        this.interactionBox.appendChild(svg);
-        
-        // Set up circle interaction events
+        // Setup drag events for the circle
         this.setupCircleInteractions();
     }
     
     setupCircleInteractions() {
-        // Variables for dragging
         let isDragging = false;
-        let hasDragged = false; // Track if dragging actually occurred
-        let offsetX, offsetY;
+        let lastDragTime = 0;
+        const dragThrottle = 200; // ms between drag sounds
+        let mouseDownTime = 0;
+        let mouseDownX = 0;
+        let mouseDownY = 0;
+        // Add offset variables to track where on the circle the user clicked
+        let offsetX = 0;
+        let offsetY = 0;
+        const movementThreshold = 5; // pixels of movement to consider it a drag
+        let isCircleClickPending = false;
+        let lastCircleClickTime = 0;
+        const doubleClickThreshold = 300; // ms between clicks to be considered a double-click
         
-        // Get the SVG element (parent of the circle)
-        const svg = this.circle.parentNode;
+        // Initialize lastDoubleClickTime if not already set
+        if (!this.lastDoubleClickTime) {
+            this.lastDoubleClickTime = 0;
+        }
         
-        // Disable context menu on the circle and interaction box
-        this.circle.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
+        // Mouse down event
+        this.circle.addEventListener('mousedown', (e) => {
+            // Only handle left clicks for dragging
+            if (e.button !== 0) return;
             
-            // Play contextmenu sound if assigned
-            const assignedId = this.assignedSounds.contextmenu;
-            if (assignedId) {
-                this.playSample(assignedId);
-            }
-            
-            return false;
-        });
-        
-        this.interactionBox.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            return false;
-        });
-        
-        // Click event with double-click detection
-        let clickTimer = null;
-        let clickDelay = 300; // milliseconds to wait before triggering single click
-        
-        this.circle.addEventListener('click', (e) => {
-            // Prevent event bubbling
+            // Prevent the event from bubbling to the interaction box
             e.stopPropagation();
             
-            // If dragging just occurred, don't trigger click
-            if (hasDragged) {
-                hasDragged = false;
+            // Check if this could be part of a double-click
+            const now = Date.now();
+            if (now - lastCircleClickTime < doubleClickThreshold) {
+                // This might be the second click of a double-click, so don't process it as a single click
                 return;
             }
             
-            // If there's a pending click timer, clear it
-            if (clickTimer) {
-                clearTimeout(clickTimer);
-                clickTimer = null;
-                return; // Don't process the click as it's part of a double-click
-            }
-            
-            // Set a timer to delay the single click action
-            clickTimer = setTimeout(() => {
-                // Change fill color on click
-                const currentFill = this.circle.getAttribute('fill');
-                const newFill = currentFill === '#3498db' ? '#e74c3c' : '#3498db';
-                this.circle.setAttribute('fill', newFill);
-                
-                // Play click sound if assigned
-                const assignedId = this.assignedSounds.click;
-                if (assignedId) {
-                    this.playSample(assignedId);
-                }
-                
-                // Reset the timer
-                clickTimer = null;
-            }, clickDelay);
-        });
-        
-        // Double-click event
-        this.circle.addEventListener('dblclick', (e) => {
-            // Clear any pending click timer to prevent single click from firing
-            if (clickTimer) {
-                clearTimeout(clickTimer);
-                clickTimer = null;
-            }
-            
-            // Play double-click sound if assigned
-            const assignedId = this.assignedSounds.dblclick;
-            if (assignedId) {
-                this.playSample(assignedId);
-            }
-            
-            // Prevent event bubbling
-            e.stopPropagation();
-        });
-        
-        // Hover events
-        this.circle.addEventListener('mouseenter', () => {
-            // Increase radius on hover
-            const currentRadius = parseInt(this.circle.getAttribute('r'));
-            this.circle.setAttribute('r', currentRadius * 1.1);
-            
-            // Play hover sound if assigned
-            const assignedId = this.assignedSounds.hover;
-            if (assignedId) {
-                this.playSample(assignedId);
-            }
-        });
-        
-        this.circle.addEventListener('mouseleave', () => {
-            // Reset radius on mouse leave
-            this.circle.setAttribute('r', '30');
-            
-            // Stop hover sound if assigned
-            const assignedId = this.assignedSounds.hover;
-            if (assignedId) {
-                this.stopSample(assignedId);
-            }
-        });
-        
-        // Mouse down event (start dragging)
-        this.circle.addEventListener('mousedown', (e) => {
-            // Only start dragging on left mouse button (button code 0)
-            if (e.button !== 0) return;
-            
-            isDragging = true;
-            hasDragged = false; // Reset drag tracking
-            
-            // Get the SVG dimensions
-            const svgRect = svg.getBoundingClientRect();
-            
-            // Get current circle position in pixels
-            const cx = parseFloat(this.circle.getAttribute('cx')) / 100 * svgRect.width;
-            const cy = parseFloat(this.circle.getAttribute('cy')) / 100 * svgRect.height;
-            
-            // Calculate the offset from the current circle position to the mouse position
-            offsetX = e.clientX - svgRect.left - cx;
-            offsetY = e.clientY - svgRect.top - cy;
-            
-            // Add a class for styling during drag
+            isDragging = false; // Reset dragging state
+            isCircleClickPending = true; // Set click pending for the circle
             this.circle.classList.add('dragging');
+            mouseDownTime = now; // Record when the mouse was pressed
+            mouseDownX = e.clientX;
+            mouseDownY = e.clientY;
             
-            // Prevent event bubbling
-            e.stopPropagation();
+            // Reset the drag operation flag
+            this.hadDragOperation = false;
+            
+            // Calculate the offset from the mouse position to the circle's top-left corner
+            const circleRect = this.circle.getBoundingClientRect();
+            offsetX = mouseDownX - circleRect.left;
+            offsetY = mouseDownY - circleRect.top;
+            
+            // Prevent text selection during drag
+            e.preventDefault();
         });
         
-        // Mouse move event (drag the circle)
+        // Mouse move event
         document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
+            if (!this.circle.classList.contains('dragging')) return;
             
-            // If this is the first movement, mark as dragged and play the sound
-            if (!hasDragged) {
-                hasDragged = true;
+            const dx = Math.abs(e.clientX - mouseDownX);
+            const dy = Math.abs(e.clientY - mouseDownY);
+            
+            // Only consider it a drag if the mouse has moved more than the threshold
+            if (!isDragging && (dx > movementThreshold || dy > movementThreshold)) {
+                isDragging = true;
+                isCircleClickPending = false; // Cancel the pending click
                 
-                // Play drag sound if assigned (only on first movement)
-                const assignedId = this.assignedSounds.drag;
-                if (assignedId) {
-                    this.playSample(assignedId);
+                // Set a flag to track that we had a drag operation
+                // This will persist even after dragging stops
+                this.hadDragOperation = true;
+                
+                // Start playing the drag sound in a loop when drag begins
+                if (this.assignedSounds.drag) {
+                    this.playLoopingSample('drag');
                 }
             }
             
-            // Get the SVG dimensions
-            const svgRect = svg.getBoundingClientRect();
+            // Get the bounds of the interaction box
+            const boxRect = this.interactionBox.getBoundingClientRect();
             
-            // Calculate new position relative to the SVG
-            let newX = e.clientX - svgRect.left - offsetX;
-            let newY = e.clientY - svgRect.top - offsetY;
+            // Calculate the new position of the circle, accounting for the initial click offset
+            let left = e.clientX - boxRect.left - offsetX;
+            let top = e.clientY - boxRect.top - offsetY;
             
-            // Get circle radius (accounting for stroke width)
-            const radius = parseInt(this.circle.getAttribute('r'));
-            const strokeWidth = parseInt(this.circle.getAttribute('stroke-width'));
-            const totalRadius = radius + strokeWidth;
+            // Constrain the circle within the box
+            const circleRadius = this.circle.offsetWidth / 2;
+            const circleWidth = this.circle.offsetWidth;
+            const circleHeight = this.circle.offsetHeight;
             
-            // Constrain to SVG boundaries
-            newX = Math.max(totalRadius, Math.min(svgRect.width - totalRadius, newX));
-            newY = Math.max(totalRadius, Math.min(svgRect.height - totalRadius, newY));
+            left = Math.max(0, Math.min(boxRect.width - circleWidth, left));
+            top = Math.max(0, Math.min(boxRect.height - circleHeight, top));
             
-            // Update circle position (as percentage for responsiveness)
-            const percentX = (newX / svgRect.width) * 100;
-            const percentY = (newY / svgRect.height) * 100;
-            
-            this.circle.setAttribute('cx', `${percentX}%`);
-            this.circle.setAttribute('cy', `${percentY}%`);
-            
-            // Continue playing drag sound if it stopped and we're still dragging
-            const assignedId = this.assignedSounds.drag;
-            if (assignedId && hasDragged) {
-                const sample = this.samples.find(s => s.id === assignedId);
-                if (sample && !sample.source) {
-                    this.playSample(assignedId);
-                }
-            }
+            // Update the circle position
+            this.circle.style.left = left + 'px';
+            this.circle.style.top = top + 'px';
+            this.circle.style.transform = 'none';
         });
         
-        // Mouse up event (stop dragging)
+        // Mouse up event
         document.addEventListener('mouseup', (e) => {
-            if (!isDragging) return;
-            
-            // Only respond to left mouse button (button code 0)
+            // Only handle left button releases
             if (e.button !== 0) return;
             
-            isDragging = false;
-            this.circle.classList.remove('dragging');
-            
-            // Stop drag sound if it's playing
-            const dragSoundId = this.assignedSounds.drag;
-            if (dragSoundId) {
-                this.stopSample(dragSoundId);
+            if (this.circle.classList.contains('dragging')) {
+                const wasDragging = isDragging || this.hadDragOperation;
+                isDragging = false;
+                this.circle.classList.remove('dragging');
+                
+                // Stop the drag sound when dragging ends
+                if (wasDragging && this.assignedSounds.drag) {
+                    this.stopSample('drag');
+                }
+                
+                const now = Date.now();
+                
+                // Only play click sound if it wasn't a drag at all
+                // This ensures no click sound plays after a drag operation
+                if (isCircleClickPending && !wasDragging && (now - mouseDownTime < 200)) {
+                    // Check if this is too close to a recent double-click or if a double-click is in progress
+                    if (now - this.lastDoubleClickTime > 300 && !this.isDoubleClickInProgress) {
+                        // Record this click time for double-click detection
+                        lastCircleClickTime = now;
+                        
+                        // Also update the global last click time for double-click detection
+                        this.lastClickTime = now;
+                        
+                        // Play the click sound immediately for better responsiveness
+                        if (this.assignedSounds.click) {
+                            this.logDebug('Playing click sound from circle');
+                            this.playSample('click');
+                        }
+                    }
+                }
+                
+                isCircleClickPending = false;
             }
         });
         
-        // Mouse leave event for the SVG (stop dragging if mouse leaves the area)
-        svg.addEventListener('mouseleave', () => {
-            if (!isDragging) return;
+        // Double click event for the circle
+        this.circle.addEventListener('dblclick', (e) => {
+            e.stopPropagation(); // Prevent the interaction box double click from firing
             
-            isDragging = false;
-            this.circle.classList.remove('dragging');
+            isDragging = false; // Reset dragging state
+            isCircleClickPending = false; // Cancel any pending click
             
-            // Stop drag sound if it's playing
-            const dragSoundId = this.assignedSounds.drag;
-            if (dragSoundId) {
-                this.stopSample(dragSoundId);
+            this.handleDoubleClick(e, true);
+        });
+        
+        // Click event for the circle - we'll handle this in mouseup instead
+        this.circle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the interaction box click from firing
+            
+            // If we haven't already processed this click in the mouseup handler
+            // and it's not too close to a double-click, play the click sound
+            // BUT ONLY if we weren't dragging
+            const now = Date.now();
+            if (!isDragging && !this.hadDragOperation && 
+                now - this.lastDoubleClickTime > 300 && 
+                !this.isDoubleClickInProgress && 
+                this.assignedSounds.click) {
+                // This is a fallback in case the mouseup handler didn't catch it
+                this.logDebug('Playing click sound from circle click event');
+                
+                // Update the last click time
+                this.lastClickTime = now;
+                
+                this.playSample('click');
             }
         });
+        
+        // Context menu event for the circle
+        this.circle.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // Prevent the default context menu
+            e.stopPropagation(); // Prevent the interaction box context menu from firing
+            
+            // Cancel any dragging state
+            isDragging = false;
+            isCircleClickPending = false;
+            this.circle.classList.remove('dragging');
+            
+            if (this.assignedSounds.contextmenu) {
+                this.playSample('contextmenu');
+            }
+        });
+    }
+    
+    // Load sample sounds from the test-sounds folder
+    loadSampleSounds() {
+        this.logDebug('Loading sample sounds...');
+        
+        // Define the mapping of sample files to event types
+        const sampleMapping = {
+            'click': '01left.m4a',
+            'contextmenu': '02right.m4a',
+            'dblclick': '03doubleclick.m4a',
+            'hover': '04hover.m4a',
+            'drag': '05drag.m4a',
+            'scroll': '06scroll.m4a'
+        };
+        
+        // Load each sample
+        Object.entries(sampleMapping).forEach(([eventType, fileName]) => {
+            this.loadSampleFromFile(eventType, fileName);
+        });
+    }
+    
+    // Load a sample from a file in the test-sounds folder
+    loadSampleFromFile(eventType, fileName) {
+        this.logDebug(`Loading sample for ${eventType}: ${fileName}`);
+        
+        // Show loading indicator
+        this.showLoadingIndicator(eventType);
+        
+        // Fetch the sample file
+        fetch(`test-sounds/${fileName}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to load sample: ${response.statusText}`);
+                }
+                return response.arrayBuffer();
+            })
+            .then(arrayBuffer => {
+                // Decode the audio data
+                return this.audioContext.decodeAudioData(arrayBuffer);
+            })
+            .then(buffer => {
+                // Create a sample object
+                const sample = {
+                    name: fileName,
+                    buffer: buffer,
+                    source: null
+                };
+                
+                // Store the sample
+                this.samples[eventType] = sample;
+                
+                // Assign the sample to the event type
+                this.assignedSounds[eventType] = eventType;
+                
+                // Update the UI
+                this.updateTriggerEventRow(eventType);
+                
+                // Hide loading indicator
+                this.hideLoadingIndicator(eventType);
+                
+                this.logDebug(`Sample loaded for ${eventType}: ${fileName}`);
+            })
+            .catch(error => {
+                this.logDebug(`Error loading sample: ${error.message}`);
+                
+                // Hide loading indicator
+                this.hideLoadingIndicator(eventType);
+                
+                // Show error message
+                const row = this.triggerEventsTable.querySelector(`tr[data-event="${eventType}"]`);
+                if (row) {
+                    const soundCell = row.querySelector('.sound-cell');
+                    const soundAssignment = soundCell.querySelector('.sound-assignment');
+                    const noSoundMessage = soundAssignment.querySelector('.no-sound-message');
+                    
+                    if (noSoundMessage) {
+                        noSoundMessage.textContent = 'Error loading sound';
+                        noSoundMessage.style.color = 'red';
+                    }
+                }
+            });
     }
 }
 

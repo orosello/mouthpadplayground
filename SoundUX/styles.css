@@ -285,7 +285,7 @@ footer {
 /* Load Sample Sounds Button */
 .load-samples-container {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     margin-top: 20px;
 }
 

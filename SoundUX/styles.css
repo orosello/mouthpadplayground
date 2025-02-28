@@ -21,6 +21,39 @@ body {
     padding: 20px;
 }
 
+/* Navigation Bar Styles */
+.navbar {
+    display: flex;
+    margin-bottom: 20px;
+    background-color: #000000;
+    padding: 10px 0;
+    position: relative;
+    z-index: 10;
+}
+
+.navbar .button {
+    font-family: 'Press Start 2P', cursive;
+    color: #ffffff;
+    background-color: #000000;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.navbar .button:hover {
+    color: #000000;
+    background-color: #ffffff;
+}
+
+/* Ensure the interaction box doesn't overlap with the navigation toolbar */
+.interaction-section {
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+}
+
 header {
     text-align: left;
     margin-bottom: 30px;

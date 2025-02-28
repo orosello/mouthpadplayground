@@ -17,6 +17,7 @@ const regularGameOrder = [
   "../NeuraLick/neuraLick.html",
   "../type/type.html",
   "../pongVertical/pongVertical.html",
+  "../SoundUX/index.html",
 ];
 
 const ipadGameOrder = [
@@ -31,6 +32,7 @@ const ipadGameOrder = [
   "../scrollText/scrollText.html", // I9
   "../chaseBallRightClick/chaseBallRightClick.html", // I10
   "../benchmark/benchmark.html", // I11
+  "../SoundUX/index.html", // I12
 ];
 
 // Store the current game order

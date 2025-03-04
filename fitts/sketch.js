@@ -156,18 +156,14 @@ function updateCircleSizes() {
   let newRadius;
   switch (circles[0].r) {
     case 70:
-      newRadius = 50;
+      newRadius = 30;
       break;
-    case 50:
-      newRadius = 20;
-      break;
-    case 20:
-      newRadius = 40;
-      break;
-    case 40:
-      newRadius = 7; //aprox close window size icon, Corbin's suggestion
+    case 30:
+      newRadius = 7;
       break;
     case 7:
+      newRadius = 70;
+      break;
     default:
       newRadius = 70;
       break;

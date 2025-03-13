@@ -6,7 +6,6 @@ const regularGameOrder = [
   "../fitts/fitts.html",
   "../chaseBallRightClick/chaseBallRightClick.html",
   "../chaseBallDoubleClick/chaseBallDoubleClick.html",
-  "../orbit/orbit.html",
   "../dragHole/dragHole.html",
   "../paint/paint.html",
   "../scrollText/scrollText.html",
@@ -14,10 +13,8 @@ const regularGameOrder = [
   "../pong/pong.html",
   "../flappyBirds/flappyBirds.html",
   "../AngryLicks2/angryLicks2.html",
-  "../NeuraLick/neuraLick.html",
   "../type/type.html",
   "../pongVertical/pongVertical.html",
-  "../SoundUX/index.html",
 ];
 
 const ipadGameOrder = [
@@ -26,13 +23,11 @@ const ipadGameOrder = [
   "../OnOff/onOff.html", // I3
   "../fitts/fitts.html", // I4
   "../chaseBallDoubleClick/chaseBallDoubleClick.html", // I5
-  "../orbit/orbit.html", // I6
-  "../dragHole/dragHole.html", // I7
-  "../paint/paint.html", // I8
-  "../scrollText/scrollText.html", // I9
-  "../chaseBallRightClick/chaseBallRightClick.html", // I10
-  "../benchmark/benchmark.html", // I11
-  "../SoundUX/index.html", // I12
+  "../dragHole/dragHole.html", // I6
+  "../paint/paint.html", // I7
+  "../scrollText/scrollText.html", // I8
+  "../chaseBallRightClick/chaseBallRightClick.html", // I9
+  "../benchmark/benchmark.html", // I10
 ];
 
 // Store the current game order

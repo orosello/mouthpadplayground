@@ -113,7 +113,6 @@ function mousePressed() {
     bubble.mouseIsPressed = true;
 
     if (mouseButton === LEFT) {
-      bubble.startAnimation();
       showingWrongClick = true;
       wrongClickTime = millis();
     } else if (mouseButton === RIGHT) {

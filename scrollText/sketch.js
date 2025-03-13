@@ -19,18 +19,6 @@ const macbethText = `
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 SCENE I. Three witches plan to meet Macbeth.
 
 FIRST WITCH
@@ -246,9 +234,8 @@ function drawCube() {
   // Position cube behind text
   translate(0, 0, -1200); // Moved further back for larger appearance
 
-  // Rotate cube based on scroll position
+  // Rotate cube based on scroll position (X axis only)
   rotateX(angle);
-  rotateY(angle * 0.7);
 
   // Set cube appearance
   strokeWeight(5);
@@ -257,9 +244,8 @@ function drawCube() {
   // Draw nested cubes with increasing size
   for (let i = 1; i <= 5; i++) {
     push();
-    // Scale rotation slightly for each cube
+    // Scale rotation slightly for each cube (X axis only)
     rotateX(angle * (1 + i * 0.01));
-    rotateY(angle * (1 + i * 0.01));
 
     if (i === 1) {
       // Make the center cube's edges purely white

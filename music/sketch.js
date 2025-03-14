@@ -167,7 +167,7 @@ function draw() {
         textSize(16);
         textAlign(CENTER, CENTER);
         fill(255);
-        text('Click anywhere to start\nMove cursor to shape the sound\nRight click for Superstition', width/2, height/2);
+        text('Click anywhere to start\nMove cursor to shape the sound\nRight click to funk it out', width/2, height/2);
         return;
     }
 

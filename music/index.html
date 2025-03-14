@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stevie Wonder-Inspired Synth</title>
+    <title>MouthPad^ Music</title>
+    <link rel="stylesheet" href="../common.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -18,10 +19,25 @@
         }
         canvas {
             border: 2px solid #333;
+            display: block;
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            padding: 20px;
+        }
+        .button {
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <button class="button" onclick="window.location.href='../'">Back</button>
+        <button class="button" onclick="window.location.reload()">Reset</button>
+    </div>
     <script src="sketch.js"></script>
 </body>
 </html> 

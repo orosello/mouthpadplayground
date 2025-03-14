@@ -13,6 +13,7 @@ let smoothedY = 0;
 let analyzer;
 let superstitionPlayer;
 let isSuperstitionMode = false;
+let myFont;
 
 // Musical parameters - Inspired by "As" and "Isn't She Lovely"
 const standardProgression = [
@@ -25,10 +26,14 @@ const standardProgression = [
 let currentProgression = standardProgression;
 let currentChordIndex = 0;
 
+function preload() {
+    myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
+}
+
 function setup() {
     // Make canvas fullscreen
     createCanvas(windowWidth, windowHeight);
-    background(26, 26, 26);
+    background(0);
     
     // Prevent context menu on right click
     document.addEventListener('contextmenu', e => e.preventDefault());
@@ -153,23 +158,25 @@ function setup() {
             playStandardPattern(time);
         }
     }, "8n").start(0);
-
-    // Instructions text
-    textAlign(CENTER, CENTER);
-    textSize(16);
-    fill(255);
-    text('Click anywhere to start\nMove cursor to shape the sound\nRight click for Superstition', width/2, height/2);
 }
 
 function draw() {
-    if (!started) return;
+    if (!started) {
+        // Set text properties
+        textFont(myFont);
+        textSize(16);
+        textAlign(CENTER, CENTER);
+        fill(255);
+        text('Click anywhere to start\nMove cursor to shape the sound\nRight click for Superstition', width/2, height/2);
+        return;
+    }
 
     // More aggressive smoothing for mobile
     smoothedX = lerp(smoothedX, mouseX, 0.15);
     smoothedY = lerp(smoothedY, mouseY, 0.15);
 
     // Optimized background clear
-    background(26, 26, 26, 30);  // Increased alpha for better performance
+    background(0, 0, 0, 30);  // Increased alpha for better performance
     
     // Draw waveform with reduced points
     const waveform = analyzer.getValue();
@@ -255,7 +262,7 @@ function draw() {
 function windowResized() {
     // Ensure canvas stays fullscreen on window resize
     resizeCanvas(windowWidth, windowHeight);
-    background(26, 26, 26);
+    background(0);
     
     // Update canvas style
     let canvas = document.querySelector('canvas');
@@ -269,7 +276,7 @@ function mousePressed() {
         isPlaying = true;
         Tone.start();
         Tone.Transport.start();
-        background(26, 26, 26);
+        background(0);
         
         // Initialize smooth values with current mouse position
         smoothedX = mouseX;

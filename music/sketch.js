@@ -14,6 +14,7 @@ let analyzer;
 let superstitionPlayer;
 let isSuperstitionMode = false;
 let myFont;
+let isIOS = false;
 
 // Musical parameters - Inspired by "As" and "Isn't She Lovely"
 const standardProgression = [
@@ -26,6 +27,19 @@ const standardProgression = [
 let currentProgression = standardProgression;
 let currentChordIndex = 0;
 
+// Check if device is running iOS
+function detectIOS() {
+    return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+    ].includes(navigator.platform)
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+}
+
 function preload() {
     myFont = loadFont("../assets/Press_Start_2P/PressStart2P-Regular.ttf");
 }
@@ -34,6 +48,8 @@ function setup() {
     // Make canvas fullscreen
     createCanvas(windowWidth, windowHeight);
     background(0);
+    
+    isIOS = detectIOS();
     
     // Prevent context menu on right click
     document.addEventListener('contextmenu', e => e.preventDefault());
@@ -51,8 +67,15 @@ function setup() {
     canvas.style.width = '100%';
     canvas.style.height = '100%';
 
+    // Initialize audio context and effects only after user interaction on iOS
+    if (!isIOS) {
+        initializeAudio();
+    }
+}
+
+function initializeAudio() {
     // Initialize analyzer with lower resolution for mobile
-    analyzer = new Tone.Analyser("waveform", 128);  // Reduced from 256
+    analyzer = new Tone.Analyser("waveform", 128);
     
     // Initialize standard effects with optimized settings
     filter = new Tone.Filter({
@@ -167,7 +190,11 @@ function draw() {
         textSize(16);
         textAlign(CENTER, CENTER);
         fill(255);
-        text('Click anywhere to start\nMove cursor to shape the sound\nRight click to funk it out', width/2, height/2);
+        if (isIOS) {
+            text('Tap anywhere to start\nMove finger to shape the sound\nTwo-finger tap to funk it out', width/2, height/2);
+        } else {
+            text('Click anywhere to start\nMove cursor to shape the sound\nRight click to funk it out', width/2, height/2);
+        }
         return;
     }
 
@@ -270,12 +297,29 @@ function windowResized() {
     canvas.style.height = '100%';
 }
 
+async function initializeIOSAudio() {
+    try {
+        await Tone.start();
+        await Tone.context.resume();
+        initializeAudio();
+        Tone.Transport.start();
+    } catch (error) {
+        console.error('Error initializing iOS audio:', error);
+    }
+}
+
 function mousePressed() {
     if (!started) {
         started = true;
         isPlaying = true;
-        Tone.start();
-        Tone.Transport.start();
+        
+        if (isIOS) {
+            initializeIOSAudio();
+        } else {
+            Tone.start();
+            Tone.Transport.start();
+        }
+        
         background(0);
         
         // Initialize smooth values with current mouse position

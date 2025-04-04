@@ -339,17 +339,17 @@ function generateShapePoints(shape) {
       // First half - right side of heart
       for (let i = 0; i < SAMPLE_POINTS/2; i++) {
         let t = i / (SAMPLE_POINTS/2);
-        let size = shapeSize/2;
+        let size = shapeSize;
         
         // Bezier curve parameters matching the drawHeart function
         let x1 = centerX;
-        let y1 = centerY + size/4;
+        let y1 = centerY;
         let cx1 = centerX + size/2;
-        let cy1 = centerY - size/2;
+        let cy1 = centerY - size*0.75;
         let cx2 = centerX + size;
-        let cy2 = centerY + size/4;
+        let cy2 = centerY;
         let x2 = centerX;
-        let y2 = centerY + size;
+        let y2 = centerY + size*0.75;
         
         // Calculate point on bezier curve
         let x = bezierPoint(x1, cx1, cx2, x2, t);
@@ -361,17 +361,17 @@ function generateShapePoints(shape) {
       // Second half - left side of heart
       for (let i = 0; i < SAMPLE_POINTS/2; i++) {
         let t = i / (SAMPLE_POINTS/2);
-        let size = shapeSize/2;
+        let size = shapeSize;
         
         // Bezier curve parameters matching the drawHeart function
         let x1 = centerX;
-        let y1 = centerY + size;
+        let y1 = centerY + size*0.75;
         let cx1 = centerX - size;
-        let cy1 = centerY + size/4;
+        let cy1 = centerY;
         let cx2 = centerX - size/2;
-        let cy2 = centerY - size/2;
+        let cy2 = centerY - size*0.75;
         let x2 = centerX;
-        let y2 = centerY + size/4;
+        let y2 = centerY;
         
         // Calculate point on bezier curve
         let x = bezierPoint(x1, cx1, cx2, x2, t);
@@ -399,7 +399,7 @@ function drawShape(shape) {
       drawStar(0, 0, shapeSize/2, shapeSize/4, 5);
       break;
     case 'heart':
-      drawHeart(0, 0, shapeSize/2);
+      drawHeart(0, 0, shapeSize);
       break;
   }
 }
@@ -426,18 +426,18 @@ function drawStar(x, y, radius1, radius2, npoints) {
 // Draw a heart shape
 function drawHeart(x, y, size) {
   beginShape();
-  vertex(x, y + size/4);
+  vertex(x, y);
   // Right curve
   bezierVertex(
-    x + size/2, y - size/2,
-    x + size, y + size/4,
-    x, y + size
+    x + size/2, y - size*0.75,
+    x + size, y,
+    x, y + size*0.75
   );
   // Left curve
   bezierVertex(
-    x - size, y + size/4,
-    x - size/2, y - size/2,
-    x, y + size/4
+    x - size, y,
+    x - size/2, y - size*0.75,
+    x, y
   );
   endShape(CLOSE);
 }
